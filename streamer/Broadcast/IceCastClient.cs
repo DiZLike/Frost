@@ -109,11 +109,10 @@ namespace Strimer.Broadcast
 
                 using (var client = new WebClient())
                 {
+                    // Синхронное скачивание данных
                     string json = client.DownloadString(statsUrl);
 
                     // Парсим JSON для получения количества слушателей
-                    // (упрощенный парсинг, можно заменить на JSON парсер)
-
                     string mountPoint = $"/{_config.IceCastMount}";
                     if (json.Contains(mountPoint))
                     {

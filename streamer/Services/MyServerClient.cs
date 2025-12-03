@@ -22,7 +22,7 @@ namespace Strimer.Services
             }
         }
 
-        public async void SendTrackInfo(int trackNumber, string artist, string title, string filename)
+        public void SendTrackInfo(int trackNumber, string artist, string title, string filename)
         {
             if (!_enabled)
                 return;
@@ -37,12 +37,12 @@ namespace Strimer.Services
                            $"{_config.MyAddSongInfoTitleVar}={Uri.EscapeDataString(title)}&" +
                            $"{_config.MyAddSongInfoLinkVar}={Uri.EscapeDataString(_config.MyAddSongInfoLinkFolderOnServer + filename)}";
 
-                // Отправляем GET запрос
-                var response = await _httpClient.GetAsync(url);
+                // Отправляем GET запрос (синхронно)
+                var response = _httpClient.GetAsync(url).Result;
 
                 if (response.IsSuccessStatusCode)
                 {
-                    string responseText = await response.Content.ReadAsStringAsync();
+                    string responseText = response.Content.ReadAsStringAsync().Result;
                     //Logger.Info($"Track info sent to MyServer: {responseText.Trim()}");
                 }
                 else

@@ -3,12 +3,16 @@
   "WorkspaceRootPath": "D:\\Evgeny\\git\\strimer\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|d:\\evgeny\\git\\strimer\\streamer\\services\\radioservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|solutionrelative:streamer\\services\\radioservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|d:\\evgeny\\git\\strimer\\streamer\\broadcast\\icecastclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|solutionrelative:streamer\\broadcast\\icecastclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|d:\\evgeny\\git\\strimer\\streamer\\services\\myserverclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|solutionrelative:streamer\\services\\myserverclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|d:\\evgeny\\git\\strimer\\streamer\\services\\radioservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|solutionrelative:streamer\\services\\radioservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|d:\\evgeny\\git\\strimer\\streamer\\core\\appconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -27,19 +31,32 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "IceCastClient.cs",
+              "DocumentMoniker": "D:\\Evgeny\\git\\strimer\\streamer\\Broadcast\\IceCastClient.cs",
+              "RelativeDocumentMoniker": "streamer\\Broadcast\\IceCastClient.cs",
+              "ToolTip": "D:\\Evgeny\\git\\strimer\\streamer\\Broadcast\\IceCastClient.cs",
+              "RelativeToolTip": "streamer\\Broadcast\\IceCastClient.cs",
+              "ViewState": "AgIAAHAAAAAAAAAAAAAAAKMAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T22:56:00.517Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "RadioService.cs",
               "DocumentMoniker": "D:\\Evgeny\\git\\strimer\\streamer\\Services\\RadioService.cs",
               "RelativeDocumentMoniker": "streamer\\Services\\RadioService.cs",
-              "ToolTip": "D:\\Evgeny\\git\\strimer\\streamer\\Services\\RadioService.cs*",
-              "RelativeToolTip": "streamer\\Services\\RadioService.cs*",
-              "ViewState": "AgIAAI0AAAAAAAAAAAAqwJwAAAA8AAAAAAAAAA==",
+              "ToolTip": "D:\\Evgeny\\git\\strimer\\streamer\\Services\\RadioService.cs",
+              "RelativeToolTip": "streamer\\Services\\RadioService.cs",
+              "ViewState": "AgIAAI0AAAAAAAAAAAAqwKYAAAA2AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-03T22:43:24.318Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "AppConfig.cs",
               "DocumentMoniker": "D:\\Evgeny\\git\\strimer\\streamer\\Core\\AppConfig.cs",
               "RelativeDocumentMoniker": "streamer\\Core\\AppConfig.cs",
@@ -47,8 +64,7 @@
               "RelativeToolTip": "streamer\\Core\\AppConfig.cs",
               "ViewState": "AgIAACMAAAAAAAAAAAAhwNUAAAA8AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-03T22:29:40.294Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-03T22:29:40.294Z"
             },
             {
               "$type": "Document",
@@ -58,7 +74,7 @@
               "RelativeDocumentMoniker": "streamer\\Services\\MyServerClient.cs",
               "ToolTip": "D:\\Evgeny\\git\\strimer\\streamer\\Services\\MyServerClient.cs",
               "RelativeToolTip": "streamer\\Services\\MyServerClient.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAAAQwBUAAAANAAAAAAAAAA==",
+              "ViewState": "AgIAAAcAAAAAAAAAAAAAADoAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-03T22:18:22.229Z",
               "EditorCaption": ""

@@ -860,3 +860,31 @@
 [2025-12-04 01:48:39] [INFO] Stream -2147483643 added to mixer
 [2025-12-04 01:48:39] [INFO] Now playing: clotkpre - Я тупой!
 [2025-12-04 01:48:39] [INFO] Metadata updated: clotkpre - Я тупой!
+[2025-12-04 01:56:10] [INFO] === Strimer Radio Starting ===
+[2025-12-04 01:56:10] [INFO] Detected OS: Windows (X64)
+[2025-12-04 01:56:10] [INFO] Config: app.configured='yes' -> parsed as 'yes' -> IsConfigured=True
+[2025-12-04 01:56:10] [INFO] Configuration loaded
+[2025-12-04 01:56:10] [INFO] Initializing Radio Service...
+[2025-12-04 01:56:10] [INFO] Loading playlist from: C:\Users\Evgeny\Desktop\list.pls
+[2025-12-04 01:56:10] [INFO] Loaded 1 tracks
+[2025-12-04 01:56:10] [INFO] Loaded 1 tracks from history
+[2025-12-04 01:56:10] [INFO] MyServer client initialized
+[2025-12-04 01:56:10] [INFO] Playlist loaded: 1 tracks
+[2025-12-04 01:56:10] [INFO] Starting radio service...
+[2025-12-04 01:56:10] [INFO] Initializing audio system...
+[2025-12-04 01:56:10] [INFO] Mixer created (handle: -2147483647)
+[2025-12-04 01:56:10] [INFO] Loading audio plugins...
+[2025-12-04 01:56:10] [INFO]   Loaded: bassopus
+[2025-12-04 01:56:10] [INFO] Audio system initialized successfully
+[2025-12-04 01:56:10] [INFO] Initializing IceCast client...
+[2025-12-04 01:56:10] [INFO] Initializing Opus encoder...
+[2025-12-04 01:56:10] [INFO] Opus encoder initialized: 48kbps vbr
+[2025-12-04 01:56:10] [INFO] Connected to IceCast: http://r.dlike.ru:8000/live
+[2025-12-04 01:56:10] [INFO] IceCast client initialized
+[2025-12-04 01:56:10] [INFO] Radio service started successfully
+[2025-12-04 01:56:10] [INFO] Playback loop started
+[2025-12-04 01:56:10] [INFO] History cleared, starting playlist over
+[2025-12-04 01:56:10] [INFO] Selected track: Я тупой!.mp3 (Index: 1/1)
+[2025-12-04 01:56:10] [INFO] Stream -2147483643 added to mixer
+[2025-12-04 01:56:10] [INFO] Now playing: clotkpre - Я тупой!
+[2025-12-04 01:56:10] [INFO] Metadata updated: clotkpre - Я тупой!
