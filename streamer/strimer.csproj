@@ -13,10 +13,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="cs\encoders\EncOpus.cs~RF14fb1ec6.TMP" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
 

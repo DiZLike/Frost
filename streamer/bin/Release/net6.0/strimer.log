@@ -1,0 +1,31 @@
+[2025-12-03 23:31:49] [INFO] === Strimer Radio Starting ===
+[2025-12-03 23:31:49] [INFO] Detected OS: Windows (X64)
+[2025-12-03 23:31:49] [INFO] Configuration loaded
+[2025-12-03 23:31:49] [INFO] Initializing Radio Service...
+[2025-12-03 23:31:49] Fatal error: System.IO.FileNotFoundException: Playlist file not found: C:\Users\Evgeny\Desktop\list.pls
+   at Strimer.Audio.Playlist.LoadPlaylist(String filePath) in D:\Evgeny\git\strimer\streamer\Audio\Playlist.cs:line 28
+   at Strimer.Audio.Playlist..ctor(String playlistFile, Boolean saveHistory) in D:\Evgeny\git\strimer\streamer\Audio\Playlist.cs:line 19
+   at Strimer.Services.RadioService..ctor(AppConfig config) in D:\Evgeny\git\strimer\streamer\Services\RadioService.cs:line 31
+   at Strimer.Core.StrimerApp.Run(String[] args) in D:\Evgeny\git\strimer\streamer\Core\StrimerApp.cs:line 27
+   at Strimer.Program.Main(String[] args) in D:\Evgeny\git\strimer\streamer\Program.cs:line 20
+[2025-12-03 23:32:54] [INFO] === Strimer Radio Starting ===
+[2025-12-03 23:32:54] [INFO] Detected OS: Windows (X64)
+[2025-12-03 23:32:54] [INFO] Configuration loaded
+[2025-12-03 23:32:54] [INFO] Initializing Radio Service...
+[2025-12-03 23:32:54] Fatal error: System.IO.FileNotFoundException: Playlist file not found: C:\Users\Evgeny\Desktop\list.pls
+   at Strimer.Audio.Playlist.LoadPlaylist(String filePath) in D:\Evgeny\git\strimer\streamer\Audio\Playlist.cs:line 28
+   at Strimer.Audio.Playlist..ctor(String playlistFile, Boolean saveHistory) in D:\Evgeny\git\strimer\streamer\Audio\Playlist.cs:line 19
+   at Strimer.Services.RadioService..ctor(AppConfig config) in D:\Evgeny\git\strimer\streamer\Services\RadioService.cs:line 31
+   at Strimer.Core.StrimerApp.Run(String[] args) in D:\Evgeny\git\strimer\streamer\Core\StrimerApp.cs:line 27
+   at Strimer.Program.Main(String[] args) in D:\Evgeny\git\strimer\streamer\Program.cs:line 20
+[2025-12-03 23:33:15] [INFO] === Strimer Radio Starting ===
+[2025-12-03 23:33:15] [INFO] Detected OS: Windows (X64)
+[2025-12-03 23:33:15] [INFO] Configuration loaded
+[2025-12-03 23:33:15] [INFO] Initializing Radio Service...
+[2025-12-03 23:33:15] [INFO] Loading playlist from: C:\Users\Evgeny\Desktop\list.pls
+[2025-12-03 23:33:15] Fatal error: System.IO.InvalidDataException: No tracks found in playlist
+   at Strimer.Audio.Playlist.LoadPlaylist(String filePath) in D:\Evgeny\git\strimer\streamer\Audio\Playlist.cs:line 36
+   at Strimer.Audio.Playlist..ctor(String playlistFile, Boolean saveHistory) in D:\Evgeny\git\strimer\streamer\Audio\Playlist.cs:line 19
+   at Strimer.Services.RadioService..ctor(AppConfig config) in D:\Evgeny\git\strimer\streamer\Services\RadioService.cs:line 31
+   at Strimer.Core.StrimerApp.Run(String[] args) in D:\Evgeny\git\strimer\streamer\Core\StrimerApp.cs:line 27
+   at Strimer.Program.Main(String[] args) in D:\Evgeny\git\strimer\streamer\Program.cs:line 20
