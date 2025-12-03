@@ -30,12 +30,12 @@ namespace Strimer.Services
             try
             {
                 // Строим URL для отправки
-                string url = $"{_config.MyServerUrl}?" +
+                string url = $"{_config.MyServerUrl}/{_config.MyAddSongInfoPage}?" +
                            $"key={Uri.EscapeDataString(_config.MyServerKey)}&" +
-                           $"number={trackNumber}&" +
-                           $"artist={Uri.EscapeDataString(artist)}&" +
-                           $"title={Uri.EscapeDataString(title)}&" +
-                           $"file={Uri.EscapeDataString(filename)}";
+                           $"{_config.MyAddSongInfoNumberVar}={trackNumber}&" +
+                           $"{_config.MyAddSongInfoArtistVar}={Uri.EscapeDataString(artist)}&" +
+                           $"{_config.MyAddSongInfoTitleVar}={Uri.EscapeDataString(title)}&" +
+                           $"{_config.MyAddSongInfoLinkVar}={Uri.EscapeDataString(_config.MyAddSongInfoLinkFolderOnServer + filename)}";
 
                 // Отправляем GET запрос
                 var response = await _httpClient.GetAsync(url);
@@ -43,7 +43,7 @@ namespace Strimer.Services
                 if (response.IsSuccessStatusCode)
                 {
                     string responseText = await response.Content.ReadAsStringAsync();
-                    Logger.Info($"Track info sent to MyServer: {responseText.Trim()}");
+                    //Logger.Info($"Track info sent to MyServer: {responseText.Trim()}");
                 }
                 else
                 {

@@ -3,8 +3,16 @@
   "WorkspaceRootPath": "D:\\Evgeny\\git\\strimer\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|d:\\evgeny\\git\\strimer\\streamer\\audio\\player.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|solutionrelative:streamer\\audio\\player.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|d:\\evgeny\\git\\strimer\\streamer\\services\\radioservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|solutionrelative:streamer\\services\\radioservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|d:\\evgeny\\git\\strimer\\streamer\\services\\myserverclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|solutionrelative:streamer\\services\\myserverclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|d:\\evgeny\\git\\strimer\\streamer\\core\\appconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|solutionrelative:streamer\\core\\appconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -19,14 +27,40 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Player.cs",
-              "DocumentMoniker": "D:\\Evgeny\\git\\strimer\\streamer\\Audio\\Player.cs",
-              "RelativeDocumentMoniker": "streamer\\Audio\\Player.cs",
-              "ToolTip": "D:\\Evgeny\\git\\strimer\\streamer\\Audio\\Player.cs",
-              "RelativeToolTip": "streamer\\Audio\\Player.cs",
-              "ViewState": "AgIAAH0AAAAAAAAAAADwv5MAAAA0AAAAAAAAAA==",
+              "Title": "RadioService.cs",
+              "DocumentMoniker": "D:\\Evgeny\\git\\strimer\\streamer\\Services\\RadioService.cs",
+              "RelativeDocumentMoniker": "streamer\\Services\\RadioService.cs",
+              "ToolTip": "D:\\Evgeny\\git\\strimer\\streamer\\Services\\RadioService.cs",
+              "RelativeToolTip": "streamer\\Services\\RadioService.cs",
+              "ViewState": "AgIAAI0AAAAAAAAAAAAqwKYAAAA2AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-03T20:28:12.922Z",
+              "WhenOpened": "2025-12-03T22:43:24.318Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AppConfig.cs",
+              "DocumentMoniker": "D:\\Evgeny\\git\\strimer\\streamer\\Core\\AppConfig.cs",
+              "RelativeDocumentMoniker": "streamer\\Core\\AppConfig.cs",
+              "ToolTip": "D:\\Evgeny\\git\\strimer\\streamer\\Core\\AppConfig.cs",
+              "RelativeToolTip": "streamer\\Core\\AppConfig.cs",
+              "ViewState": "AgIAACMAAAAAAAAAAAAhwNUAAAA8AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T22:29:40.294Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MyServerClient.cs",
+              "DocumentMoniker": "D:\\Evgeny\\git\\strimer\\streamer\\Services\\MyServerClient.cs",
+              "RelativeDocumentMoniker": "streamer\\Services\\MyServerClient.cs",
+              "ToolTip": "D:\\Evgeny\\git\\strimer\\streamer\\Services\\MyServerClient.cs",
+              "RelativeToolTip": "streamer\\Services\\MyServerClient.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAQwBUAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T22:18:22.229Z",
               "EditorCaption": ""
             }
           ]

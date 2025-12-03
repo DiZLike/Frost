@@ -1,4 +1,5 @@
-﻿using Un4seen.Bass;
+﻿using Strimer.Core;
+using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Mix;
 
 namespace Strimer.Audio
@@ -12,6 +13,9 @@ namespace Strimer.Audio
 
         public Mixer(int sampleRate)
         {
+            // Убрали неправильную проверку
+            // BASS должен быть уже инициализирован к этому моменту
+
             // Создаем микшерный поток
             _handle = BassMix.BASS_Mixer_StreamCreate(
                 sampleRate,
@@ -22,8 +26,10 @@ namespace Strimer.Audio
             if (_handle == 0)
             {
                 var error = Bass.BASS_ErrorGetCode();
-                throw new Exception($"Failed to create mixer: {error}");
+                throw new Exception($"Failed to create mixer. Error: {error}");
             }
+
+            Logger.Info($"Mixer created (handle: {_handle})");
         }
 
         public void AddStream(int stream)
@@ -40,6 +46,7 @@ namespace Strimer.Audio
             if (success)
             {
                 _streams.Add(stream);
+                Logger.Info($"Stream {stream} added to mixer");
             }
             else
             {
@@ -54,6 +61,7 @@ namespace Strimer.Audio
             {
                 BassMix.BASS_Mixer_ChannelRemove(stream);
                 _streams.Remove(stream);
+                Logger.Info($"Stream {stream} removed from mixer");
             }
         }
 
@@ -65,6 +73,7 @@ namespace Strimer.Audio
             }
 
             _streams.Clear();
+            Logger.Info("Mixer cleared");
         }
     }
 }

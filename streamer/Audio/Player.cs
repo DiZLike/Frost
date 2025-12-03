@@ -9,8 +9,8 @@ namespace Strimer.Audio
     public class Player : IDisposable
     {
         private readonly AppConfig _config;
-        private readonly Mixer _mixer;
-        private readonly ReplayGain _replayGain;
+        private Mixer _mixer; // ← Сделать не readonly
+        private ReplayGain _replayGain;
 
         private int _currentStream;
         private bool _isInitialized;
@@ -26,8 +26,7 @@ namespace Strimer.Audio
         public Player(AppConfig config)
         {
             _config = config;
-            _mixer = new Mixer(config.SampleRate);
-            _replayGain = new ReplayGain(config.UseReplayGain, config.UseCustomGain, _mixer.Handle);
+            // НЕ создаем Mixer и ReplayGain здесь!
         }
 
         public void Initialize()
@@ -37,7 +36,7 @@ namespace Strimer.Audio
 
             Logger.Info("Initializing audio system...");
 
-            // Инициализация BASS
+            // 1. Инициализация BASS
             bool initSuccess = Bass.BASS_Init(
                 _config.AudioDevice,
                 _config.SampleRate,
@@ -51,7 +50,13 @@ namespace Strimer.Audio
                 throw new Exception($"Failed to initialize BASS: {error}");
             }
 
-            // Загружаем плагины
+            // 2. Создаем микшер ПОСЛЕ инициализации BASS
+            _mixer = new Mixer(_config.SampleRate);
+
+            // 3. Создаем ReplayGain
+            _replayGain = new ReplayGain(_config.UseReplayGain, _config.UseCustomGain, _mixer.Handle);
+
+            // 4. Загружаем плагины
             LoadPlugins();
 
             _isInitialized = true;

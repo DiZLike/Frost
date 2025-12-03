@@ -44,6 +44,12 @@ namespace Strimer.Core
         public bool MyServerEnabled { get; set; } = false;
         public string MyServerUrl { get; set; } = "";
         public string MyServerKey { get; set; } = "";
+        public string MyAddSongInfoPage { get; set; } = "";
+        public string MyAddSongInfoNumberVar { get; set; } = "";
+        public string MyAddSongInfoTitleVar { get; set; } = "";
+        public string MyAddSongInfoArtistVar { get; set; } = "";
+        public string MyAddSongInfoLinkVar { get; set; } = "";
+        public string MyAddSongInfoLinkFolderOnServer { get; set; } = "";
 
         public AppConfig()
         {
@@ -94,7 +100,7 @@ namespace Strimer.Core
                     }
                 }
 
-                IsConfigured = true;
+                //IsConfigured = true;
                 Logger.Info("Configuration loaded");
             }
             catch (Exception ex)
@@ -109,7 +115,12 @@ namespace Strimer.Core
             switch (key.ToLower())
             {
                 case "app.configured":
-                    IsConfigured = value.ToLower() == "yes";
+                    // Убедитесь, что правильно парсится значение
+                    string cleanValue = value.ToLower().Trim();
+                    IsConfigured = (cleanValue == "yes" || cleanValue == "true" || cleanValue == "1");
+
+                    // Логируем для отладки
+                    Logger.Info($"Config: app.configured='{value}' -> parsed as '{cleanValue}' -> IsConfigured={IsConfigured}");
                     break;
 
                 case "icecast.server":
@@ -135,10 +146,12 @@ namespace Strimer.Core
                     break;
 
                 case "device.device":
-                    AudioDevice = int.Parse(value);
+                    if (int.TryParse(value, out int deviceId))
+                        AudioDevice = deviceId;
                     break;
                 case "device.frequency":
-                    SampleRate = int.Parse(value);
+                    if (int.TryParse(value, out int freq))
+                        SampleRate = freq;
                     break;
 
                 case "radio.playlist":
@@ -149,7 +162,8 @@ namespace Strimer.Core
                     break;
 
                 case "opus.bitrate":
-                    OpusBitrate = int.Parse(value);
+                    if (int.TryParse(value, out int bitrate))
+                        OpusBitrate = bitrate;
                     break;
                 case "opus.bitrate_mode":
                     OpusMode = value;
@@ -158,7 +172,8 @@ namespace Strimer.Core
                     OpusContentType = value;
                     break;
                 case "opus.complexity":
-                    OpusComplexity = int.Parse(value);
+                    if (int.TryParse(value, out int complexity))
+                        OpusComplexity = complexity;
                     break;
                 case "opus.framesize":
                     OpusFrameSize = value;
@@ -179,6 +194,24 @@ namespace Strimer.Core
                     break;
                 case "mysrv.key":
                     MyServerKey = value;
+                    break;
+                case "mysrv.add_song_info_page":
+                    MyAddSongInfoPage = value;
+                    break;
+                case "mysrv.add_song_info_number_var":
+                    MyAddSongInfoNumberVar = value;
+                    break;
+                case "mysrv.add_song_info_title_var":
+                    MyAddSongInfoTitleVar = value;
+                    break;
+                case "mysrv.add_song_info_artist_var":
+                    MyAddSongInfoArtistVar = value;
+                    break;
+                case "mysrv.add_song_info_link_var":
+                    MyAddSongInfoLinkVar = value;
+                    break;
+                case "mysrv.add_song_info_link_folder_on_server":
+                    MyAddSongInfoLinkFolderOnServer = value;
                     break;
             }
         }

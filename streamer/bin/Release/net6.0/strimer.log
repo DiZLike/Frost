@@ -1,31 +1,272 @@
-[2025-12-03 23:31:49] [INFO] === Strimer Radio Starting ===
-[2025-12-03 23:31:49] [INFO] Detected OS: Windows (X64)
-[2025-12-03 23:31:49] [INFO] Configuration loaded
-[2025-12-03 23:31:49] [INFO] Initializing Radio Service...
-[2025-12-03 23:31:49] Fatal error: System.IO.FileNotFoundException: Playlist file not found: C:\Users\Evgeny\Desktop\list.pls
-   at Strimer.Audio.Playlist.LoadPlaylist(String filePath) in D:\Evgeny\git\strimer\streamer\Audio\Playlist.cs:line 28
-   at Strimer.Audio.Playlist..ctor(String playlistFile, Boolean saveHistory) in D:\Evgeny\git\strimer\streamer\Audio\Playlist.cs:line 19
-   at Strimer.Services.RadioService..ctor(AppConfig config) in D:\Evgeny\git\strimer\streamer\Services\RadioService.cs:line 31
-   at Strimer.Core.StrimerApp.Run(String[] args) in D:\Evgeny\git\strimer\streamer\Core\StrimerApp.cs:line 27
-   at Strimer.Program.Main(String[] args) in D:\Evgeny\git\strimer\streamer\Program.cs:line 20
-[2025-12-03 23:32:54] [INFO] === Strimer Radio Starting ===
-[2025-12-03 23:32:54] [INFO] Detected OS: Windows (X64)
-[2025-12-03 23:32:54] [INFO] Configuration loaded
-[2025-12-03 23:32:54] [INFO] Initializing Radio Service...
-[2025-12-03 23:32:54] Fatal error: System.IO.FileNotFoundException: Playlist file not found: C:\Users\Evgeny\Desktop\list.pls
-   at Strimer.Audio.Playlist.LoadPlaylist(String filePath) in D:\Evgeny\git\strimer\streamer\Audio\Playlist.cs:line 28
-   at Strimer.Audio.Playlist..ctor(String playlistFile, Boolean saveHistory) in D:\Evgeny\git\strimer\streamer\Audio\Playlist.cs:line 19
-   at Strimer.Services.RadioService..ctor(AppConfig config) in D:\Evgeny\git\strimer\streamer\Services\RadioService.cs:line 31
-   at Strimer.Core.StrimerApp.Run(String[] args) in D:\Evgeny\git\strimer\streamer\Core\StrimerApp.cs:line 27
-   at Strimer.Program.Main(String[] args) in D:\Evgeny\git\strimer\streamer\Program.cs:line 20
-[2025-12-03 23:33:15] [INFO] === Strimer Radio Starting ===
-[2025-12-03 23:33:15] [INFO] Detected OS: Windows (X64)
-[2025-12-03 23:33:15] [INFO] Configuration loaded
-[2025-12-03 23:33:15] [INFO] Initializing Radio Service...
-[2025-12-03 23:33:15] [INFO] Loading playlist from: C:\Users\Evgeny\Desktop\list.pls
-[2025-12-03 23:33:15] Fatal error: System.IO.InvalidDataException: No tracks found in playlist
-   at Strimer.Audio.Playlist.LoadPlaylist(String filePath) in D:\Evgeny\git\strimer\streamer\Audio\Playlist.cs:line 36
-   at Strimer.Audio.Playlist..ctor(String playlistFile, Boolean saveHistory) in D:\Evgeny\git\strimer\streamer\Audio\Playlist.cs:line 19
-   at Strimer.Services.RadioService..ctor(AppConfig config) in D:\Evgeny\git\strimer\streamer\Services\RadioService.cs:line 31
-   at Strimer.Core.StrimerApp.Run(String[] args) in D:\Evgeny\git\strimer\streamer\Core\StrimerApp.cs:line 27
-   at Strimer.Program.Main(String[] args) in D:\Evgeny\git\strimer\streamer\Program.cs:line 20
+[2025-12-04 00:03:19] [INFO] === Strimer Radio Starting ===
+[2025-12-04 00:03:19] [INFO] Detected OS: Windows (X64)
+[2025-12-04 00:03:19] [INFO] Configuration loaded
+[2025-12-04 00:03:19] [INFO] Initializing Radio Service...
+[2025-12-04 00:03:19] [INFO] Loading playlist from: C:\Users\Evgeny\Desktop\list.pls
+[2025-12-04 00:03:19] [INFO] Loaded 1 tracks
+[2025-12-04 00:03:19] [INFO] Loaded 1 tracks from history
+[2025-12-04 00:03:19] [INFO] Playlist loaded: 1 tracks
+[2025-12-04 00:03:19] [INFO] Starting radio service...
+[2025-12-04 00:03:19] [INFO] Initializing audio system...
+[2025-12-04 00:03:19] [INFO] Mixer created (handle: -2147483647)
+[2025-12-04 00:03:19] [INFO] Loading audio plugins...
+[2025-12-04 00:03:19] [INFO]   Loaded: bassopus
+[2025-12-04 00:03:19] [INFO] Audio system initialized successfully
+[2025-12-04 00:03:19] [INFO] Initializing IceCast client...
+[2025-12-04 00:03:19] [INFO] Initializing Opus encoder...
+[2025-12-04 00:03:19] [INFO] Opus encoder initialized: 128kbps vbr
+[2025-12-04 00:03:24] [ERROR] IceCast connection failed: Failed to initialize IceCast stream: BASS_ERROR_TIMEOUT
+[2025-12-04 00:03:24] [INFO] IceCast client initialized
+[2025-12-04 00:03:24] [INFO] Radio service started successfully
+[2025-12-04 00:03:24] [INFO] Playback loop started
+[2025-12-04 00:03:24] [INFO] History cleared, starting playlist over
+[2025-12-04 00:03:24] [INFO] Selected track: Я тупой!.mp3 (Index: 1/1)
+[2025-12-04 00:03:24] [INFO] Stream -2147483643 added to mixer
+[2025-12-04 00:03:24] [INFO] Now playing: clotkpre - Я тупой!
+[2025-12-04 00:03:45] [INFO] Stream -2147483643 removed from mixer
+[2025-12-04 00:03:45] [INFO] Skipping to next track...
+[2025-12-04 00:03:45] [INFO] History cleared, starting playlist over
+[2025-12-04 00:03:45] [INFO] Selected track: Я тупой!.mp3 (Index: 1/1)
+[2025-12-04 00:03:45] [INFO] Stream -2147483638 added to mixer
+[2025-12-04 00:03:45] [INFO] Now playing: clotkpre - Я тупой!
+[2025-12-04 00:03:46] [INFO] Stopping radio service...
+[2025-12-04 00:03:46] [INFO] Playback loop ended
+[2025-12-04 00:03:46] [INFO] Stream -2147483638 removed from mixer
+[2025-12-04 00:03:46] [INFO] Opus encoder disposed
+[2025-12-04 00:03:46] [INFO] IceCast client disposed
+[2025-12-04 00:03:46] [INFO] Radio service stopped
+[2025-12-04 00:03:46] [INFO] === Strimer Radio Stopped ===
+[2025-12-04 00:07:55] [INFO] === Strimer Radio Starting ===
+[2025-12-04 00:07:55] [INFO] Detected OS: Windows (X64)
+[2025-12-04 00:07:55] [WARN] Configuration file not found. Using defaults.
+[2025-12-04 00:07:55] [INFO] Copying native libraries for current platform...
+[2025-12-04 00:07:55] [ERROR] Library folder not found: D:\Evgeny\git\strimer\streamer\bin\Release\net6.0\libs\win_x64
+[2025-12-04 00:07:55] [INFO] 
+=== SETUP WIZARD ===
+[2025-12-04 00:17:20] [INFO] === Strimer Radio Starting ===
+[2025-12-04 00:17:20] [INFO] Detected OS: Windows (X64)
+[2025-12-04 00:17:20] [INFO] Config: app.configured='no' -> parsed as 'no' -> IsConfigured=False
+[2025-12-04 00:17:20] [INFO] Configuration loaded
+[2025-12-04 00:20:30] [INFO] === Strimer Radio Starting ===
+[2025-12-04 00:20:30] [INFO] Detected OS: Windows (X64)
+[2025-12-04 00:20:30] [INFO] Config: app.configured='no' -> parsed as 'no' -> IsConfigured=False
+[2025-12-04 00:20:30] [INFO] Configuration loaded
+[2025-12-04 00:21:15] [INFO] === Strimer Radio Starting ===
+[2025-12-04 00:21:15] [INFO] Detected OS: Windows (X64)
+[2025-12-04 00:21:15] [INFO] Config: app.configured='no' -> parsed as 'no' -> IsConfigured=False
+[2025-12-04 00:21:15] [INFO] Configuration loaded
+[2025-12-04 00:22:45] [INFO] === Strimer Radio Starting ===
+[2025-12-04 00:22:45] [INFO] Detected OS: Windows (X64)
+[2025-12-04 00:22:45] [INFO] Config: app.configured='no' -> parsed as 'no' -> IsConfigured=False
+[2025-12-04 00:22:45] [INFO] Configuration loaded
+[2025-12-04 00:23:17] [INFO] === Strimer Radio Starting ===
+[2025-12-04 00:23:17] [INFO] Detected OS: Windows (X64)
+[2025-12-04 00:23:17] [INFO] Config: app.configured='yes' -> parsed as 'yes' -> IsConfigured=True
+[2025-12-04 00:23:17] [INFO] Configuration loaded
+[2025-12-04 00:25:01] [INFO] === Strimer Radio Starting ===
+[2025-12-04 00:25:01] [INFO] Detected OS: Windows (X64)
+[2025-12-04 00:25:01] [INFO] Config: app.configured='yes' -> parsed as 'yes' -> IsConfigured=True
+[2025-12-04 00:25:01] [INFO] Configuration loaded
+[2025-12-04 00:25:01] [INFO] Initializing Radio Service...
+[2025-12-04 00:25:01] [INFO] Loading playlist from: C:\Users\Evgeny\Desktop\list.pls
+[2025-12-04 00:25:01] [INFO] Loaded 1 tracks
+[2025-12-04 00:25:01] [INFO] Loaded 1 tracks from history
+[2025-12-04 00:25:01] [INFO] Playlist loaded: 1 tracks
+[2025-12-04 00:25:01] [INFO] Starting radio service...
+[2025-12-04 00:25:01] [INFO] Initializing audio system...
+[2025-12-04 00:25:01] [INFO] Mixer created (handle: -2147483647)
+[2025-12-04 00:25:01] [INFO] Loading audio plugins...
+[2025-12-04 00:25:01] [INFO]   Loaded: bassopus
+[2025-12-04 00:25:01] [INFO] Audio system initialized successfully
+[2025-12-04 00:25:01] [INFO] Initializing IceCast client...
+[2025-12-04 00:25:01] [INFO] Initializing Opus encoder...
+[2025-12-04 00:25:01] [INFO] Opus encoder initialized: 128kbps vbr
+[2025-12-04 00:25:06] [ERROR] IceCast connection failed: Failed to initialize IceCast stream: BASS_ERROR_TIMEOUT
+[2025-12-04 00:25:06] [INFO] IceCast client initialized
+[2025-12-04 00:25:06] [INFO] Radio service started successfully
+[2025-12-04 00:25:06] [INFO] Playback loop started
+[2025-12-04 00:25:06] [INFO] History cleared, starting playlist over
+[2025-12-04 00:25:06] [INFO] Selected track: Я тупой!.mp3 (Index: 1/1)
+[2025-12-04 00:25:06] [INFO] Stream -2147483643 added to mixer
+[2025-12-04 00:25:06] [INFO] Now playing: clotkpre - Я тупой!
+[2025-12-04 01:06:15] [INFO] === Strimer Radio Starting ===
+[2025-12-04 01:06:15] [INFO] Detected OS: Windows (X64)
+[2025-12-04 01:06:15] [INFO] Config: app.configured='yes' -> parsed as 'yes' -> IsConfigured=True
+[2025-12-04 01:06:15] [INFO] Configuration loaded
+[2025-12-04 01:06:15] [INFO] Initializing Radio Service...
+[2025-12-04 01:06:15] [INFO] Loading playlist from: C:\Users\Evgeny\Desktop\list.pls
+[2025-12-04 01:06:15] [INFO] Loaded 1 tracks
+[2025-12-04 01:06:15] [INFO] Loaded 1 tracks from history
+[2025-12-04 01:06:15] [INFO] Playlist loaded: 1 tracks
+[2025-12-04 01:06:15] [INFO] Starting radio service...
+[2025-12-04 01:06:15] [INFO] Initializing audio system...
+[2025-12-04 01:06:15] [INFO] Mixer created (handle: -2147483647)
+[2025-12-04 01:06:15] [INFO] Loading audio plugins...
+[2025-12-04 01:06:15] [INFO]   Loaded: bassopus
+[2025-12-04 01:06:15] [INFO] Audio system initialized successfully
+[2025-12-04 01:06:15] [INFO] Initializing IceCast client...
+[2025-12-04 01:06:15] [INFO] Initializing Opus encoder...
+[2025-12-04 01:06:15] [INFO] Opus encoder initialized: 48kbps vbr
+[2025-12-04 01:06:15] [INFO] Connected to IceCast: http://r.dlike.ru:8000/live_test
+[2025-12-04 01:06:15] [INFO] IceCast client initialized
+[2025-12-04 01:06:15] [INFO] Radio service started successfully
+[2025-12-04 01:06:15] [INFO] Playback loop started
+[2025-12-04 01:06:15] [INFO] History cleared, starting playlist over
+[2025-12-04 01:06:15] [INFO] Selected track: Я тупой!.mp3 (Index: 1/1)
+[2025-12-04 01:06:15] [INFO] Stream -2147483643 added to mixer
+[2025-12-04 01:06:15] [INFO] Now playing: clotkpre - Я тупой!
+[2025-12-04 01:06:15] [INFO] Metadata updated: clotkpre - Я тупой!
+[2025-12-04 01:08:19] [INFO] === Strimer Radio Starting ===
+[2025-12-04 01:08:19] [INFO] Detected OS: Windows (X64)
+[2025-12-04 01:08:19] [INFO] Config: app.configured='yes' -> parsed as 'yes' -> IsConfigured=True
+[2025-12-04 01:08:19] [INFO] Configuration loaded
+[2025-12-04 01:08:19] [INFO] Initializing Radio Service...
+[2025-12-04 01:08:19] [INFO] Loading playlist from: C:\Users\Evgeny\Desktop\list.pls
+[2025-12-04 01:08:19] [INFO] Loaded 1 tracks
+[2025-12-04 01:08:19] [INFO] Loaded 1 tracks from history
+[2025-12-04 01:08:19] [INFO] MyServer client initialized
+[2025-12-04 01:08:19] [INFO] Playlist loaded: 1 tracks
+[2025-12-04 01:08:19] [INFO] Starting radio service...
+[2025-12-04 01:08:19] [INFO] Initializing audio system...
+[2025-12-04 01:08:19] [INFO] Mixer created (handle: -2147483647)
+[2025-12-04 01:08:19] [INFO] Loading audio plugins...
+[2025-12-04 01:08:19] [INFO]   Loaded: bassopus
+[2025-12-04 01:08:19] [INFO] Audio system initialized successfully
+[2025-12-04 01:08:19] [INFO] Initializing IceCast client...
+[2025-12-04 01:08:19] [INFO] Initializing Opus encoder...
+[2025-12-04 01:08:19] [INFO] Opus encoder initialized: 48kbps vbr
+[2025-12-04 01:08:19] [INFO] Connected to IceCast: http://r.dlike.ru:8000/live_test
+[2025-12-04 01:08:19] [INFO] IceCast client initialized
+[2025-12-04 01:08:19] [INFO] Radio service started successfully
+[2025-12-04 01:08:19] [INFO] Playback loop started
+[2025-12-04 01:08:19] [INFO] History cleared, starting playlist over
+[2025-12-04 01:08:19] [INFO] Selected track: Я тупой!.mp3 (Index: 1/1)
+[2025-12-04 01:08:19] [INFO] Stream -2147483643 added to mixer
+[2025-12-04 01:08:19] [INFO] Now playing: clotkpre - Я тупой!
+[2025-12-04 01:08:19] [INFO] Metadata updated: clotkpre - Я тупой!
+[2025-12-04 01:08:19] [INFO] Track info sent to MyServer: <!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Pub.radio</title>
+    
+    
+
+    
+    <link rel="stylesheet" href="/static/main/css/main_styles.css?v=1.1">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tiny5&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="header">
+    <h1>Retro Pub.radio</h1>
+</div>
+
+<div class="main-container">
+    <div class="radio-container">
+        <div class="radio-player">
+            <audio id="radio-player" controls autoplay>
+                Ваш браузер не поддерживает элемент audio.
+            </audio>
+        </div>
+
+        <div class="current-song">
+            <p>Сейчас играет: </p><span id="current-song">—</span>
+        </div>
+        <!-- Добавленная ссылка для скачивания плейлиста -->
+        <div class="download-playlist">
+            <a href="http://pub.dlike.ru:8000/live.m3u" download="playlist.m3u">Скачать плейлист</a>
+        </div>
+    </div>
+
+    <div class="history-container">
+        <h2>История воспроизведения</h2>
+        <ul id="history-list"></ul>
+    </div>
+</div>
+
+<script src="/static/main/js/main_script.js?v=1.0"></script>
+
+</body>
+</html>
+[2025-12-04 01:12:35] [INFO] === Strimer Radio Starting ===
+[2025-12-04 01:12:35] [INFO] Detected OS: Windows (X64)
+[2025-12-04 01:12:35] [INFO] Config: app.configured='yes' -> parsed as 'yes' -> IsConfigured=True
+[2025-12-04 01:12:35] [INFO] Configuration loaded
+[2025-12-04 01:12:35] [INFO] Initializing Radio Service...
+[2025-12-04 01:12:35] [INFO] Loading playlist from: C:\Users\Evgeny\Desktop\list.pls
+[2025-12-04 01:12:35] [INFO] Loaded 1 tracks
+[2025-12-04 01:12:35] [INFO] Loaded 1 tracks from history
+[2025-12-04 01:12:35] [INFO] MyServer client initialized
+[2025-12-04 01:12:35] [INFO] Playlist loaded: 1 tracks
+[2025-12-04 01:12:35] [INFO] Starting radio service...
+[2025-12-04 01:12:35] [INFO] Initializing audio system...
+[2025-12-04 01:12:35] [INFO] Mixer created (handle: -2147483647)
+[2025-12-04 01:12:35] [INFO] Loading audio plugins...
+[2025-12-04 01:12:35] [INFO]   Loaded: bassopus
+[2025-12-04 01:12:35] [INFO] Audio system initialized successfully
+[2025-12-04 01:12:35] [INFO] Initializing IceCast client...
+[2025-12-04 01:12:35] [INFO] Initializing Opus encoder...
+[2025-12-04 01:12:36] [INFO] Opus encoder initialized: 48kbps vbr
+[2025-12-04 01:12:36] [INFO] Connected to IceCast: http://r.dlike.ru:8000/live_test
+[2025-12-04 01:12:36] [INFO] IceCast client initialized
+[2025-12-04 01:12:36] [INFO] Radio service started successfully
+[2025-12-04 01:12:36] [INFO] Playback loop started
+[2025-12-04 01:12:36] [INFO] History cleared, starting playlist over
+[2025-12-04 01:12:36] [INFO] Selected track: Я тупой!.mp3 (Index: 1/1)
+[2025-12-04 01:12:36] [INFO] Stream -2147483643 added to mixer
+[2025-12-04 01:12:36] [INFO] Now playing: clotkpre - Я тупой!
+[2025-12-04 01:12:36] [INFO] Metadata updated: clotkpre - Я тупой!
+[2025-12-04 01:12:36] [INFO] Track info sent to MyServer: <!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Pub.radio</title>
+    
+    
+
+    
+    <link rel="stylesheet" href="/static/main/css/main_styles.css?v=1.1">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tiny5&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="header">
+    <h1>Retro Pub.radio</h1>
+</div>
+
+<div class="main-container">
+    <div class="radio-container">
+        <div class="radio-player">
+            <audio id="radio-player" controls autoplay>
+                Ваш браузер не поддерживает элемент audio.
+            </audio>
+        </div>
+
+        <div class="current-song">
+            <p>Сейчас играет: </p><span id="current-song">—</span>
+        </div>
+        <!-- Добавленная ссылка для скачивания плейлиста -->
+        <div class="download-playlist">
+            <a href="http://pub.dlike.ru:8000/live.m3u" download="playlist.m3u">Скачать плейлист</a>
+        </div>
+    </div>
+
+    <div class="history-container">
+        <h2>История воспроизведения</h2>
+        <ul id="history-list"></ul>
+    </div>
+</div>
+
+<script src="/static/main/js/main_script.js?v=1.0"></script>
+
+</body>
+</html>

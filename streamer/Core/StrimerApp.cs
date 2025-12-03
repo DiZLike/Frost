@@ -16,21 +16,49 @@ namespace Strimer.Core
             // 1. Загрузка конфигурации
             _config = new AppConfig();
 
-            // 2. Копируем библиотеки для текущей ОС, если это первая настройка
+            // 2. Показываем реальный статус
+            Console.WriteLine($"\n=== CONFIGURATION STATUS ===");
+            Console.WriteLine($"IsConfigured property: {_config.IsConfigured}");
+            Console.WriteLine($"Config file: {Path.Combine(_config.ConfigDirectory, "strimer.conf")}");
+            Console.WriteLine($"File exists: {File.Exists(Path.Combine(_config.ConfigDirectory, "strimer.conf"))}");
+
+            // 3. Если не настроено - запускаем мастер настройки
             if (!_config.IsConfigured)
             {
+                Console.WriteLine("\n" + new string('═', 50));
+                Console.WriteLine("  STRIMER RADIO - FIRST TIME SETUP");
+                Console.WriteLine(new string('═', 50));
+
+                Console.WriteLine("\nThe application needs to be configured before use.");
+                Console.WriteLine("Press any key to start setup wizard...");
+                Console.ReadKey();
+
+                // Копируем библиотеки
                 CopyNativeLibraries();
+
+                // Запускаем мастер настройки
                 RunSetupWizard();
+
+                // После мастера настройки снова загружаем конфиг
+                _config = new AppConfig();
+            }
+            else
+            {
+                Console.WriteLine("\nConfiguration already set up.");
             }
 
-            // 3. Инициализируем и запускаем радио-сервис
+            // 4. Запускаем радио сервис
+            Console.WriteLine("\n" + new string('═', 50));
+            Console.WriteLine("  STARTING RADIO STREAM");
+            Console.WriteLine(new string('═', 50) + "\n");
+
             _radioService = new RadioService(_config);
             _radioService.Start();
 
-            // 4. Главный цикл управления
+            // 5. Главный цикл управления
             RunMainLoop();
 
-            // 5. Очистка при завершении
+            // 6. Очистка
             _radioService.Stop();
             Logger.Info("=== Strimer Radio Stopped ===");
         }
@@ -99,37 +127,127 @@ namespace Strimer.Core
 
         private void RunSetupWizard()
         {
-            Logger.Info("\n=== SETUP WIZARD ===");
+            try
+            {
+                Console.Clear();
+                Console.WriteLine("╔══════════════════════════════════════════════╗");
+                Console.WriteLine("║        STRIMER RADIO - SETUP WIZARD         ║");
+                Console.WriteLine("╚══════════════════════════════════════════════╝\n");
 
-            Console.WriteLine("\nIceCast Server Configuration:");
-            Console.Write($"Server [{_config.IceCastServer}]: ");
-            var server = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(server))
-                _config.IceCastServer = server;
+                Console.WriteLine("Step 1 of 4: IceCast Server Settings");
+                Console.WriteLine("-------------------------------------");
 
-            Console.Write($"Port [{_config.IceCastPort}]: ");
-            var port = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(port))
-                _config.IceCastPort = port;
+                // IceCast настройки
+                Console.Write($"Server address [{_config.IceCastServer}]: ");
+                var server = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(server))
+                    _config.IceCastServer = server;
 
-            Console.Write($"Mount point [{_config.IceCastMount}]: ");
-            var mount = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(mount))
-                _config.IceCastMount = mount;
+                Console.Write($"Port [{_config.IceCastPort}]: ");
+                var port = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(port))
+                    _config.IceCastPort = port;
 
-            Console.Write($"Username [{_config.IceCastUser}]: ");
-            var user = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(user))
-                _config.IceCastUser = user;
+                Console.Write($"Mount point (stream URL) [{_config.IceCastMount}]: ");
+                var mount = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(mount))
+                    _config.IceCastMount = mount;
 
-            Console.Write($"Password [{_config.IceCastPassword}]: ");
-            var pass = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(pass))
-                _config.IceCastPassword = pass;
+                Console.Write($"Stream name [{_config.IceCastName}]: ");
+                var name = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(name))
+                    _config.IceCastName = name;
 
-            // Сохраняем конфигурацию
-            _config.Save();
-            Logger.Info("Setup completed. Configuration saved.");
+                Console.Write($"Username [{_config.IceCastUser}]: ");
+                var user = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(user))
+                    _config.IceCastUser = user;
+
+                Console.Write($"Password [{_config.IceCastPassword}]: ");
+                var pass = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(pass))
+                    _config.IceCastPassword = pass;
+
+                Console.WriteLine("\nStep 2 of 4: Playlist Settings");
+                Console.WriteLine("--------------------------------");
+
+                // Playlist
+                Console.Write($"Path to playlist file [{_config.PlaylistFile}]: ");
+                var playlist = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(playlist))
+                    _config.PlaylistFile = playlist;
+
+                // Проверяем плейлист
+                if (File.Exists(_config.PlaylistFile))
+                {
+                    Console.WriteLine($"✓ Playlist file found: {_config.PlaylistFile}");
+                }
+                else
+                {
+                    Console.WriteLine($"✗ Playlist file NOT found: {_config.PlaylistFile}");
+                    Console.WriteLine("Please create a playlist file with this format:");
+                    Console.WriteLine("  track=C:\\Music\\song1.mp3?;");
+                    Console.WriteLine("  track=C:\\Music\\song2.mp3?;");
+                    Console.Write("Create empty playlist file now? (y/n): ");
+
+                    if (Console.ReadKey().Key == ConsoleKey.Y)
+                    {
+                        try
+                        {
+                            string dir = Path.GetDirectoryName(_config.PlaylistFile);
+                            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                                Directory.CreateDirectory(dir);
+
+                            File.WriteAllText(_config.PlaylistFile, "# Strimer Playlist\n# Add tracks in format: track=C:\\path\\to\\file.mp3?;\n");
+                            Console.WriteLine($"\n✓ Empty playlist created: {_config.PlaylistFile}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"\n✗ Failed to create playlist: {ex.Message}");
+                        }
+                    }
+                    Console.WriteLine();
+                }
+
+                Console.WriteLine("\nStep 3 of 4: Encoder Settings");
+                Console.WriteLine("--------------------------------");
+
+                // Encoder settings
+                Console.Write($"Bitrate (kbps) [{_config.OpusBitrate}]: ");
+                var bitrate = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(bitrate) && int.TryParse(bitrate, out int bitrateValue))
+                    _config.OpusBitrate = bitrateValue;
+
+                Console.Write($"Mode (vbr/cvbr/hard-cbr) [{_config.OpusMode}]: ");
+                var mode = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(mode))
+                    _config.OpusMode = mode;
+
+                Console.WriteLine("\nStep 4 of 4: Saving Configuration");
+                Console.WriteLine("-----------------------------------");
+
+                // Сохраняем конфигурацию
+                _config.Save();
+                _config.IsConfigured = true;
+
+                Console.WriteLine("\n✓ Configuration saved successfully!");
+                Console.WriteLine("\nSummary:");
+                Console.WriteLine($"  Server: {_config.IceCastServer}:{_config.IceCastPort}/{_config.IceCastMount}");
+                Console.WriteLine($"  Playlist: {_config.PlaylistFile}");
+                Console.WriteLine($"  Bitrate: {_config.OpusBitrate} kbps ({_config.OpusMode})");
+
+                Console.WriteLine("\nPress any key to start streaming...");
+                Console.ReadKey();
+                Console.Clear();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Setup wizard failed: {ex.Message}");
+                Console.WriteLine($"\nSetup failed: {ex.Message}");
+                Console.WriteLine("Press any key to exit...");
+                Console.ReadKey();
+                Environment.Exit(1);
+            }
         }
 
         private void RunMainLoop()

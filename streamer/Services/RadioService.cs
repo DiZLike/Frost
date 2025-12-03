@@ -150,11 +150,11 @@ namespace Strimer.Services
             Console.WriteLine("╔════════════════════════════════════════╗");
             Console.WriteLine("║        STRIMER RADIO - LIVE STREAM     ║");
             Console.WriteLine("╠════════════════════════════════════════╣");
-            Console.WriteLine($"║ Now Playing: {_currentTrack.Artist,-30}║");
-            Console.WriteLine($"║            : {_currentTrack.Title,-30}║");
+            Console.WriteLine($"║ Now Playing: {_currentTrack.Artist,-30}");
+            Console.WriteLine($"║            : {_currentTrack.Title,-30}");
             Console.WriteLine("╠════════════════════════════════════════╣");
-            Console.WriteLine($"║ Track: {_playlist.CurrentIndex + 1,3}/{_playlist.TotalTracks,-3} " +
-                            $"Listeners: {_iceCast.Listeners,4} (Peak: {_iceCast.PeakListeners,4}) ║");
+            Console.WriteLine($"║ Track: {_playlist.CurrentIndex + 1,3}/{_playlist.TotalTracks,-3}" +
+                            $"Listeners: {_iceCast.Listeners} (Peak: {_iceCast.PeakListeners})");
             Console.WriteLine("╚════════════════════════════════════════╝");
             Console.WriteLine("\nCommands: [Q]uit [S]tatus [N]ext [P]ause [I]nfo");
         }
@@ -168,12 +168,12 @@ namespace Strimer.Services
             string total = _player.GetTotalTime();
 
             Console.SetCursorPosition(0, 5);
-            Console.WriteLine($"║ Time: {elapsed} / {total,-35}║");
+            Console.WriteLine($"║ Time: {elapsed} / {total,-35}");
 
             // Также обновляем статистику слушателей
             Console.SetCursorPosition(0, 6);
             Console.WriteLine($"║ Track: {_playlist.CurrentIndex + 1,3}/{_playlist.TotalTracks,-3} " +
-                            $"Listeners: {_iceCast.Listeners,4} (Peak: {_iceCast.PeakListeners,4}) ║");
+                            $"Listeners: {_iceCast.Listeners} (Peak: {_iceCast.PeakListeners})");
         }
 
         public void ShowStatus()
