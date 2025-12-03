@@ -1,27 +1,93 @@
-A program for creating your own online radio.
-The following functions are currently implemented:
-- Broadcast to ICEcast servers;
-- Encoding a stream using the OPUS codec;
-- Reading and passing tags to the stream (but not to the server page);
-- Track randomizer.
+# 🎵 Strimer Radio Streamer
 
-Launching the app:
-Upon first launch, the application will identify your operating system and copy the necessary libraries,
-depending on the architecture of your computer. Then you will need to follow a few steps:
+**Решение для потокового радио на IceCast**
+## 📖 О проекте
 
-- Select the playback device (it is recommended to select "0" so that the program does not play audio).
-- Specify the sampling rate.
-- Enter the IP address or the address of your server to which the broadcast will be performed.
-- Specify the server port.
-- Come up with a name for the broadcast link that will be created.
-- Come up with a name for the broadcast.
-- Select the broadcast genre.
-- Enter the parameters corresponding to the selected encoder.
+Strimer - это программное обеспечение для потокового вещания радиостанций через серверы IceCast. Поддерживает высококачественное кодирование аудио в формат Opus, управление плейлистами и интеграцию с внешними сервисами.
 
-The initial setup is complete. The program will close with a playlist error (so far this is normal).
+### 🎧 Аудио и кодирование
+- **Высококачественное кодирование Opus** с настраиваемым битрейтом (32-512 kbps)
+- **Поддержка Replay Gain** для автоматической нормализации громкости
+- **Поддержка всех популярных форматов**: MP3, FLAC, AAC, WAV, OGG
 
-Setting up a playlist:
-Open the settings file "strimer.conf" in the application folder (path: <application folder>\config). Find the [Radio] section and enter the path to your playlist in the "radio.playlist" key.
+### 📻 Вещание
+- **Полная совместимость с IceCast 2.4+**
+- **Автоматическое обновление метаданных** (артист, трек, альбом)
+- **Мониторинг статистики** в реальном времени (слушатели, пиковые значения)
+- **Устойчивое соединение** с автоматическим восстановлением
 
-Playlist file syntax:
-Each new track is added from a new line in the format "track=track path?;".
+### 🎵 Управление контентом
+- **Интеллектуальный плейлист** с ротацией треков
+- **История воспроизведения** с возможностью сохранения
+- **Случайный выбор треков** без повторений
+
+### 🛠️ Управление и мониторинг
+- **Интерактивная консоль управления** с hotkeys
+- **Детальная статистика** воспроизведения
+- **Логирование событий** в файл и консоль
+- **Интеграция с внешними API** (MyServer)
+
+### ⚙️ Настройки
+- **Мастер первоначальной настройки** для быстрого старта
+- **Конфигурационные файлы** в формате key=value;
+- **Кроссплатформенность** (Windows, Linux)
+- **Автоматическое определение** библиотек для текущей платформы
+
+### Требования
+- **.NET 6.0 Runtime** или новее
+- **IceCast Server 2.4+** (установлен и настроен)
+- **Аудиофайлы** в поддерживаемых форматах
+
+### Настройка
+- **Запустите Strimer - при первом запуске откроется мастер настройки
+- **Настройте подключение к IceCast:
+- **Сервер (localhost или удаленный)
+- **Порт (обычно 8000)
+- **Mount point (/stream)
+- **Логин и парод источника
+- **Укажите путь к плейлисту (формат: C:\music\file.pls)
+- **Настройте параметры кодирования (битрейт, режим кодирования)
+
+### Конфигурация
+Основной конфигурационный файл config/strimer.conf:
+
+Strimer Configuration
+app.configured=yes;
+
+IceCast Settings
+icecast.server=localhost;
+icecast.port=8000;
+icecast.link=live;
+icecast.name=My Radio Station;
+icecast.genre=Various;
+icecast.username=source;
+icecast.password=hackme;
+
+Audio Settings
+device.device=-1;
+device.frequency=44100;
+
+Playlist Settings
+radio.playlist=playlist.txt;
+radio.save_playlist_history=yes;
+
+Opus Encoder
+opus.bitrate=128;
+opus.bitrate_mode=vbr;
+opus.content_type=music;
+opus.complexity=10;
+opus.framesize=20;
+
+Audio Processing
+radio.use_replay_gain=yes;
+radio.use_custom_gain=no;
+
+### Формат плейлиста
+Плейлист использует простой текстовый формат:
+
+Strimer Playlist
+Формат: track=путь_к_файлу?;
+
+track=C:\Music\Artist1\Song1.mp3?;
+track=/home/user/music/Song2.flac?;
+track=D:\Audio\Album\Track3.wav?;
