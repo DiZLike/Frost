@@ -1,0 +1,15 @@
+D:\Evgeny\git\strimer\DirectoryStructureExporter\bin\Debug\net6.0\DirectoryStructureExporter.exe
+D:\Evgeny\git\strimer\DirectoryStructureExporter\bin\Debug\net6.0\DirectoryStructureExporter.deps.json
+D:\Evgeny\git\strimer\DirectoryStructureExporter\bin\Debug\net6.0\DirectoryStructureExporter.runtimeconfig.json
+D:\Evgeny\git\strimer\DirectoryStructureExporter\bin\Debug\net6.0\DirectoryStructureExporter.dll
+D:\Evgeny\git\strimer\DirectoryStructureExporter\bin\Debug\net6.0\DirectoryStructureExporter.pdb
+D:\Evgeny\git\strimer\DirectoryStructureExporter\obj\Debug\net6.0\DirectoryStructureExporter.GeneratedMSBuildEditorConfig.editorconfig
+D:\Evgeny\git\strimer\DirectoryStructureExporter\obj\Debug\net6.0\DirectoryStructureExporter.AssemblyInfoInputs.cache
+D:\Evgeny\git\strimer\DirectoryStructureExporter\obj\Debug\net6.0\DirectoryStructureExporter.AssemblyInfo.cs
+D:\Evgeny\git\strimer\DirectoryStructureExporter\obj\Debug\net6.0\DirectoryStructureExporter.csproj.CoreCompileInputs.cache
+D:\Evgeny\git\strimer\DirectoryStructureExporter\obj\Debug\net6.0\DirectoryStructureExporter.sourcelink.json
+D:\Evgeny\git\strimer\DirectoryStructureExporter\obj\Debug\net6.0\DirectoryStructureExporter.dll
+D:\Evgeny\git\strimer\DirectoryStructureExporter\obj\Debug\net6.0\refint\DirectoryStructureExporter.dll
+D:\Evgeny\git\strimer\DirectoryStructureExporter\obj\Debug\net6.0\DirectoryStructureExporter.pdb
+D:\Evgeny\git\strimer\DirectoryStructureExporter\obj\Debug\net6.0\DirectoryStructureExporter.genruntimeconfig.cache
+D:\Evgeny\git\strimer\DirectoryStructureExporter\obj\Debug\net6.0\ref\DirectoryStructureExporter.dll
