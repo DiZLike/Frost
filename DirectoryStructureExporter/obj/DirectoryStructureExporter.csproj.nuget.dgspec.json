@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "F:\\1Evgeny\\git\\strimer\\DirectoryStructureExporter\\DirectoryStructureExporter.csproj": {}
+    "D:\\Evgeny\\git\\strimer\\DirectoryStructureExporter\\DirectoryStructureExporter.csproj": {}
   },
   "projects": {
-    "F:\\1Evgeny\\git\\strimer\\DirectoryStructureExporter\\DirectoryStructureExporter.csproj": {
+    "D:\\Evgeny\\git\\strimer\\DirectoryStructureExporter\\DirectoryStructureExporter.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\1Evgeny\\git\\strimer\\DirectoryStructureExporter\\DirectoryStructureExporter.csproj",
+        "projectUniqueName": "D:\\Evgeny\\git\\strimer\\DirectoryStructureExporter\\DirectoryStructureExporter.csproj",
         "projectName": "DirectoryStructureExporter",
-        "projectPath": "F:\\1Evgeny\\git\\strimer\\DirectoryStructureExporter\\DirectoryStructureExporter.csproj",
-        "packagesPath": "C:\\Users\\diz91\\.nuget\\packages\\",
-        "outputPath": "F:\\1Evgeny\\git\\strimer\\DirectoryStructureExporter\\obj\\",
+        "projectPath": "D:\\Evgeny\\git\\strimer\\DirectoryStructureExporter\\DirectoryStructureExporter.csproj",
+        "packagesPath": "C:\\Users\\Evgeny\\.nuget\\packages\\",
+        "outputPath": "D:\\Evgeny\\git\\strimer\\DirectoryStructureExporter\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\diz91\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\Evgeny\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [

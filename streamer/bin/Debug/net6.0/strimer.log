@@ -888,3 +888,191 @@
 [2025-12-04 01:56:10] [INFO] Stream -2147483643 added to mixer
 [2025-12-04 01:56:10] [INFO] Now playing: clotkpre - Я тупой!
 [2025-12-04 01:56:10] [INFO] Metadata updated: clotkpre - Я тупой!
+[2025-12-06 13:12:01] [INFO] === Strimer Radio Starting ===
+[2025-12-06 13:12:01] [INFO] Detected OS: Windows (X64)
+[2025-12-06 13:12:01] [INFO] Config: app.configured='yes' -> parsed as 'yes' -> IsConfigured=True
+[2025-12-06 13:12:01] [INFO] Config: UseReplayGain = True
+[2025-12-06 13:12:01] [INFO] Config: UseCustomGain = True
+[2025-12-06 13:12:01] [INFO] Configuration loaded
+[2025-12-06 13:12:01] [INFO] Initializing Radio Service...
+[2025-12-06 13:12:01] [INFO] Loading playlist from: C:\Users\Evgeny\Desktop\list.pls
+[2025-12-06 13:12:01] [INFO] Loaded 1 tracks
+[2025-12-06 13:12:01] [INFO] Loaded 1 tracks from history
+[2025-12-06 13:12:01] [INFO] MyServer client initialized
+[2025-12-06 13:12:01] [INFO] Playlist loaded: 1 tracks
+[2025-12-06 13:12:01] [INFO] Starting radio service...
+[2025-12-06 13:12:01] [INFO] Initializing audio system...
+[2025-12-06 13:12:01] [INFO] Mixer created (handle: -2147483647)
+[2025-12-06 13:12:01] [INFO] ReplayGain initialized: UseReplayGain=True, UseCustomGain=True
+[2025-12-06 13:12:01] [ERROR] Failed to create ReplayGain compressor: BASS_ERROR_ILLTYPE
+[2025-12-06 13:12:01] [INFO] Loading audio plugins...
+[2025-12-06 13:12:01] [INFO]   Loaded: bassopus
+[2025-12-06 13:12:01] [INFO] Audio system initialized successfully
+[2025-12-06 13:12:01] [INFO] Initializing IceCast client...
+[2025-12-06 13:12:01] [INFO] Initializing Opus encoder...
+[2025-12-06 13:12:01] [INFO] Opus encoder initialized: 128kbps vbr
+[2025-12-06 13:12:06] [ERROR] IceCast connection failed: Failed to initialize IceCast stream: BASS_ERROR_TIMEOUT
+[2025-12-06 13:12:06] [INFO] IceCast client initialized
+[2025-12-06 13:12:06] [INFO] Radio service started successfully
+[2025-12-06 13:12:06] [INFO] Playback loop started
+[2025-12-06 13:12:06] [INFO] History cleared, starting playlist over
+[2025-12-06 13:12:06] [INFO] Selected track: Я тупой!.mp3 (Index: 1/1)
+[2025-12-06 13:12:06] [INFO] Using ReplayGain from tags: -100,00 dB
+[2025-12-06 13:16:17] [INFO] === Strimer Radio Starting ===
+[2025-12-06 13:16:17] [INFO] Detected OS: Windows (X64)
+[2025-12-06 13:16:17] [INFO] Config: app.configured='yes' -> parsed as 'yes' -> IsConfigured=True
+[2025-12-06 13:16:17] [INFO] Config: UseReplayGain = True
+[2025-12-06 13:16:17] [INFO] Config: UseCustomGain = True
+[2025-12-06 13:16:17] [INFO] Configuration loaded
+[2025-12-06 13:16:17] [INFO] Initializing Radio Service...
+[2025-12-06 13:16:17] [INFO] Loading playlist from: C:\Users\Evgeny\Desktop\list.pls
+[2025-12-06 13:16:17] [INFO] Loaded 1 tracks
+[2025-12-06 13:16:17] [INFO] Loaded 1 tracks from history
+[2025-12-06 13:16:17] [INFO] MyServer client initialized
+[2025-12-06 13:16:17] [INFO] Playlist loaded: 1 tracks
+[2025-12-06 13:16:17] [INFO] Starting radio service...
+[2025-12-06 13:16:17] [INFO] Initializing audio system...
+[2025-12-06 13:16:17] [INFO] Mixer created (handle: -2147483647)
+[2025-12-06 13:16:17] [INFO] ReplayGain initialized: UseReplayGain=True, UseCustomGain=True
+[2025-12-06 13:21:01] [INFO] === Strimer Radio Starting ===
+[2025-12-06 13:21:01] [INFO] Detected OS: Windows (X64)
+[2025-12-06 13:21:01] [INFO] Config: app.configured='yes' -> parsed as 'yes' -> IsConfigured=True
+[2025-12-06 13:21:01] [INFO] Config: UseReplayGain = True
+[2025-12-06 13:21:01] [INFO] Config: UseCustomGain = True
+[2025-12-06 13:21:01] [INFO] Configuration loaded
+[2025-12-06 13:21:01] [INFO] Initializing Radio Service...
+[2025-12-06 13:21:01] [INFO] Loading playlist from: C:\Users\Evgeny\Desktop\list.pls
+[2025-12-06 13:21:01] [INFO] Loaded 1 tracks
+[2025-12-06 13:21:01] [INFO] Loaded 1 tracks from history
+[2025-12-06 13:21:01] [INFO] MyServer client initialized
+[2025-12-06 13:21:01] [INFO] Playlist loaded: 1 tracks
+[2025-12-06 13:21:01] [INFO] Starting radio service...
+[2025-12-06 13:21:01] [INFO] Initializing audio system...
+[2025-12-06 13:21:01] [INFO] Mixer created (handle: -2147483647)
+[2025-12-06 13:21:01] [INFO] ReplayGain initialized: UseReplayGain=True, UseCustomGain=True
+[2025-12-06 13:23:34] [INFO] === Strimer Radio Starting ===
+[2025-12-06 13:23:34] [INFO] Detected OS: Windows (X64)
+[2025-12-06 13:23:34] [INFO] Config: app.configured='yes' -> parsed as 'yes' -> IsConfigured=True
+[2025-12-06 13:23:34] [INFO] Config: UseReplayGain = True
+[2025-12-06 13:23:34] [INFO] Config: UseCustomGain = True
+[2025-12-06 13:23:34] [INFO] Configuration loaded
+[2025-12-06 13:23:34] [INFO] Initializing Radio Service...
+[2025-12-06 13:23:34] [INFO] Loading playlist from: C:\Users\Evgeny\Desktop\list.pls
+[2025-12-06 13:23:34] [INFO] Loaded 1 tracks
+[2025-12-06 13:23:34] [INFO] Loaded 1 tracks from history
+[2025-12-06 13:23:34] [INFO] MyServer client initialized
+[2025-12-06 13:23:34] [INFO] Playlist loaded: 1 tracks
+[2025-12-06 13:23:34] [INFO] Starting radio service...
+[2025-12-06 13:23:34] [INFO] Initializing audio system...
+[2025-12-06 13:23:34] [INFO] Mixer created (handle: -2147483647)
+[2025-12-06 13:23:34] [INFO] ReplayGain initialized: UseReplayGain=True, UseCustomGain=True
+[2025-12-06 13:23:35] [INFO] ReplayGain compressor created (handle: -2147483645)
+[2025-12-06 13:23:35] [INFO] Loading audio plugins...
+[2025-12-06 13:23:35] [INFO]   Loaded: bassopus
+[2025-12-06 13:23:35] [INFO] Audio system initialized successfully
+[2025-12-06 13:23:35] [INFO] Initializing IceCast client...
+[2025-12-06 13:23:35] [INFO] Initializing Opus encoder...
+[2025-12-06 13:23:35] [INFO] Opus encoder initialized: 128kbps vbr
+[2025-12-06 13:23:40] [ERROR] IceCast connection failed: Failed to initialize IceCast stream: BASS_ERROR_TIMEOUT
+[2025-12-06 13:23:40] [INFO] IceCast client initialized
+[2025-12-06 13:23:40] [INFO] Radio service started successfully
+[2025-12-06 13:23:40] [INFO] Playback loop started
+[2025-12-06 13:23:40] [INFO] History cleared, starting playlist over
+[2025-12-06 13:23:40] [INFO] Selected track: Я тупой!.mp3 (Index: 1/1)
+[2025-12-06 13:23:41] [INFO] No ReplayGain data found, using 0 dB
+[2025-12-06 13:23:41] [INFO] Set compressor gain to: 0,00 dB
+[2025-12-06 13:32:51] [INFO] === Strimer Radio Starting ===
+[2025-12-06 13:32:51] [INFO] Detected OS: Windows (X64)
+[2025-12-06 13:32:51] [INFO] Config: app.configured='yes' -> parsed as 'yes' -> IsConfigured=True
+[2025-12-06 13:32:51] [INFO] Config: UseReplayGain = True
+[2025-12-06 13:32:51] [INFO] Config: UseCustomGain = True
+[2025-12-06 13:32:51] [INFO] Configuration loaded
+[2025-12-06 13:32:51] [INFO] Initializing Radio Service...
+[2025-12-06 13:32:51] [INFO] Loading playlist from: C:\Users\Evgeny\Desktop\list.pls
+[2025-12-06 13:32:51] [INFO] Loaded 1 tracks
+[2025-12-06 13:32:51] [INFO] Loaded 1 tracks from history
+[2025-12-06 13:32:51] [INFO] MyServer client initialized
+[2025-12-06 13:32:51] [INFO] Playlist loaded: 1 tracks
+[2025-12-06 13:32:51] [INFO] Starting radio service...
+[2025-12-06 13:32:51] [INFO] Initializing audio system...
+[2025-12-06 13:32:52] [INFO] Mixer created (handle: -2147483647)
+[2025-12-06 13:32:52] [INFO] ReplayGain initialized: UseReplayGain=True, UseCustomGain=True
+[2025-12-06 13:32:52] [INFO] BassFx: 33819654
+[2025-12-06 13:32:52] [INFO] ReplayGain compressor created (handle: -2147483645)
+[2025-12-06 13:33:15] [INFO] Loading audio plugins...
+[2025-12-06 13:33:15] [INFO]   Loaded: bassopus
+[2025-12-06 13:33:19] [INFO] Audio system initialized successfully
+[2025-12-06 13:33:22] [INFO] Initializing IceCast client...
+[2025-12-06 13:33:22] [INFO] Initializing Opus encoder...
+[2025-12-06 13:33:22] [INFO] Opus encoder initialized: 128kbps vbr
+[2025-12-06 13:33:27] [ERROR] IceCast connection failed: Failed to initialize IceCast stream: BASS_ERROR_TIMEOUT
+[2025-12-06 13:33:27] [INFO] IceCast client initialized
+[2025-12-06 13:33:54] [INFO] === Strimer Radio Starting ===
+[2025-12-06 13:33:54] [INFO] Detected OS: Windows (X64)
+[2025-12-06 13:33:54] [INFO] Config: app.configured='yes' -> parsed as 'yes' -> IsConfigured=True
+[2025-12-06 13:33:54] [INFO] Config: UseReplayGain = True
+[2025-12-06 13:33:54] [INFO] Config: UseCustomGain = True
+[2025-12-06 13:33:54] [INFO] Configuration loaded
+[2025-12-06 13:33:54] [INFO] Initializing Radio Service...
+[2025-12-06 13:33:54] [INFO] Loading playlist from: C:\Users\Evgeny\Desktop\list.pls
+[2025-12-06 13:33:54] [INFO] Loaded 1 tracks
+[2025-12-06 13:33:54] [INFO] Loaded 1 tracks from history
+[2025-12-06 13:33:54] [INFO] MyServer client initialized
+[2025-12-06 13:33:54] [INFO] Playlist loaded: 1 tracks
+[2025-12-06 13:33:54] [INFO] Starting radio service...
+[2025-12-06 13:33:54] [INFO] Initializing audio system...
+[2025-12-06 13:33:54] [INFO] Mixer created (handle: -2147483647)
+[2025-12-06 13:33:54] [INFO] ReplayGain initialized: UseReplayGain=True, UseCustomGain=True
+[2025-12-06 13:33:54] [INFO] BassFx: 33819654
+[2025-12-06 13:33:54] [INFO] ReplayGain compressor created (handle: -2147483645)
+[2025-12-06 13:33:58] [INFO] Loading audio plugins...
+[2025-12-06 13:33:58] [INFO]   Loaded: bassopus
+[2025-12-06 13:33:58] [INFO] Audio system initialized successfully
+[2025-12-06 13:33:58] [INFO] Initializing IceCast client...
+[2025-12-06 13:33:58] [INFO] Initializing Opus encoder...
+[2025-12-06 13:33:58] [INFO] Opus encoder initialized: 128kbps vbr
+[2025-12-06 13:34:03] [ERROR] IceCast connection failed: Failed to initialize IceCast stream: BASS_ERROR_TIMEOUT
+[2025-12-06 13:34:03] [INFO] IceCast client initialized
+[2025-12-06 13:34:03] [INFO] Radio service started successfully
+[2025-12-06 13:34:04] [INFO] Playback loop started
+[2025-12-06 13:34:13] [INFO] History cleared, starting playlist over
+[2025-12-06 13:34:13] [INFO] Selected track: Я тупой!.mp3 (Index: 1/1)
+[2025-12-06 13:34:17] [INFO] No ReplayGain data found, using 0 dB
+[2025-12-06 13:34:17] [INFO] Set compressor gain to: 0,00 dB
+[2025-12-06 13:34:31] [INFO] ReplayGain applied: 0,00 dB
+[2025-12-06 13:35:01] [INFO] === Strimer Radio Starting ===
+[2025-12-06 13:35:01] [INFO] Detected OS: Windows (X64)
+[2025-12-06 13:35:01] [INFO] Config: app.configured='yes' -> parsed as 'yes' -> IsConfigured=True
+[2025-12-06 13:35:01] [INFO] Config: UseReplayGain = True
+[2025-12-06 13:35:01] [INFO] Config: UseCustomGain = True
+[2025-12-06 13:35:01] [INFO] Configuration loaded
+[2025-12-06 13:35:01] [INFO] Initializing Radio Service...
+[2025-12-06 13:35:01] [INFO] Loading playlist from: C:\Users\Evgeny\Desktop\list.pls
+[2025-12-06 13:35:01] [INFO] Loaded 1 tracks
+[2025-12-06 13:35:01] [INFO] Loaded 1 tracks from history
+[2025-12-06 13:35:01] [INFO] MyServer client initialized
+[2025-12-06 13:35:01] [INFO] Playlist loaded: 1 tracks
+[2025-12-06 13:35:01] [INFO] Starting radio service...
+[2025-12-06 13:35:01] [INFO] Initializing audio system...
+[2025-12-06 13:35:01] [INFO] Mixer created (handle: -2147483647)
+[2025-12-06 13:35:01] [INFO] ReplayGain initialized: UseReplayGain=True, UseCustomGain=True
+[2025-12-06 13:35:01] [INFO] BassFx: 33819654
+[2025-12-06 13:35:01] [INFO] ReplayGain compressor created (handle: -2147483645)
+[2025-12-06 13:35:01] [INFO] Loading audio plugins...
+[2025-12-06 13:35:01] [INFO]   Loaded: bassopus
+[2025-12-06 13:35:01] [INFO] Audio system initialized successfully
+[2025-12-06 13:35:01] [INFO] Initializing IceCast client...
+[2025-12-06 13:35:01] [INFO] Initializing Opus encoder...
+[2025-12-06 13:35:01] [INFO] Opus encoder initialized: 128kbps vbr
+[2025-12-06 13:35:06] [ERROR] IceCast connection failed: Failed to initialize IceCast stream: BASS_ERROR_TIMEOUT
+[2025-12-06 13:35:06] [INFO] IceCast client initialized
+[2025-12-06 13:35:06] [INFO] Radio service started successfully
+[2025-12-06 13:35:06] [INFO] Playback loop started
+[2025-12-06 13:35:08] [INFO] History cleared, starting playlist over
+[2025-12-06 13:35:08] [INFO] Selected track: Я тупой!.mp3 (Index: 1/1)
+[2025-12-06 13:35:08] [INFO] No ReplayGain data found, using 0 dB
+[2025-12-06 13:35:08] [INFO] Set compressor gain to: 0,00 dB
+[2025-12-06 13:35:08] [INFO] ReplayGain applied: 0,00 dB
+[2025-12-06 13:35:27] [ERROR] Error in playback loop: Failed to add stream to mixer: BASS_ERROR_DECODE
+[2025-12-06 13:35:32] [INFO] History cleared, starting playlist over
+[2025-12-06 13:35:32] [INFO] Selected track: Я тупой!.mp3 (Index: 1/1)

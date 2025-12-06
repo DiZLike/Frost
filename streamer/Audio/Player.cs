@@ -107,11 +107,11 @@ namespace Strimer.Audio
                 return null;
             }
 
-            // Создаем поток для файла
+            // Создаем поток для файла - УБЕРИТЕ BASS_STREAM_DECODE!
             _currentStream = Bass.BASS_StreamCreateFile(
                 filePath,
                 0, 0,
-                BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_STREAM_PRESCAN
+                BASSFlag.BASS_DEFAULT | BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_STREAM_DECODE
             );
 
             if (_currentStream == 0)
@@ -132,10 +132,13 @@ namespace Strimer.Audio
             // Добавляем поток в микшер
             _mixer.AddStream(_currentStream);
 
-            // Запускаем воспроизведение
+            // Запускаем воспроизведение через микшер
             Bass.BASS_ChannelPlay(_mixer.Handle, false);
 
             Logger.Info($"Now playing: {trackInfo.Artist} - {trackInfo.Title}");
+
+            // Логируем ReplayGain значение для отладки
+            Logger.Info($"ReplayGain: {trackInfo.ReplayGain} dB, UseReplayGain: {_config.UseReplayGain}");
 
             return trackInfo;
         }

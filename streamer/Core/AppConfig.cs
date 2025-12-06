@@ -181,9 +181,11 @@ namespace Strimer.Core
 
                 case "radio.use_replay_gain":
                     UseReplayGain = value.ToLower() == "yes";
+                    Logger.Info($"Config: UseReplayGain = {UseReplayGain}");
                     break;
                 case "radio.use_custom_gain":
                     UseCustomGain = value.ToLower() == "yes";
+                    Logger.Info($"Config: UseCustomGain = {UseCustomGain}");
                     break;
 
                 case "mysrv.enable":
