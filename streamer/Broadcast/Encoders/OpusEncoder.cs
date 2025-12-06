@@ -68,7 +68,7 @@ namespace Strimer.Broadcast.Encoders
             }
             else // Linux
             {
-                return Path.Combine(baseDir, "opusenc");
+                return Path.Combine("/usr/bin/", "opusenc");
             }
         }
 

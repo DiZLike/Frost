@@ -253,7 +253,7 @@ namespace Strimer.Core
         private void RunMainLoop()
         {
             _isRunning = true;
-
+            
             Console.WriteLine("\n=== STREAMING CONTROL ===");
             Console.WriteLine("Commands:");
             Console.WriteLine("  Q - Quit");
@@ -265,35 +265,35 @@ namespace Strimer.Core
 
             while (_isRunning)
             {
-                if (Console.KeyAvailable)
-                {
-                    var key = Console.ReadKey(true).Key;
+                //if (Console.KeyAvailable)
+                //{
+                //    var key = Console.ReadKey(true).Key;
 
-                    switch (key)
-                    {
-                        case ConsoleKey.Q:
-                            _isRunning = false;
-                            Console.WriteLine("\nShutting down...");
-                            break;
+                //    switch (key)
+                //    {
+                //        case ConsoleKey.Q:
+                //            _isRunning = false;
+                //            Console.WriteLine("\nShutting down...");
+                //            break;
 
-                        case ConsoleKey.S:
-                            _radioService?.ShowStatus();
-                            break;
+                //        case ConsoleKey.S:
+                //            _radioService?.ShowStatus();
+                //            break;
 
-                        case ConsoleKey.N:
-                            _radioService?.PlayNextTrack();
-                            break;
+                //        case ConsoleKey.N:
+                //            _radioService?.PlayNextTrack();
+                //            break;
 
-                        case ConsoleKey.P:
-                            _radioService?.TogglePause();
-                            break;
+                //        case ConsoleKey.P:
+                //            _radioService?.TogglePause();
+                //            break;
 
-                        case ConsoleKey.I:
-                            _radioService?.ShowStreamInfo();
-                            break;
-                    }
-                }
-
+                //        case ConsoleKey.I:
+                //            _radioService?.ShowStreamInfo();
+                //            break;
+                //    }
+                //}
+            
                 Thread.Sleep(100);
             }
         }

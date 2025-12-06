@@ -1,12 +1,88 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\Evgeny\\git\\strimer\\",
-  "Documents": [],
+  "WorkspaceRootPath": "F:\\1Evgeny\\git\\strimer\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|f:\\1evgeny\\git\\strimer\\streamer\\core\\strimerapp.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|solutionrelative:streamer\\core\\strimerapp.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|f:\\1evgeny\\git\\strimer\\streamer\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|solutionrelative:streamer\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|f:\\1evgeny\\git\\strimer\\streamer\\config\\strimer.conf||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|solutionrelative:streamer\\config\\strimer.conf||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|f:\\1evgeny\\git\\strimer\\streamer\\broadcast\\encoders\\opusencoder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|solutionrelative:streamer\\broadcast\\encoders\\opusencoder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "StrimerApp.cs",
+              "DocumentMoniker": "F:\\1Evgeny\\git\\strimer\\streamer\\Core\\StrimerApp.cs",
+              "RelativeDocumentMoniker": "streamer\\Core\\StrimerApp.cs",
+              "ToolTip": "F:\\1Evgeny\\git\\strimer\\streamer\\Core\\StrimerApp.cs",
+              "RelativeToolTip": "streamer\\Core\\StrimerApp.cs",
+              "ViewState": "AgIAAAMBAAAAAAAAAAAhwBABAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-04T17:18:18.144Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "strimer.conf",
+              "DocumentMoniker": "F:\\1Evgeny\\git\\strimer\\streamer\\config\\strimer.conf",
+              "RelativeDocumentMoniker": "streamer\\config\\strimer.conf",
+              "ToolTip": "F:\\1Evgeny\\git\\strimer\\streamer\\config\\strimer.conf",
+              "RelativeToolTip": "streamer\\config\\strimer.conf",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-12-04T15:40:40.197Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "OpusEncoder.cs",
+              "DocumentMoniker": "F:\\1Evgeny\\git\\strimer\\streamer\\Broadcast\\Encoders\\OpusEncoder.cs",
+              "RelativeDocumentMoniker": "streamer\\Broadcast\\Encoders\\OpusEncoder.cs",
+              "ToolTip": "F:\\1Evgeny\\git\\strimer\\streamer\\Broadcast\\Encoders\\OpusEncoder.cs",
+              "RelativeToolTip": "streamer\\Broadcast\\Encoders\\OpusEncoder.cs",
+              "ViewState": "AgIAACMAAAAAAAAAAAAwwEYAAAA8AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-04T15:15:44.86Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Program.cs",
+              "DocumentMoniker": "F:\\1Evgeny\\git\\strimer\\streamer\\Program.cs",
+              "RelativeDocumentMoniker": "streamer\\Program.cs",
+              "ToolTip": "F:\\1Evgeny\\git\\strimer\\streamer\\Program.cs",
+              "RelativeToolTip": "streamer\\Program.cs",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAiwBMAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-04T15:14:46.758Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }
