@@ -270,3 +270,46 @@
 
 </body>
 </html>
+[2025-12-08 00:26:52] [INFO] === Strimer Radio Starting ===
+[2025-12-08 00:26:52] [INFO] Detected OS: Windows (X64)
+[2025-12-08 00:26:52] [INFO] Config: app.configured='yes' -> parsed as 'yes' -> IsConfigured=True
+[2025-12-08 00:26:52] [INFO] Config: DynamicPlaylist = True
+[2025-12-08 00:26:52] [INFO] Config: UseReplayGain = True
+[2025-12-08 00:26:52] [INFO] Config: UseCustomGain = False
+[2025-12-08 00:26:52] [INFO] Configuration loaded
+[2025-12-08 00:26:52] [INFO] Initializing Radio Service...
+[2025-12-08 00:26:52] [INFO] Playlist loaded: 1 tracks
+[2025-12-08 00:26:52] [INFO] Playlist loaded: 1 tracks
+[2025-12-08 00:26:52] [INFO] Starting radio service...
+[2025-12-08 00:26:52] [INFO] Initializing audio system...
+[2025-12-08 00:26:52] [INFO] Mixer created (handle: -2147483647)
+[2025-12-08 00:26:52] [INFO] ReplayGain initialized: UseReplayGain=True, UseCustomGain=False
+[2025-12-08 00:26:52] [INFO] BassFx: 33819654
+[2025-12-08 00:26:52] [INFO] ReplayGain compressor created (handle: -2147483645)
+[2025-12-08 00:26:52] [INFO] Loading audio plugins...
+[2025-12-08 00:26:52] [INFO]   Loaded: bassopus
+[2025-12-08 00:26:52] [INFO] Audio system initialized successfully
+[2025-12-08 00:26:52] [INFO] Initializing IceCast client...
+[2025-12-08 00:26:52] [INFO] Initializing Opus encoder...
+[2025-12-08 00:26:52] [INFO] Opus encoder initialized: 48kbps vbr
+[2025-12-08 00:26:53] [INFO] Connected to IceCast: http://r.dlike.ru:8000/live_test
+[2025-12-08 00:26:53] [INFO] IceCast client initialized
+[2025-12-08 00:26:53] [INFO] Radio service started successfully
+[2025-12-08 00:26:53] [INFO] Playback loop started
+[2025-12-08 00:26:53] [INFO] No ReplayGain data found, using 0 dB
+[2025-12-08 00:26:53] [INFO] Set compressor gain to: 0,00 dB
+[2025-12-08 00:26:53] [INFO] ReplayGain applied: 0,00 dB
+[2025-12-08 00:26:53] [INFO] Stream -2147483642 added to mixer
+[2025-12-08 00:26:53] [INFO] Now playing: clotkpre - Я тупой!
+[2025-12-08 00:26:53] [INFO] ReplayGain: -100 dB, UseReplayGain: True
+[2025-12-08 00:26:53] [INFO] Metadata updated: clotkpre - Я тупой!
+[2025-12-08 00:28:53] [INFO] Playlist loaded: 2 tracks
+[2025-12-08 00:28:53] [INFO] Playlist updated: 1 -> 2 tracks
+[2025-12-08 00:28:53] [INFO] Stream -2147483642 removed from mixer
+[2025-12-08 00:28:53] [INFO] No ReplayGain data found, using 0 dB
+[2025-12-08 00:28:53] [INFO] Set compressor gain to: 0,00 dB
+[2025-12-08 00:28:53] [INFO] ReplayGain applied: 0,00 dB
+[2025-12-08 00:28:53] [INFO] Stream -2147483637 added to mixer
+[2025-12-08 00:28:53] [INFO] Now playing: clotkpre - Oleg-check... Oleg-check...
+[2025-12-08 00:28:53] [INFO] ReplayGain: -100 dB, UseReplayGain: True
+[2025-12-08 00:28:53] [INFO] Metadata updated: clotkpre - Oleg-check... Oleg-check...

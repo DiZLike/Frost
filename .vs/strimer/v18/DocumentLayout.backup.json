@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "D:\\Evgeny\\git\\strimer\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|d:\\evgeny\\git\\strimer\\streamer\\audio\\replaygain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|solutionrelative:streamer\\audio\\replaygain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|d:\\evgeny\\git\\strimer\\streamer\\audio\\playlist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|solutionrelative:streamer\\audio\\playlist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|d:\\evgeny\\git\\strimer\\streamer\\audio\\player.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|solutionrelative:streamer\\audio\\player.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|d:\\evgeny\\git\\strimer\\streamer\\config\\strimer.conf||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|solutionrelative:streamer\\config\\strimer.conf||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|d:\\evgeny\\git\\strimer\\streamer\\services\\radioservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -17,10 +17,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|d:\\evgeny\\git\\strimer\\streamer\\core\\appconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|solutionrelative:streamer\\core\\appconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|d:\\evgeny\\git\\strimer\\streamer\\config\\strimer.conf||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|solutionrelative:streamer\\config\\strimer.conf||{3B902123-F8A7-4915-9F01-361F908088D0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -30,21 +26,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 1,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "AppConfig.cs",
-              "DocumentMoniker": "D:\\Evgeny\\git\\strimer\\streamer\\Core\\AppConfig.cs",
-              "RelativeDocumentMoniker": "streamer\\Core\\AppConfig.cs",
-              "ToolTip": "D:\\Evgeny\\git\\strimer\\streamer\\Core\\AppConfig.cs",
-              "RelativeToolTip": "streamer\\Core\\AppConfig.cs",
-              "ViewState": "AgIAAKQAAAAAAAAAAAAhwMgAAAAuAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-06T10:06:37.402Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Document",
               "DocumentIndex": 2,
@@ -53,48 +36,48 @@
               "RelativeDocumentMoniker": "streamer\\Services\\RadioService.cs",
               "ToolTip": "D:\\Evgeny\\git\\strimer\\streamer\\Services\\RadioService.cs",
               "RelativeToolTip": "streamer\\Services\\RadioService.cs",
-              "ViewState": "AgIAAE0AAAAAAAAAAAASwF8AAAAxAAAAAAAAAA==",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABcAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-06T10:05:28.302Z",
+              "WhenOpened": "2025-12-07T21:12:04.823Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "ReplayGain.cs",
-              "DocumentMoniker": "D:\\Evgeny\\git\\strimer\\streamer\\Audio\\ReplayGain.cs",
-              "RelativeDocumentMoniker": "streamer\\Audio\\ReplayGain.cs",
-              "ToolTip": "D:\\Evgeny\\git\\strimer\\streamer\\Audio\\ReplayGain.cs",
-              "RelativeToolTip": "streamer\\Audio\\ReplayGain.cs",
-              "ViewState": "AgIAADwAAAAAAAAAAAArwF0AAAAmAAAAAAAAAA==",
+              "Title": "Playlist.cs",
+              "DocumentMoniker": "D:\\Evgeny\\git\\strimer\\streamer\\Audio\\Playlist.cs",
+              "RelativeDocumentMoniker": "streamer\\Audio\\Playlist.cs",
+              "ToolTip": "D:\\Evgeny\\git\\strimer\\streamer\\Audio\\Playlist.cs",
+              "RelativeToolTip": "streamer\\Audio\\Playlist.cs",
+              "ViewState": "AgIAAI8AAAAAAAAAAAAuwKMAAABRAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-06T10:00:20.18Z",
+              "WhenOpened": "2025-12-07T21:08:29.011Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "AppConfig.cs",
+              "DocumentMoniker": "D:\\Evgeny\\git\\strimer\\streamer\\Core\\AppConfig.cs",
+              "RelativeDocumentMoniker": "streamer\\Core\\AppConfig.cs",
+              "ToolTip": "D:\\Evgeny\\git\\strimer\\streamer\\Core\\AppConfig.cs",
+              "RelativeToolTip": "streamer\\Core\\AppConfig.cs",
+              "ViewState": "AgIAAIQAAAAAAAAAAAAhwKIAAABQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-07T21:05:38.142Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "Player.cs",
-              "DocumentMoniker": "D:\\Evgeny\\git\\strimer\\streamer\\Audio\\Player.cs",
-              "RelativeDocumentMoniker": "streamer\\Audio\\Player.cs",
-              "ToolTip": "D:\\Evgeny\\git\\strimer\\streamer\\Audio\\Player.cs",
-              "RelativeToolTip": "streamer\\Audio\\Player.cs",
-              "ViewState": "AgIAAGAAAAAAAAAAAAASwHMAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-06T09:59:01.018Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
               "Title": "strimer.conf",
               "DocumentMoniker": "D:\\Evgeny\\git\\strimer\\streamer\\config\\strimer.conf",
               "RelativeDocumentMoniker": "streamer\\config\\strimer.conf",
               "ToolTip": "D:\\Evgeny\\git\\strimer\\streamer\\config\\strimer.conf",
               "RelativeToolTip": "streamer\\config\\strimer.conf",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAUAAAAAAAAAA==",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAAC4AAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-12-04T15:40:40.197Z",
+              "WhenOpened": "2025-12-07T20:57:26.76Z",
               "EditorCaption": ""
             }
           ]

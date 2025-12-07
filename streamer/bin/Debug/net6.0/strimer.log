@@ -1076,3 +1076,12 @@
 [2025-12-06 13:35:27] [ERROR] Error in playback loop: Failed to add stream to mixer: BASS_ERROR_DECODE
 [2025-12-06 13:35:32] [INFO] History cleared, starting playlist over
 [2025-12-06 13:35:32] [INFO] Selected track: Я тупой!.mp3 (Index: 1/1)
+[2025-12-08 00:31:00] [INFO] === Strimer Radio Starting ===
+[2025-12-08 00:31:00] [INFO] Detected OS: Windows (X64)
+[2025-12-08 00:31:00] [INFO] Config: app.configured='yes' -> parsed as 'yes' -> IsConfigured=True
+[2025-12-08 00:31:00] [INFO] Config: DynamicPlaylist = True
+[2025-12-08 00:31:00] [INFO] Config: UseReplayGain = True
+[2025-12-08 00:31:00] [INFO] Config: UseCustomGain = False
+[2025-12-08 00:31:00] [INFO] Configuration loaded
+[2025-12-08 00:31:00] [INFO] Initializing Radio Service...
+[2025-12-08 00:31:00] [INFO] Playlist loaded: 2 tracks

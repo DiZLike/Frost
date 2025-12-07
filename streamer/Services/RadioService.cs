@@ -28,7 +28,11 @@ namespace Strimer.Services
             Logger.Info("Initializing Radio Service...");
 
             // Инициализация компонентов
-            _playlist = new Playlist(config.PlaylistFile, config.SavePlaylistHistory);
+            _playlist = new Playlist(
+        config.PlaylistFile,
+        config.SavePlaylistHistory,
+        config.DynamicPlaylist
+    );
             _player = new Player(config);
             _iceCast = new IceCastClient(config);
             _myServer = new MyServerClient(config);

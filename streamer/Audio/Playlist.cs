@@ -1,169 +1,211 @@
 ﻿using Strimer.Core;
 
-namespace Strimer.Audio
+public class Playlist
 {
-    public class Playlist
+    private readonly string _playlistFile;
+    private readonly bool _saveHistory;
+    private readonly bool _dynamic;
+    private List<string> _tracks = new();
+    private List<string> _playedTracks = new();
+    private DateTime _lastFileWriteTime;
+    private int _currentIndex = -1;
+    private Random _random = new();
+
+    public int TotalTracks => _tracks.Count;
+    public int CurrentIndex => _currentIndex;
+    public int PlayedCount => _playedTracks.Count;
+
+    public Playlist(string playlistFile, bool saveHistory, bool dynamic = false)
     {
-        private List<string> _tracks = new();
-        private List<string> _history = new();
-        private Random _random = new();
-        private int _currentIndex = -1;
-        private bool _saveHistory;
+        _playlistFile = playlistFile;
+        _saveHistory = saveHistory;
+        _dynamic = dynamic;
 
-        public int TotalTracks => _tracks.Count;
-        public int CurrentIndex => _currentIndex;
+        LoadPlaylist();
 
-        public Playlist(string playlistFile, bool saveHistory = true)
+        // Загружаем историю воспроизведения если нужно
+        if (_saveHistory)
         {
-            _saveHistory = saveHistory;
-            LoadPlaylist(playlistFile);
-
-            if (_saveHistory)
-                LoadHistory();
+            LoadHistory();
         }
+    }
 
-        private void LoadPlaylist(string filePath)
+    private void LoadPlaylist()
+    {
+        try
         {
-            if (!File.Exists(filePath))
-                throw new FileNotFoundException($"Playlist file not found: {filePath}");
-
-            Logger.Info($"Loading playlist from: {filePath}");
-
-            string content = File.ReadAllText(filePath);
-            _tracks = ExtractTracks(content);
-
-            if (_tracks.Count == 0)
-                throw new InvalidDataException("No tracks found in playlist");
-
-            Logger.Info($"Loaded {_tracks.Count} tracks");
-        }
-
-        private List<string> ExtractTracks(string content)
-        {
-            var tracks = new List<string>();
-
-            // Ищем все track=...?; в строке
-            int startIndex = 0;
-            while (startIndex < content.Length)
+            if (File.Exists(_playlistFile))
             {
-                // Ищем начало трека
-                int trackStart = content.IndexOf("track=", startIndex, StringComparison.Ordinal);
-                if (trackStart == -1) break;
+                var lines = File.ReadAllLines(_playlistFile);
+                _tracks.Clear();
 
-                trackStart += 6; // Длина "track="
-
-                // Ищем конец трека
-                int trackEnd = content.IndexOf("?;", trackStart, StringComparison.Ordinal);
-                if (trackEnd == -1) break;
-
-                string track = content.Substring(trackStart, trackEnd - trackStart).Trim();
-
-                // Проверяем, что трек не пустой
-                if (!string.IsNullOrWhiteSpace(track))
+                foreach (var line in lines)
                 {
-                    // Проверяем существование файла
-                    if (File.Exists(track))
+                    if (string.IsNullOrWhiteSpace(line) || line.TrimStart().StartsWith("#"))
+                        continue;
+
+                    // ТВОЙ ФОРМАТ: track=C:\path\to\file.mp3?;
+                    string trackPath = line.Trim();
+
+                    if (trackPath.StartsWith("track="))
                     {
-                        tracks.Add(track);
+                        trackPath = trackPath.Substring(6); // убираем "track="
+                        trackPath = trackPath.TrimEnd('?', ';');
+                    }
+
+                    if (File.Exists(trackPath))
+                    {
+                        _tracks.Add(trackPath);
                     }
                     else
                     {
-                        Logger.Warning($"Track file not found: {track}");
+                        Logger.Warning($"Track not found: {trackPath}");
                     }
                 }
 
-                startIndex = trackEnd + 2;
-            }
-
-            return tracks;
-        }
-
-        public string GetRandomTrack()
-        {
-            if (_tracks.Count == 0)
-                throw new InvalidOperationException("Playlist is empty");
-
-            // Получаем треки, которых нет в истории
-            List<string> availableTracks;
-
-            if (_history.Count >= _tracks.Count)
-            {
-                // Все треки уже были в истории, очищаем историю
-                availableTracks = _tracks.ToList();
-                _history.Clear();
-                Logger.Info("History cleared, starting playlist over");
+                _lastFileWriteTime = File.GetLastWriteTime(_playlistFile);
+                Logger.Info($"Playlist loaded: {_tracks.Count} tracks");
             }
             else
             {
-                availableTracks = _tracks.Except(_history).ToList();
+                Logger.Error($"Playlist file not found: {_playlistFile}");
             }
-
-            // Выбираем случайный трек из доступных
-            int randomIndex = _random.Next(availableTracks.Count);
-            string selectedTrack = availableTracks[randomIndex];
-
-            // Обновляем историю
-            _history.Add(selectedTrack);
-            _currentIndex = _tracks.IndexOf(selectedTrack);
-
-            // Сохраняем историю в файл
-            if (_saveHistory)
-                SaveHistory();
-
-            Logger.Info($"Selected track: {Path.GetFileName(selectedTrack)} " +
-                       $"(Index: {_currentIndex + 1}/{_tracks.Count})");
-
-            return selectedTrack;
         }
-
-        private void LoadHistory()
+        catch (Exception ex)
         {
-            string historyFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config", "history.pls");
+            Logger.Error($"Failed to load playlist: {ex.Message}");
+        }
+    }
 
-            if (!File.Exists(historyFile))
-                return;
+    private void CheckAndReload()
+    {
+        if (!_dynamic || !File.Exists(_playlistFile))
+            return;
 
-            try
+        try
+        {
+            var currentWriteTime = File.GetLastWriteTime(_playlistFile);
+
+            // Если файл изменился с момента последней загрузки
+            if (currentWriteTime != _lastFileWriteTime)
             {
-                var lines = File.ReadAllLines(historyFile);
-                foreach (var line in lines)
+                int oldCount = _tracks.Count;
+
+                // Сохраняем текущее состояние воспроизведения
+                //string? currentTrack = _currentIndex >= 0 && _currentIndex < _tracks.Count
+                //    ? _tracks[_currentIndex]
+                //    : null;
+
+                LoadPlaylist();  // Перезагружаем плейлист
+
+                // Обновляем currentIndex если трек все еще в плейлисте
+                //if (currentTrack != null)
+                //{
+                //    _currentIndex = _tracks.IndexOf(currentTrack);
+                //}
+
+                Logger.Info($"Playlist updated: {oldCount} -> {_tracks.Count} tracks");
+
+                // Сохраняем историю после обновления
+                if (_saveHistory)
                 {
-                    if (!string.IsNullOrWhiteSpace(line) && File.Exists(line))
-                        _history.Add(line);
+                    SaveHistory();
                 }
-
-                Logger.Info($"Loaded {_history.Count} tracks from history");
-            }
-            catch (Exception ex)
-            {
-                Logger.Error($"Failed to load history: {ex.Message}");
             }
         }
-
-        private void SaveHistory()
+        catch (Exception ex)
         {
-            try
-            {
-                string configDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config");
-                Directory.CreateDirectory(configDir);
-
-                string historyFile = Path.Combine(configDir, "history.pls");
-                File.WriteAllLines(historyFile, _history);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error($"Failed to save history: {ex.Message}");
-            }
+            Logger.Error($"Failed to check playlist updates: {ex.Message}");
         }
+    }
 
-        public void ClearHistory()
+    public string GetRandomTrack()
+    {
+        // ПРОВЕРЯЕМ ОБНОВЛЕНИЯ перед выбором трека
+        CheckAndReload();
+
+        if (_tracks.Count == 0)
         {
-            _history.Clear();
-
-            if (_saveHistory)
-                SaveHistory();
-
-            Logger.Info("Playlist history cleared");
+            Logger.Warning("Playlist is empty");
+            return null;
         }
+
+        if (_playedTracks.Count >= _tracks.Count)
+        {
+            // Все треки сыграли, начинаем заново
+            _playedTracks.Clear();
+            Logger.Info("Playlist history cleared, starting new cycle");
+        }
+
+        string selectedTrack;
+        do
+        {
+            _currentIndex = _random.Next(0, _tracks.Count);
+            selectedTrack = _tracks[_currentIndex];
+        }
+        while (_playedTracks.Contains(selectedTrack) && _playedTracks.Count < _tracks.Count);
+
+        // Добавляем в историю
+        _playedTracks.Add(selectedTrack);
+
+        // Сохраняем историю если нужно
+        if (_saveHistory)
+        {
+            SaveHistory();
+        }
+
+        return selectedTrack;
+    }
+
+    private void LoadHistory()
+    {
+        try
+        {
+            string historyFile = Path.ChangeExtension(_playlistFile, ".history");
+            if (File.Exists(historyFile))
+            {
+                _playedTracks = File.ReadAllLines(historyFile)
+                    .Where(line => !string.IsNullOrWhiteSpace(line))
+                    .ToList();
+
+                Logger.Info($"Playlist history loaded: {_playedTracks.Count} played tracks");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"Failed to load playlist history: {ex.Message}");
+        }
+    }
+
+    private void SaveHistory()
+    {
+        try
+        {
+            string historyFile = Path.ChangeExtension(_playlistFile, ".history");
+            File.WriteAllLines(historyFile, _playedTracks);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"Failed to save playlist history: {ex.Message}");
+        }
+    }
+
+    public void ClearHistory()
+    {
+        _playedTracks.Clear();
+        if (_saveHistory)
+        {
+            SaveHistory();
+        }
+        Logger.Info("Playlist history cleared");
+    }
+
+    public string[] GetRecentTracks(int count = 10)
+    {
+        return _playedTracks
+            .TakeLast(Math.Min(count, _playedTracks.Count))
+            .Reverse() // Последний сыгранный трек первым
+            .Select(path => Path.GetFileName(path))
+            .ToArray();
     }
 }

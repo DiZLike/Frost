@@ -27,6 +27,7 @@ namespace Strimer.Core
 
         // Плейлист
         public string PlaylistFile { get; set; } = "playlist.txt";
+        public bool DynamicPlaylist { get; set; } = false;
         public bool SavePlaylistHistory { get; set; } = true;
 
         // Opus настройки
@@ -156,6 +157,10 @@ namespace Strimer.Core
 
                 case "radio.playlist":
                     PlaylistFile = value;
+                    break;
+                case "radio.dynamic_playlist":
+                    DynamicPlaylist = value.ToLower() == "yes";
+                    Logger.Info($"Config: DynamicPlaylist = {DynamicPlaylist}");
                     break;
                 case "radio.save_playlist_history":
                     SavePlaylistHistory = value.ToLower() == "yes";
