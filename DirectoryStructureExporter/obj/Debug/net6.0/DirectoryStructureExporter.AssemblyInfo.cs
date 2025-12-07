@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DirectoryStructureExporter")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+20a12075fb11b8c5485a1e5c4bc1a45473a69674")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+35a9cc24922b98a33ad39c108f1b138b7a6a92c6")]
 [assembly: System.Reflection.AssemblyProductAttribute("DirectoryStructureExporter")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DirectoryStructureExporter")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
