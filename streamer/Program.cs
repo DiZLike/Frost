@@ -14,6 +14,7 @@ namespace Strimer
                 // Получаем версию из сборки
                 var version = Assembly.GetExecutingAssembly().GetName().Version;
                 Console.WriteLine($"Version: {version?.Major}.{version?.Minor}.{version?.Build}");
+                Console.WriteLine($"Текущее время сервера: {DateTime.Now}");
 
                 // Создаем и запускаем приложение
                 var app = new StrimerApp();

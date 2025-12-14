@@ -30,6 +30,10 @@ namespace Strimer.Core
         public bool DynamicPlaylist { get; set; } = false;
         public bool SavePlaylistHistory { get; set; } = true;
 
+        // Расписание (НОВОЕ)
+        public bool ScheduleEnable { get; set; } = false;
+        public string ScheduleFile { get; set; } = "schedule.json";
+
         // Opus настройки
         public int OpusBitrate { get; set; } = 128;
         public string OpusMode { get; set; } = "vbr";
@@ -101,7 +105,6 @@ namespace Strimer.Core
                     }
                 }
 
-                //IsConfigured = true;
                 Logger.Info("Configuration loaded");
             }
             catch (Exception ex)
@@ -116,11 +119,8 @@ namespace Strimer.Core
             switch (key.ToLower())
             {
                 case "app.configured":
-                    // Убедитесь, что правильно парсится значение
                     string cleanValue = value.ToLower().Trim();
                     IsConfigured = (cleanValue == "yes" || cleanValue == "true" || cleanValue == "1");
-
-                    // Логируем для отладки
                     Logger.Info($"Config: app.configured='{value}' -> parsed as '{cleanValue}' -> IsConfigured={IsConfigured}");
                     break;
 
@@ -164,6 +164,15 @@ namespace Strimer.Core
                     break;
                 case "radio.save_playlist_history":
                     SavePlaylistHistory = value.ToLower() == "yes";
+                    break;
+
+                // НОВЫЕ ПАРАМЕТРЫ РАСПИСАНИЯ
+                case "radio.schedule_enable":
+                    ScheduleEnable = value.ToLower() == "yes";
+                    Logger.Info($"Config: ScheduleEnable = {ScheduleEnable}");
+                    break;
+                case "radio.schedule":
+                    ScheduleFile = value;
                     break;
 
                 case "opus.bitrate":
@@ -253,6 +262,7 @@ namespace Strimer.Core
                     "[Playlist]",
                     $"radio.playlist={PlaylistFile};",
                     $"radio.save_playlist_history={(SavePlaylistHistory ? "yes" : "no")};",
+                    $"radio.schedule_enable={(ScheduleEnable ? "yes" : "no")};",
                     "",
                     "[Encoder]",
                     $"opus.bitrate={OpusBitrate};",

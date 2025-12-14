@@ -9,7 +9,8 @@ namespace Strimer.Services
     {
         private readonly AppConfig _config;
         private readonly Player _player;
-        private readonly Playlist _playlist;
+        private readonly ScheduleManager _scheduleManager;
+        private readonly Playlist? _fallbackPlaylist;
         private readonly IceCastClient _iceCast;
         private readonly MyServerClient _myServer;
 
@@ -18,7 +19,7 @@ namespace Strimer.Services
         private bool _isPaused;
 
         // Текущая информация о треке
-        private TrackInfo _currentTrack;
+        private TrackInfo? _currentTrack;
         private DateTime _trackStartTime;
 
         public RadioService(AppConfig config)
@@ -28,16 +29,51 @@ namespace Strimer.Services
             Logger.Info("Initializing Radio Service...");
 
             // Инициализация компонентов
-            _playlist = new Playlist(
-        config.PlaylistFile,
-        config.SavePlaylistHistory,
-        config.DynamicPlaylist
-    );
             _player = new Player(config);
             _iceCast = new IceCastClient(config);
             _myServer = new MyServerClient(config);
 
-            Logger.Info($"Playlist loaded: {_playlist.TotalTracks} tracks");
+            // Инициализация менеджера расписания
+            _scheduleManager = new ScheduleManager(config);
+
+            // Резервный плейлист (если расписание отключено или не настроено)
+            if (!config.ScheduleEnable || _scheduleManager.CurrentPlaylist == null)
+            {
+                _fallbackPlaylist = new Playlist(
+                    config.PlaylistFile,
+                    config.SavePlaylistHistory,
+                    config.DynamicPlaylist
+                );
+                Logger.Info($"Fallback playlist loaded: {_fallbackPlaylist.TotalTracks} tracks");
+            }
+
+            Logger.Info($"Schedule enabled: {config.ScheduleEnable}");
+        }
+
+        private Playlist? GetCurrentPlaylist()
+        {
+            if (_config.ScheduleEnable)
+            {
+                return _scheduleManager.CurrentPlaylist;
+            }
+            else
+            {
+                return _fallbackPlaylist;
+            }
+        }
+
+        private string? GetNextTrackFromPlaylist()
+        {
+            if (_config.ScheduleEnable)
+            {
+                return _scheduleManager.GetNextTrack();
+            }
+            else if (_fallbackPlaylist != null)
+            {
+                return _fallbackPlaylist.GetRandomTrack();
+            }
+
+            return null;
         }
 
         public void Start()
@@ -93,8 +129,15 @@ namespace Strimer.Services
                         continue;
                     }
 
-                    // 1. Получаем следующий трек из плейлиста
-                    string trackFile = _playlist.GetRandomTrack();
+                    // 1. Получаем следующий трек
+                    string? trackFile = GetNextTrackFromPlaylist();
+
+                    if (string.IsNullOrEmpty(trackFile))
+                    {
+                        Logger.Error("No track available. Waiting...");
+                        Thread.Sleep(5000);
+                        continue;
+                    }
 
                     // 2. Воспроизводим трек
                     _currentTrack = _player.PlayTrack(trackFile);
@@ -114,8 +157,11 @@ namespace Strimer.Services
                     // 4. Отправляем информацию на внешний сервер
                     if (_config.MyServerEnabled)
                     {
+                        var currentPlaylist = GetCurrentPlaylist();
+                        int trackNumber = currentPlaylist?.CurrentIndex + 1 ?? 0;
+
                         _myServer.SendTrackInfo(
-                            _playlist.CurrentIndex + 1,
+                            trackNumber,
                             _currentTrack.Artist,
                             _currentTrack.Title,
                             Path.GetFileName(trackFile)
@@ -154,11 +200,30 @@ namespace Strimer.Services
             Console.WriteLine("╔════════════════════════════════════════╗");
             Console.WriteLine("║        STRIMER RADIO - LIVE STREAM     ║");
             Console.WriteLine("╠════════════════════════════════════════╣");
-            Console.WriteLine($"║ Now Playing: {_currentTrack.Artist,-30}");
-            Console.WriteLine($"║            : {_currentTrack.Title,-30}");
+
+            if (_currentTrack != null)
+            {
+                Console.WriteLine($"║ Now Playing: {_currentTrack.Artist,-30}");
+                Console.WriteLine($"║            : {_currentTrack.Title,-30}");
+            }
+
             Console.WriteLine("╠════════════════════════════════════════╣");
-            Console.WriteLine($"║ Track: {_playlist.CurrentIndex + 1,3}/{_playlist.TotalTracks,-3}" +
-                            $"Listeners: {_iceCast.Listeners} (Peak: {_iceCast.PeakListeners})");
+
+            var currentPlaylist = GetCurrentPlaylist();
+            if (currentPlaylist != null)
+            {
+                if (_config.ScheduleEnable && _scheduleManager.CurrentSchedule != null)
+                {
+                    Console.WriteLine($"║ Schedule: {_scheduleManager.CurrentSchedule.Name,-12}" +
+                                    $"Track: {currentPlaylist.CurrentIndex + 1,3}/{currentPlaylist.TotalTracks,-3}");
+                }
+                else
+                {
+                    Console.WriteLine($"║ Track: {currentPlaylist.CurrentIndex + 1,3}/{currentPlaylist.TotalTracks,-3}");
+                }
+            }
+
+            Console.WriteLine($"║ Listeners: {_iceCast.Listeners} (Peak: {_iceCast.PeakListeners})");
             Console.WriteLine("╚════════════════════════════════════════╝");
             Console.WriteLine("\nCommands: [Q]uit [S]tatus [N]ext [P]ause [I]nfo");
         }
@@ -174,10 +239,20 @@ namespace Strimer.Services
             Console.SetCursorPosition(0, 5);
             Console.WriteLine($"║ Time: {elapsed} / {total,-35}");
 
-            // Также обновляем статистику слушателей
-            Console.SetCursorPosition(0, 6);
-            Console.WriteLine($"║ Track: {_playlist.CurrentIndex + 1,3}/{_playlist.TotalTracks,-3} " +
-                            $"Listeners: {_iceCast.Listeners} (Peak: {_iceCast.PeakListeners})");
+            // Обновляем информацию о расписании если активно
+            if (_config.ScheduleEnable)
+            {
+                Console.SetCursorPosition(0, 6);
+                var currentPlaylist = GetCurrentPlaylist();
+                if (_scheduleManager.CurrentSchedule != null && currentPlaylist != null)
+                {
+                    Console.WriteLine($"║ Schedule: {_scheduleManager.CurrentSchedule.Name,-12}" +
+                                    $"Track: {currentPlaylist.CurrentIndex + 1,3}/{currentPlaylist.TotalTracks,-3}");
+                }
+            }
+
+            Console.SetCursorPosition(0, 7);
+            Console.WriteLine($"║ Listeners: {_iceCast.Listeners} (Peak: {_iceCast.PeakListeners})");
         }
 
         public void ShowStatus()
@@ -186,8 +261,8 @@ namespace Strimer.Services
             Console.WriteLine($"Service: {(_isRunning ? "Running" : "Stopped")}");
             Console.WriteLine($"Playback: {(_isPaused ? "Paused" : "Playing")}");
             Console.WriteLine($"IceCast: {(_iceCast.IsConnected ? "Connected" : "Disconnected")}");
-            Console.WriteLine($"Playlist: {_playlist.TotalTracks} tracks");
-            Console.WriteLine($"Current: {_playlist.CurrentIndex + 1}/{_playlist.TotalTracks}");
+            Console.WriteLine($"Playlist: {GetCurrentPlaylist()?.TotalTracks ?? 0} tracks");
+            Console.WriteLine($"Current: {GetCurrentPlaylist()?.CurrentIndex + 1 ?? 0}/{GetCurrentPlaylist()?.TotalTracks ?? 0}");
             Console.WriteLine($"Memory: {GC.GetTotalMemory(false) / 1024 / 1024} MB");
             Console.WriteLine("==============");
         }

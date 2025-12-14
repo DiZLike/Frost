@@ -8,19 +8,24 @@
     "net6.0": []
   },
   "packageFolders": {
-    "C:\\Users\\Evgeny\\.nuget\\packages\\": {}
+    "C:\\Users\\diz91\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Evgeny\\git\\strimer\\list_creater\\list_creater.csproj",
+      "projectUniqueName": "F:\\1Evgeny\\git\\strimer\\list_creater\\list_creater.csproj",
       "projectName": "list_creater",
-      "projectPath": "D:\\Evgeny\\git\\strimer\\list_creater\\list_creater.csproj",
-      "packagesPath": "C:\\Users\\Evgeny\\.nuget\\packages\\",
-      "outputPath": "D:\\Evgeny\\git\\strimer\\list_creater\\obj\\",
+      "projectPath": "F:\\1Evgeny\\git\\strimer\\list_creater\\list_creater.csproj",
+      "packagesPath": "C:\\Users\\diz91\\.nuget\\packages\\",
+      "outputPath": "F:\\1Evgeny\\git\\strimer\\list_creater\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\Evgeny\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\diz91\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
