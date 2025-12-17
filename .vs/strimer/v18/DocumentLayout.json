@@ -1,10 +1,10 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\Evgeny\\git\\strimer\\",
+  "WorkspaceRootPath": "D:\\DiZ\\git\\strimer\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E5132E26-89C3-456D-9CC5-2154DA89B595}|RadioStationManager\\RadioStationManager.csproj|D:\\Evgeny\\git\\strimer\\radiostationmanager\\ui\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{E5132E26-89C3-456D-9CC5-2154DA89B595}|RadioStationManager\\RadioStationManager.csproj|solutionrelative:radiostationmanager\\ui\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+      "AbsoluteMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|d:\\diz\\git\\strimer\\streamer\\services\\radioservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F817AED8-77DB-4A1D-8833-E563E584717E}|streamer\\strimer.csproj|solutionrelative:streamer\\services\\radioservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -19,14 +19,15 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "MainForm.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
-              "DocumentMoniker": "D:\\Evgeny\\git\\strimer\\RadioStationManager\\UI\\MainForm.cs",
-              "RelativeDocumentMoniker": "RadioStationManager\\UI\\MainForm.cs",
-              "ToolTip": "D:\\Evgeny\\git\\strimer\\RadioStationManager\\UI\\MainForm.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
-              "RelativeToolTip": "RadioStationManager\\UI\\MainForm.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
+              "Title": "RadioService.cs",
+              "DocumentMoniker": "D:\\DiZ\\git\\strimer\\streamer\\Services\\RadioService.cs",
+              "RelativeDocumentMoniker": "streamer\\Services\\RadioService.cs",
+              "ToolTip": "D:\\DiZ\\git\\strimer\\streamer\\Services\\RadioService.cs",
+              "RelativeToolTip": "streamer\\Services\\RadioService.cs",
+              "ViewState": "AgIAAKMAAAAAAAAAAIAwwK0AAAAwAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-15T17:41:35.73Z",
-              "EditorCaption": " [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]"
+              "WhenOpened": "2025-12-16T10:21:53.008Z",
+              "EditorCaption": ""
             }
           ]
         }

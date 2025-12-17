@@ -1,4 +1,5 @@
-﻿using Strimer.Audio;
+﻿using Strimer.App;
+using Strimer.Audio;
 using Strimer.Core;
 using System.Text;
 using Un4seen.Bass;

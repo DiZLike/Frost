@@ -1,4 +1,5 @@
-﻿using Strimer.Audio;
+﻿using Strimer.App;
+using Strimer.Audio;
 using Strimer.Core;
 
 namespace Strimer.Services
@@ -124,7 +125,7 @@ namespace Strimer.Services
             }
         }
 
-        public void CheckAndUpdatePlaylist(bool forceCheck = false)
+        public void CheckAndUpdatePlaylist()
         {
             if (!_config.ScheduleEnable)
             {
@@ -142,8 +143,8 @@ namespace Strimer.Services
             DateTime now = DateTime.Now;
 
             // Проверяем не чаще чем раз в минуту (если не принудительно)
-            if (!forceCheck && (now - _lastCheckTime).TotalMinutes < 1)
-                return;
+            //if (!forceCheck && (now - _lastCheckTime).TotalMinutes < 1)
+            //    return;
 
             _lastCheckTime = now;
 
@@ -224,7 +225,7 @@ namespace Strimer.Services
             if (_currentPlaylist == null)
             {
                 Logger.Info("No current playlist, checking schedule...");
-                CheckAndUpdatePlaylist(true);
+                CheckAndUpdatePlaylist();
 
                 if (_currentPlaylist == null)
                 {

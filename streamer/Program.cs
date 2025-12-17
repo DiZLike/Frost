@@ -1,4 +1,4 @@
-﻿using Strimer.Core;
+﻿using Strimer.App;
 using System.Reflection;
 
 namespace Strimer
@@ -18,12 +18,29 @@ namespace Strimer
 
                 // Создаем и запускаем приложение
                 var app = new StrimerApp();
-                app.Run(args);
+                app.Run();
+
+                // Ждем завершения
+                Console.WriteLine("\nRadio streamer is running. Press Ctrl+C to stop...");
+
+                // Используем ManualResetEvent для ожидания
+                var stopEvent = new ManualResetEvent(false);
+                Console.CancelKeyPress += (sender, e) => {
+                    e.Cancel = true;
+                    stopEvent.Set();
+                };
+
+                stopEvent.WaitOne();
+
+                // Останавливаем приложение
+                app.Stop();
+
+                Console.WriteLine("Application stopped.");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"\nFATAL ERROR: {ex.Message}");
-                Logger.Log($"Fatal error: {ex}");
+                Core.Logger.Log($"Fatal error: {ex}");
                 Console.WriteLine("\nPress any key to exit...");
                 Console.ReadKey();
             }

@@ -1,5 +1,6 @@
-﻿using Strimer.Core;
-using Strimer.Services;
+﻿using Strimer.App;
+using Strimer.Core;
+using System.Reflection;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Fx;
 using Un4seen.Bass.AddOn.Tags;

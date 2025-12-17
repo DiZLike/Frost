@@ -74,3 +74,10 @@ F:\1Evgeny\git\strimer\list_creater\obj\Debug\net6.0\refint\list_creater.dll
 F:\1Evgeny\git\strimer\list_creater\obj\Debug\net6.0\list_creater.pdb
 F:\1Evgeny\git\strimer\list_creater\obj\Debug\net6.0\list_creater.genruntimeconfig.cache
 F:\1Evgeny\git\strimer\list_creater\obj\Debug\net6.0\ref\list_creater.dll
+D:\DiZ\git\strimer\streamer\bin\Debug\net6.0\list_creater.exe
+D:\DiZ\git\strimer\streamer\bin\Debug\net6.0\list_creater.deps.json
+D:\DiZ\git\strimer\streamer\bin\Debug\net6.0\list_creater.runtimeconfig.json
+D:\DiZ\git\strimer\streamer\bin\Debug\net6.0\list_creater.dll
+D:\DiZ\git\strimer\streamer\bin\Debug\net6.0\list_creater.pdb
+D:\DiZ\git\strimer\list_creater\obj\Debug\net6.0\list_creater.csproj.AssemblyReference.cache
+D:\DiZ\git\strimer\list_creater\obj\Debug\net6.0\list_cre.0415E05B.Up2Date

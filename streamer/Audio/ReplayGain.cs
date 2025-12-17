@@ -1,4 +1,5 @@
 ﻿using Strimer.Core;
+using System.Globalization;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Fx;
 using Un4seen.Bass.AddOn.Tags;
@@ -54,8 +55,8 @@ namespace Strimer.Audio
             _compressor = new BASS_BFX_COMPRESSOR2
             {
                 fAttack = 0.01f,
-                fRelease = 250f,
-                fThreshold = 0f,
+                fRelease = 100f,
+                fThreshold = -3f,
                 fRatio = 100f,
                 fGain = 0f  // Начальное значение
             };
@@ -72,29 +73,70 @@ namespace Strimer.Audio
             }
 
             float gainValue = 0f;
+            string source = "none";
+            bool gainFound = false;
 
+            // 1. Пробуем кастомный gain из комментария (если включено)
             if (_useCustomGain && !string.IsNullOrEmpty(tagInfo.comment))
             {
-                // Пытаемся извлечь кастомный gain из комментария
                 gainValue = ExtractCustomGain(tagInfo.comment);
-                Logger.Info($"Using custom gain from comment: {gainValue} dB");
+
+                // Проверяем, действительно ли нашли gain (не 0 и не ошибка парсинга)
+                if (Math.Abs(gainValue) > 0.001f)
+                {
+                    source = "custom comment";
+                    gainFound = true;
+                    Logger.Info($"Using custom gain from comment: {gainValue:F2} dB");
+                }
+                else
+                {
+                    // Gain не найден в комментарии, но это не ошибка
+                    Logger.Info($"Custom gain not found in comment: '{tagInfo.comment}'");
+                }
             }
-            else if (Math.Abs(tagInfo.replaygain_track_gain) > 0.001f && Math.Abs(tagInfo.replaygain_track_gain) != 100)
+            else if (_useCustomGain && string.IsNullOrEmpty(tagInfo.comment))
             {
-                // Используем Replay Gain из тегов (если значение не нулевое)
-                gainValue = tagInfo.replaygain_track_gain;
-                Logger.Info($"Using ReplayGain from tags: {gainValue:F2} dB");
-            }
-            else
-            {
-                Logger.Info("No ReplayGain data found, using 0 dB");
+                Logger.Info("Custom gain enabled but comment is empty");
             }
 
+            // 2. Если кастомный gain не найден ИЛИ не включен, пробуем теги
+            if (!gainFound)
+            {
+                float tagGain = tagInfo.replaygain_track_gain;
+
+                // Проверяем на разумные пределы и игнорируем специальные значения
+                if (Math.Abs(tagGain) > 0.001f &&
+                    Math.Abs(tagGain - 100f) > 0.01f &&
+                    tagGain >= -24f &&
+                    tagGain <= 24f)
+                {
+                    gainValue = tagGain;
+                    source = "track tag";
+                    gainFound = true;
+                    Logger.Info($"Using ReplayGain from tags: {gainValue:F2} dB");
+                }
+                else if (Math.Abs(tagGain) > 0.001f)
+                {
+                    // Есть значение, но оно отфильтровано
+                    Logger.Info($"Track has ReplayGain {tagGain:F2} dB but filtered " +
+                                $"(range: {-24}..{+24}, special values ignored)");
+                }
+            }
+
+            // 3. Если ничего не найдено
+            if (!gainFound)
+            {
+                Logger.Info("No valid ReplayGain data found, using 0 dB");
+                source = "default (0 dB)";
+            }
+
+            // Единое ограничение для безопасности
+            gainValue = Math.Max(-24f, Math.Min(24f, gainValue));
+
+            // Обновляем компрессор
             _compressor.fGain = gainValue;
-            //_compressor.fGain = -40;
 
-            // Логи для отладки
-            Logger.Info($"Set compressor gain to: {gainValue:F2} dB");
+            Logger.Info($"ReplayGain final: {gainValue:F2} dB (source: {source})");
         }
 
         private float ExtractCustomGain(string comment)
@@ -102,43 +144,51 @@ namespace Strimer.Audio
             if (string.IsNullOrEmpty(comment))
                 return 0f;
 
-            // Ищем gain= значение в комментарии
-            // Форматы: "gain=-2.5dB", "gain=+3.0 dB", "gain=0.0dB"
-            const string gainMarker = "gain=";
+            // Ищем оба формата: "gain=" и "replay-gain=" в нижнем регистре
+            string[] gainMarkers = { "replay-gain=", "gain=" };
+            string lowerComment = comment.ToLowerInvariant();
 
-            int startIndex = comment.IndexOf(gainMarker, StringComparison.OrdinalIgnoreCase);
-            if (startIndex == -1)
+            foreach (var marker in gainMarkers)
             {
-                Logger.Warning($"No 'gain=' marker found in comment: {comment}");
-                return 0f;
-            }
+                int markerIndex = lowerComment.IndexOf(marker);
+                if (markerIndex == -1)
+                    continue;
 
-            startIndex += gainMarker.Length;
+                int startIndex = markerIndex + marker.Length;
 
-            // Ищем конец значения (пробел, точка с запятой, конец строки)
-            int endIndex = comment.Length;
-            for (int i = startIndex; i < comment.Length; i++)
-            {
-                if (comment[i] == ' ' || comment[i] == ';' || comment[i] == ',' ||
-                    comment[i] == '\n' || comment[i] == '\r' ||
-                    (comment[i] == 'd' && i + 1 < comment.Length && comment[i + 1] == 'B') ||
-                    (comment[i] == 'D' && i + 1 < comment.Length && comment[i + 1] == 'b'))
+                // Ищем конец числа (цифры, точка, запятая, минус, плюс)
+                int endIndex = startIndex;
+                while (endIndex < comment.Length)
                 {
-                    endIndex = i;
-                    break;
+                    char c = comment[endIndex];
+                    if (char.IsDigit(c) || c == '.' || c == ',' || c == '-' || c == '+')
+                    {
+                        endIndex++;
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
+
+                if (endIndex > startIndex)
+                {
+                    string gainStr = comment.Substring(startIndex, endIndex - startIndex)
+                        .Replace(',', '.'); // Заменяем запятую на точку
+
+                    if (float.TryParse(gainStr, NumberStyles.Float,
+                        CultureInfo.InvariantCulture, out float result))
+                    {
+                        // Согласовано с SetGain: -24..+24 dB
+                        return Math.Max(-24f, Math.Min(24f, result));
+                    }
+                }
+
+                // Если нашли маркер, но не смогли распарсить, прекращаем поиск
+                // (чтобы не искать второй маркер в той же строке)
+                break;
             }
 
-            string gainValue = comment.Substring(startIndex, endIndex - startIndex)
-                .Replace(" ", "")
-                .Trim();
-
-            if (float.TryParse(gainValue, out float result))
-            {
-                return result;
-            }
-
-            Logger.Warning($"Failed to parse gain value: '{gainValue}' from comment: {comment}");
             return 0f;
         }
 

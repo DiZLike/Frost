@@ -1,4 +1,5 @@
-﻿using Strimer.Core;
+﻿using Strimer.App;
+using Strimer.Core;
 using System.Net.Http;
 
 namespace Strimer.Services

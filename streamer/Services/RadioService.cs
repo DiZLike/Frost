@@ -1,7 +1,7 @@
-﻿using Strimer.Audio;
+﻿using Strimer.App;
+using Strimer.Audio;
 using Strimer.Broadcast;
 using Strimer.Core;
-using System.Numerics;
 
 namespace Strimer.Services
 {
@@ -21,6 +21,11 @@ namespace Strimer.Services
         // Текущая информация о треке
         private TrackInfo? _currentTrack;
         private DateTime _trackStartTime;
+
+        public bool IsRunning => _isRunning;
+        public bool IsPaused => _isPaused;
+        public TrackInfo? CurrentTrack => _currentTrack;
+        public IceCastClient IceCast => _iceCast;
 
         public RadioService(AppConfig config)
         {
@@ -129,13 +134,16 @@ namespace Strimer.Services
                         continue;
                     }
 
+                    // Шаг 0: Обязательная проверка расписания перед любым треком
+                    _scheduleManager.CheckAndUpdatePlaylist();
+
                     // 1. Получаем следующий трек
                     string? trackFile = GetNextTrackFromPlaylist();
 
                     if (string.IsNullOrEmpty(trackFile))
                     {
                         Logger.Error("No track available. Waiting...");
-                        Thread.Sleep(5000);
+                        Thread.Sleep(500);
                         continue;
                     }
 
@@ -145,7 +153,7 @@ namespace Strimer.Services
                     if (_currentTrack == null)
                     {
                         Logger.Error("Failed to play track. Skipping...");
-                        Thread.Sleep(5000);
+                        Thread.Sleep(500);
                         continue;
                     }
 
@@ -168,10 +176,7 @@ namespace Strimer.Services
                         );
                     }
 
-                    // 5. Отображаем информацию о треке
-                    DisplayTrackInfo();
-
-                    // 6. Ждем окончания трека
+                    // 5. Ждем окончания трека
                     WaitForTrackEnd();
                 }
                 catch (Exception ex)
@@ -188,103 +193,56 @@ namespace Strimer.Services
         {
             while (_player.IsPlaying && _isRunning && !_isPaused)
             {
-                // Обновляем отображение времени каждую секунду
-                UpdateTimeDisplay();
                 Thread.Sleep(1000);
             }
         }
 
-        private void DisplayTrackInfo()
+        public string GetStatus()
         {
-            Console.Clear();
-            Console.WriteLine("╔════════════════════════════════════════╗");
-            Console.WriteLine("║        STRIMER RADIO - LIVE STREAM     ║");
-            Console.WriteLine("╠════════════════════════════════════════╣");
-
-            if (_currentTrack != null)
-            {
-                Console.WriteLine($"║ Now Playing: {_currentTrack.Artist,-30}");
-                Console.WriteLine($"║            : {_currentTrack.Title,-30}");
-            }
-
-            Console.WriteLine("╠════════════════════════════════════════╣");
-
             var currentPlaylist = GetCurrentPlaylist();
+            var status = new System.Text.StringBuilder();
+
+            status.AppendLine($"Service: {(_isRunning ? "Running" : "Stopped")}");
+            status.AppendLine($"Playback: {(_isPaused ? "Paused" : "Playing")}");
+            status.AppendLine($"IceCast: {(_iceCast.IsConnected ? "Connected" : "Disconnected")}");
+
             if (currentPlaylist != null)
             {
-                if (_config.ScheduleEnable && _scheduleManager.CurrentSchedule != null)
-                {
-                    Console.WriteLine($"║ Schedule: {_scheduleManager.CurrentSchedule.Name,-12}" +
-                                    $"Track: {currentPlaylist.CurrentIndex + 1,3}/{currentPlaylist.TotalTracks,-3}");
-                }
-                else
-                {
-                    Console.WriteLine($"║ Track: {currentPlaylist.CurrentIndex + 1,3}/{currentPlaylist.TotalTracks,-3}");
-                }
+                status.AppendLine($"Playlist: {currentPlaylist.TotalTracks} tracks");
+                status.AppendLine($"Current: {currentPlaylist.CurrentIndex + 1}/{currentPlaylist.TotalTracks}");
             }
-
-            Console.WriteLine($"║ Listeners: {_iceCast.Listeners} (Peak: {_iceCast.PeakListeners})");
-            Console.WriteLine("╚════════════════════════════════════════╝");
-            Console.WriteLine("\nCommands: [Q]uit [S]tatus [N]ext [P]ause [I]nfo");
-        }
-
-        private void UpdateTimeDisplay()
-        {
-            if (_currentTrack == null)
-                return;
-
-            string elapsed = _player.GetCurrentTime();
-            string total = _player.GetTotalTime();
-
-            Console.SetCursorPosition(0, 5);
-            Console.WriteLine($"║ Time: {elapsed} / {total,-35}");
-
-            // Обновляем информацию о расписании если активно
-            if (_config.ScheduleEnable)
-            {
-                Console.SetCursorPosition(0, 6);
-                var currentPlaylist = GetCurrentPlaylist();
-                if (_scheduleManager.CurrentSchedule != null && currentPlaylist != null)
-                {
-                    Console.WriteLine($"║ Schedule: {_scheduleManager.CurrentSchedule.Name,-12}" +
-                                    $"Track: {currentPlaylist.CurrentIndex + 1,3}/{currentPlaylist.TotalTracks,-3}");
-                }
-            }
-
-            Console.SetCursorPosition(0, 7);
-            Console.WriteLine($"║ Listeners: {_iceCast.Listeners} (Peak: {_iceCast.PeakListeners})");
-        }
-
-        public void ShowStatus()
-        {
-            Console.WriteLine("\n=== STATUS ===");
-            Console.WriteLine($"Service: {(_isRunning ? "Running" : "Stopped")}");
-            Console.WriteLine($"Playback: {(_isPaused ? "Paused" : "Playing")}");
-            Console.WriteLine($"IceCast: {(_iceCast.IsConnected ? "Connected" : "Disconnected")}");
-            Console.WriteLine($"Playlist: {GetCurrentPlaylist()?.TotalTracks ?? 0} tracks");
-            Console.WriteLine($"Current: {GetCurrentPlaylist()?.CurrentIndex + 1 ?? 0}/{GetCurrentPlaylist()?.TotalTracks ?? 0}");
-            Console.WriteLine($"Memory: {GC.GetTotalMemory(false) / 1024 / 1024} MB");
-            Console.WriteLine("==============");
-        }
-
-        public void ShowStreamInfo()
-        {
-            Console.WriteLine("\n=== STREAM INFO ===");
-            Console.WriteLine($"Server: {_config.IceCastServer}:{_config.IceCastPort}");
-            Console.WriteLine($"Mount: /{_config.IceCastMount}");
-            Console.WriteLine($"Bitrate: {_config.OpusBitrate} kbps ({_config.OpusMode})");
-            Console.WriteLine($"Listeners: {_iceCast.Listeners}");
-            Console.WriteLine($"Peak: {_iceCast.PeakListeners}");
 
             if (_currentTrack != null)
             {
-                Console.WriteLine($"\nCurrent Track:");
-                Console.WriteLine($"  Artist: {_currentTrack.Artist}");
-                Console.WriteLine($"  Title: {_currentTrack.Title}");
-                Console.WriteLine($"  Duration: {_player.GetTotalTime()}");
+                status.AppendLine($"Current Track: {_currentTrack.Artist} - {_currentTrack.Title}");
+                status.AppendLine($"Duration: {_player.GetCurrentTime()} / {_player.GetTotalTime()}");
             }
 
-            Console.WriteLine("===================");
+            status.AppendLine($"Listeners: {_iceCast.Listeners} (Peak: {_iceCast.PeakListeners})");
+
+            return status.ToString();
+        }
+
+        public string GetStreamInfo()
+        {
+            var info = new System.Text.StringBuilder();
+
+            info.AppendLine($"Server: {_config.IceCastServer}:{_config.IceCastPort}");
+            info.AppendLine($"Mount: /{_config.IceCastMount}");
+            info.AppendLine($"Bitrate: {_config.OpusBitrate} kbps ({_config.OpusMode})");
+            info.AppendLine($"Listeners: {_iceCast.Listeners}");
+            info.AppendLine($"Peak: {_iceCast.PeakListeners}");
+
+            if (_currentTrack != null)
+            {
+                info.AppendLine();
+                info.AppendLine($"Current Track:");
+                info.AppendLine($"  Artist: {_currentTrack.Artist}");
+                info.AppendLine($"  Title: {_currentTrack.Title}");
+                info.AppendLine($"  Duration: {_player.GetTotalTime()}");
+            }
+
+            return info.ToString();
         }
 
         public void PlayNextTrack()
@@ -311,16 +269,5 @@ namespace Strimer.Services
                 Logger.Info("Playback resumed");
             }
         }
-    }
-
-    public class TrackInfo
-    {
-        public string Artist { get; set; } = "Unknown Artist";
-        public string Title { get; set; } = "Unknown Title";
-        public string Album { get; set; } = "";
-        public int Year { get; set; }
-        public string Genre { get; set; } = "";
-        public float ReplayGain { get; set; }
-        public string Comment { get; set; } = "";
     }
 }
