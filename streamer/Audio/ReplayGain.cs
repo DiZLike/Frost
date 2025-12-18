@@ -20,7 +20,7 @@ namespace Strimer.Audio
             _useCustomGain = useCustomGain;
             _mixerHandle = mixerHandle;
 
-            Logger.Info($"ReplayGain initialized: UseReplayGain={useReplayGain}, UseCustomGain={useCustomGain}");
+            Logger.Info($"ReplayGain инициализирован: UseReplayGain={useReplayGain}, UseCustomGain={useCustomGain}");
 
             if (_useReplayGain)
             {
@@ -48,7 +48,7 @@ namespace Strimer.Audio
             if (_fxHandle == 0)
             {
                 var error = Bass.BASS_ErrorGetCode();
-                Logger.Error($"Failed to create ReplayGain compressor: {error}");
+                Logger.Error($"Не удалось создать компрессор ReplayGain: {error}");
                 return;
             }
 
@@ -61,45 +61,45 @@ namespace Strimer.Audio
                 fGain = 0f  // Начальное значение
             };
 
-            Logger.Info($"ReplayGain compressor created (handle: {_fxHandle})");
+            Logger.Info($"Компрессор ReplayGain создан (handle: {_fxHandle})");
         }
 
         public void SetGain(TAG_INFO tagInfo)
         {
             if (!_useReplayGain)
             {
-                Logger.Info("ReplayGain disabled, skipping gain adjustment");
+                Logger.Info("ReplayGain отключен, пропускаем регулировку усиления");
                 return;
             }
 
             float gainValue = 0f;
-            string source = "none";
+            string source = "отсутствует";
             bool gainFound = false;
 
-            // 1. Пробуем кастомный gain из комментария (если включено)
+            // 1. Пробуем кастомное усиление из комментария (если включено)
             if (_useCustomGain && !string.IsNullOrEmpty(tagInfo.comment))
             {
                 gainValue = ExtractCustomGain(tagInfo.comment);
 
-                // Проверяем, действительно ли нашли gain (не 0 и не ошибка парсинга)
+                // Проверяем, действительно ли нашли усиление (не 0 и не ошибка парсинга)
                 if (Math.Abs(gainValue) > 0.001f)
                 {
-                    source = "custom comment";
+                    source = "кастомный комментарий";
                     gainFound = true;
-                    Logger.Info($"Using custom gain from comment: {gainValue:F2} dB");
+                    Logger.Info($"Используется кастомное усиление из комментария: {gainValue:F2} дБ");
                 }
                 else
                 {
-                    // Gain не найден в комментарии, но это не ошибка
-                    Logger.Info($"Custom gain not found in comment: '{tagInfo.comment}'");
+                    // Усиление не найдено в комментарии, но это не ошибка
+                    Logger.Info($"Кастомное усиление не найдено в комментарии: '{tagInfo.comment}'");
                 }
             }
             else if (_useCustomGain && string.IsNullOrEmpty(tagInfo.comment))
             {
-                Logger.Info("Custom gain enabled but comment is empty");
+                Logger.Info("Кастомное усиление включено, но комментарий пуст");
             }
 
-            // 2. Если кастомный gain не найден ИЛИ не включен, пробуем теги
+            // 2. Если кастомное усиление не найдено ИЛИ не включено, пробуем теги
             if (!gainFound)
             {
                 float tagGain = tagInfo.replaygain_track_gain;
@@ -111,23 +111,23 @@ namespace Strimer.Audio
                     tagGain <= 24f)
                 {
                     gainValue = tagGain;
-                    source = "track tag";
+                    source = "тег трека";
                     gainFound = true;
-                    Logger.Info($"Using ReplayGain from tags: {gainValue:F2} dB");
+                    Logger.Info($"Используется ReplayGain из тегов: {gainValue:F2} дБ");
                 }
                 else if (Math.Abs(tagGain) > 0.001f)
                 {
                     // Есть значение, но оно отфильтровано
-                    Logger.Info($"Track has ReplayGain {tagGain:F2} dB but filtered " +
-                                $"(range: {-24}..{+24}, special values ignored)");
+                    Logger.Info($"Трек имеет ReplayGain {tagGain:F2} дБ, но значение отфильтровано " +
+                                $"(диапазон: {-24}..{+24}, специальные значения игнорируются)");
                 }
             }
 
             // 3. Если ничего не найдено
             if (!gainFound)
             {
-                Logger.Info("No valid ReplayGain data found, using 0 dB");
-                source = "default (0 dB)";
+                Logger.Info("Данные ReplayGain не найдены, используется 0 дБ");
+                source = "по умолчанию (0 дБ)";
             }
 
             // Единое ограничение для безопасности
@@ -136,7 +136,7 @@ namespace Strimer.Audio
             // Обновляем компрессор
             _compressor.fGain = gainValue;
 
-            Logger.Info($"ReplayGain final: {gainValue:F2} dB (source: {source})");
+            Logger.Info($"ReplayGain финальное: {gainValue:F2} дБ (источник: {source})");
         }
 
         private float ExtractCustomGain(string comment)
@@ -196,7 +196,7 @@ namespace Strimer.Audio
         {
             if (!_useReplayGain || _fxHandle == 0)
             {
-                Logger.Warning("Cannot apply gain: ReplayGain disabled or no FX handle");
+                Logger.Warning("Не удалось применить усиление: ReplayGain отключен или отсутствует FX handle");
                 return;
             }
 
@@ -204,12 +204,12 @@ namespace Strimer.Audio
 
             if (success)
             {
-                Logger.Info($"ReplayGain applied: {_compressor.fGain:F2} dB");
+                Logger.Info($"ReplayGain применено: {_compressor.fGain:F2} дБ");
             }
             else
             {
                 var error = Bass.BASS_ErrorGetCode();
-                Logger.Error($"Failed to apply ReplayGain: {error}");
+                Logger.Error($"Не удалось применить ReplayGain: {error}");
             }
         }
 

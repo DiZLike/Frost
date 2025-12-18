@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "w3dxqJBsGdA=",
+  "dgSpecHash": "o0sZKRpw2Yw=",
   "success": true,
-  "projectFilePath": "D:\\DiZ\\git\\strimer\\RadioStationManager\\RadioStationManager.csproj",
+  "projectFilePath": "D:\\Evgeny\\git\\strimer\\RadioStationManager\\RadioStationManager.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Evgeny\\.nuget\\packages\\bouncycastle.cryptography\\2.6.2\\bouncycastle.cryptography.2.6.2.nupkg.sha512",
     "C:\\Users\\Evgeny\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.2\\microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512",

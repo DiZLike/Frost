@@ -13,7 +13,7 @@ namespace Strimer
 
                 // Получаем версию из сборки
                 var version = Assembly.GetExecutingAssembly().GetName().Version;
-                Console.WriteLine($"Version: {version?.Major}.{version?.Minor}.{version?.Build}");
+                Console.WriteLine($"Версия: {version?.Major}.{version?.Minor}.{version?.Build}");
                 Console.WriteLine($"Текущее время сервера: {DateTime.Now}");
 
                 // Создаем и запускаем приложение
@@ -21,7 +21,7 @@ namespace Strimer
                 app.Run();
 
                 // Ждем завершения
-                Console.WriteLine("\nRadio streamer is running. Press Ctrl+C to stop...");
+                Console.WriteLine("\nРадио стример запущен. Нажмите Ctrl+C для остановки...");
 
                 // Используем ManualResetEvent для ожидания
                 var stopEvent = new ManualResetEvent(false);
@@ -35,13 +35,12 @@ namespace Strimer
                 // Останавливаем приложение
                 app.Stop();
 
-                Console.WriteLine("Application stopped.");
+                Console.WriteLine("Приложение остановлено.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"\nFATAL ERROR: {ex.Message}");
-                Core.Logger.Log($"Fatal error: {ex}");
-                Console.WriteLine("\nPress any key to exit...");
+                Core.Logger.Log($"Критическая ошибка: {ex}");
+                Console.WriteLine("\nНажмите любую клавишу для выхода...");
                 Console.ReadKey();
             }
         }

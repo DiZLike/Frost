@@ -31,7 +31,7 @@ namespace Strimer.Services
         {
             _config = config;
 
-            Logger.Info("Initializing Radio Service...");
+            Logger.Info("Инициализация радио сервиса...");
 
             // Инициализация компонентов
             _player = new Player(config);
@@ -49,10 +49,10 @@ namespace Strimer.Services
                     config.SavePlaylistHistory,
                     config.DynamicPlaylist
                 );
-                Logger.Info($"Fallback playlist loaded: {_fallbackPlaylist.TotalTracks} tracks");
+                Logger.Info($"Резервный плейлист загружен: {_fallbackPlaylist.TotalTracks} треков");
             }
 
-            Logger.Info($"Schedule enabled: {config.ScheduleEnable}");
+            Logger.Info($"Расписание включено: {config.ScheduleEnable}");
         }
 
         private Playlist? GetCurrentPlaylist()
@@ -86,7 +86,7 @@ namespace Strimer.Services
             if (_isRunning)
                 return;
 
-            Logger.Info("Starting radio service...");
+            Logger.Info("[RadioService] Запуск...");
 
             _isRunning = true;
             _isPaused = false;
@@ -100,8 +100,6 @@ namespace Strimer.Services
             // Запускаем поток воспроизведения
             _playbackThread = new Thread(PlaybackLoop);
             _playbackThread.Start();
-
-            Logger.Info("Radio service started successfully");
         }
 
         public void Stop()
@@ -109,7 +107,7 @@ namespace Strimer.Services
             if (!_isRunning)
                 return;
 
-            Logger.Info("Stopping radio service...");
+            Logger.Info("Остановка радио сервиса...");
 
             _isRunning = false;
             _playbackThread?.Join(3000); // Ждем завершения потока
@@ -117,12 +115,13 @@ namespace Strimer.Services
             _player.Stop();
             _iceCast.Dispose();
 
-            Logger.Info("Radio service stopped");
+            Logger.Info("Радио сервис остановлен");
         }
 
         private void PlaybackLoop()
         {
-            Logger.Info("Playback loop started");
+            Logger.Info("Цикл воспроизведения запущен");
+            DateTime trackStartTime = DateTime.Now;
 
             while (_isRunning)
             {
@@ -135,6 +134,7 @@ namespace Strimer.Services
                     }
 
                     // Шаг 0: Обязательная проверка расписания перед любым треком
+                    trackStartTime = DateTime.Now;
                     _scheduleManager.CheckAndUpdatePlaylist();
 
                     // 1. Получаем следующий трек
@@ -142,20 +142,23 @@ namespace Strimer.Services
 
                     if (string.IsNullOrEmpty(trackFile))
                     {
-                        Logger.Error("No track available. Waiting...");
+                        Logger.Error("Нет доступных треков. Ожидание...");
                         Thread.Sleep(500);
                         continue;
                     }
 
                     // 2. Воспроизводим трек
-                    _currentTrack = _player.PlayTrack(trackFile);
+                    //_currentTrack = _player.PlayTrack(trackFile);
+                    _currentTrack = _player.PlayTrackWithSilence(trackFile);
 
                     if (_currentTrack == null)
                     {
-                        Logger.Error("Failed to play track. Skipping...");
+                        Logger.Error("Не удалось воспроизвести трек. Пропускаю...");
                         Thread.Sleep(500);
                         continue;
                     }
+                    TimeSpan loadTime = DateTime.Now - trackStartTime;
+                    Logger.Info($"[Производительность] Трек загружен за {loadTime.TotalMilliseconds:F0}мс");
 
                     _trackStartTime = DateTime.Now;
 
@@ -181,12 +184,12 @@ namespace Strimer.Services
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error($"Error in playback loop: {ex.Message}");
+                    Logger.Error($"Ошибка в цикле воспроизведения: {ex.Message}");
                     Thread.Sleep(5000); // Пауза перед повторной попыткой
                 }
             }
 
-            Logger.Info("Playback loop ended");
+            Logger.Info("Цикл воспроизведения завершен");
         }
 
         private void WaitForTrackEnd()
@@ -202,23 +205,23 @@ namespace Strimer.Services
             var currentPlaylist = GetCurrentPlaylist();
             var status = new System.Text.StringBuilder();
 
-            status.AppendLine($"Service: {(_isRunning ? "Running" : "Stopped")}");
-            status.AppendLine($"Playback: {(_isPaused ? "Paused" : "Playing")}");
-            status.AppendLine($"IceCast: {(_iceCast.IsConnected ? "Connected" : "Disconnected")}");
+            status.AppendLine($"Сервис: {(_isRunning ? "Работает" : "Остановлен")}");
+            status.AppendLine($"Воспроизведение: {(_isPaused ? "На паузе" : "Играет")}");
+            status.AppendLine($"IceCast: {(_iceCast.IsConnected ? "Подключен" : "Отключен")}");
 
             if (currentPlaylist != null)
             {
-                status.AppendLine($"Playlist: {currentPlaylist.TotalTracks} tracks");
-                status.AppendLine($"Current: {currentPlaylist.CurrentIndex + 1}/{currentPlaylist.TotalTracks}");
+                status.AppendLine($"Плейлист: {currentPlaylist.TotalTracks} треков");
+                status.AppendLine($"Текущий: {currentPlaylist.CurrentIndex + 1}/{currentPlaylist.TotalTracks}");
             }
 
             if (_currentTrack != null)
             {
-                status.AppendLine($"Current Track: {_currentTrack.Artist} - {_currentTrack.Title}");
-                status.AppendLine($"Duration: {_player.GetCurrentTime()} / {_player.GetTotalTime()}");
+                status.AppendLine($"Текущий трек: {_currentTrack.Artist} - {_currentTrack.Title}");
+                status.AppendLine($"Длительность: {_player.GetCurrentTime()} / {_player.GetTotalTime()}");
             }
 
-            status.AppendLine($"Listeners: {_iceCast.Listeners} (Peak: {_iceCast.PeakListeners})");
+            status.AppendLine($"Слушателей: {_iceCast.Listeners} (Пик: {_iceCast.PeakListeners})");
 
             return status.ToString();
         }
@@ -227,19 +230,19 @@ namespace Strimer.Services
         {
             var info = new System.Text.StringBuilder();
 
-            info.AppendLine($"Server: {_config.IceCastServer}:{_config.IceCastPort}");
+            info.AppendLine($"Сервер: {_config.IceCastServer}:{_config.IceCastPort}");
             info.AppendLine($"Mount: /{_config.IceCastMount}");
-            info.AppendLine($"Bitrate: {_config.OpusBitrate} kbps ({_config.OpusMode})");
-            info.AppendLine($"Listeners: {_iceCast.Listeners}");
-            info.AppendLine($"Peak: {_iceCast.PeakListeners}");
+            info.AppendLine($"Битрейт: {_config.OpusBitrate} кбит/с ({_config.OpusMode})");
+            info.AppendLine($"Слушателей: {_iceCast.Listeners}");
+            info.AppendLine($"Пик: {_iceCast.PeakListeners}");
 
             if (_currentTrack != null)
             {
                 info.AppendLine();
-                info.AppendLine($"Current Track:");
-                info.AppendLine($"  Artist: {_currentTrack.Artist}");
-                info.AppendLine($"  Title: {_currentTrack.Title}");
-                info.AppendLine($"  Duration: {_player.GetTotalTime()}");
+                info.AppendLine($"Текущий трек:");
+                info.AppendLine($"  Исполнитель: {_currentTrack.Artist}");
+                info.AppendLine($"  Название: {_currentTrack.Title}");
+                info.AppendLine($"  Длительность: {_player.GetTotalTime()}");
             }
 
             return info.ToString();
@@ -250,7 +253,7 @@ namespace Strimer.Services
             if (_player.IsPlaying)
             {
                 _player.StopCurrentTrack();
-                Logger.Info("Skipping to next track...");
+                Logger.Info("Переход к следующему треку...");
             }
         }
 
@@ -261,12 +264,12 @@ namespace Strimer.Services
             if (_isPaused)
             {
                 _player.Pause();
-                Logger.Info("Playback paused");
+                Logger.Info("Воспроизведение приостановлено");
             }
             else
             {
                 _player.Resume();
-                Logger.Info("Playback resumed");
+                Logger.Info("Воспроизведение возобновлено");
             }
         }
     }

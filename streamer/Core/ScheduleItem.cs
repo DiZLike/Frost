@@ -34,23 +34,23 @@ namespace Strimer.Core
             string currentDay = currentTime.DayOfWeek.ToString().ToLower();
             bool dayMatches = DaysOfWeek.Contains("*") ||
                              DaysOfWeek.Contains(currentDay) ||
-                             DaysOfWeek.Contains(currentDay.Substring(0, 3)); // Mon, Tue, etc
+                             DaysOfWeek.Contains(currentDay.Substring(0, 3));
 
             if (!dayMatches)
                 return false;
 
-            // Проверка времени
-            TimeSpan currentTimeOfDay = currentTime.TimeOfDay;
+            // Проверка времени (с округлением до минут)
+            TimeSpan currentTimeOfDay = new TimeSpan(currentTime.Hour, currentTime.Minute, 0);
+            TimeSpan start = new TimeSpan(StartHour, StartMinute, 0);
+            TimeSpan end = new TimeSpan(EndHour, EndMinute, 0);
 
-            // Если интервал не переходит через полночь
-            if (StartTime <= EndTime)
+            if (start <= end)
             {
-                return currentTimeOfDay >= StartTime && currentTimeOfDay < EndTime;
+                return currentTimeOfDay >= start && currentTimeOfDay < end;
             }
-            // Если интервал переходит через полночь (например, 22:00 - 06:00)
             else
             {
-                return currentTimeOfDay >= StartTime || currentTimeOfDay < EndTime;
+                return currentTimeOfDay >= start || currentTimeOfDay < end;
             }
         }
 

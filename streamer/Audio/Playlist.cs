@@ -47,7 +47,7 @@ namespace Strimer.Audio
                         if (string.IsNullOrWhiteSpace(line) || line.TrimStart().StartsWith("#"))
                             continue;
 
-                        // ТВОЙ ФОРМАТ: track=C:\path\to\file.mp3?;
+                        // track=C:\path\to\file.mp3?;
                         string trackPath = line.Trim();
 
                         if (trackPath.StartsWith("track="))
@@ -56,27 +56,20 @@ namespace Strimer.Audio
                             trackPath = trackPath.TrimEnd('?', ';');
                         }
 
-                        if (File.Exists(trackPath))
-                        {
-                            _tracks.Add(trackPath);
-                        }
-                        else
-                        {
-                            Logger.Warning($"Track not found: {trackPath}");
-                        }
+                        _tracks.Add(trackPath);
                     }
 
                     _lastFileWriteTime = File.GetLastWriteTime(_playlistFile);
-                    Logger.Info($"Playlist loaded: {_tracks.Count} tracks");
+                    Logger.Info($"Плейлист загружен: {_tracks.Count} треков");
                 }
                 else
                 {
-                    Logger.Error($"Playlist file not found: {_playlistFile}");
+                    Logger.Error($"Файл плейлиста не найден: {_playlistFile}");
                 }
             }
             catch (Exception ex)
             {
-                Logger.Error($"Failed to load playlist: {ex.Message}");
+                Logger.Error($"Не удалось загрузить плейлист: {ex.Message}");
             }
         }
 
@@ -94,7 +87,7 @@ namespace Strimer.Audio
                 {
                     int oldCount = _tracks.Count;
                     LoadPlaylist();  // Перезагружаем плейлист
-                    Logger.Info($"Playlist updated: {oldCount} -> {_tracks.Count} tracks");
+                    Logger.Info($"Плейлист обновлен: {oldCount} -> {_tracks.Count} треков");
 
                     // Сохраняем историю после обновления
                     if (_saveHistory)
@@ -105,7 +98,7 @@ namespace Strimer.Audio
             }
             catch (Exception ex)
             {
-                Logger.Error($"Failed to check playlist updates: {ex.Message}");
+                Logger.Error($"Не удалось проверить обновления плейлиста: {ex.Message}");
             }
         }
 
@@ -116,7 +109,7 @@ namespace Strimer.Audio
 
             if (_tracks.Count == 0)
             {
-                Logger.Warning("Playlist is empty");
+                Logger.Warning("Плейлист пуст");
                 return null;
             }
 
@@ -124,7 +117,7 @@ namespace Strimer.Audio
             {
                 // Все треки сыграли, начинаем заново
                 _playedTracks.Clear();
-                Logger.Info("Playlist history cleared, starting new cycle");
+                Logger.Info("История плейлиста очищена, начинается новый цикл");
             }
 
             string selectedTrack;
@@ -174,12 +167,12 @@ namespace Strimer.Audio
                         .Where(line => !string.IsNullOrWhiteSpace(line))
                         .ToList();
 
-                    Logger.Info($"Playlist history loaded: {_playedTracks.Count} played tracks");
+                    Logger.Info($"История плейлиста загружена: {_playedTracks.Count} воспроизведенных треков");
                 }
             }
             catch (Exception ex)
             {
-                Logger.Error($"Failed to load playlist history: {ex.Message}");
+                Logger.Error($"Не удалось загрузить историю плейлиста: {ex.Message}");
             }
         }
 
@@ -196,7 +189,7 @@ namespace Strimer.Audio
             }
             catch (Exception ex)
             {
-                Logger.Error($"Failed to save playlist history: {ex.Message}");
+                Logger.Error($"Не удалось сохранить историю плейлиста: {ex.Message}");
             }
         }
 
@@ -207,7 +200,7 @@ namespace Strimer.Audio
             {
                 SaveHistory();
             }
-            Logger.Info("Playlist history cleared");
+            Logger.Info("История плейлиста очищена");
         }
 
         public string[] GetRecentTracks(int count = 10)

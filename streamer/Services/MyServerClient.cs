@@ -19,7 +19,7 @@ namespace Strimer.Services
             {
                 _httpClient = new HttpClient();
                 _httpClient.Timeout = TimeSpan.FromSeconds(5);
-                Logger.Info("MyServer client initialized");
+                Logger.Info("MyServer клиент инициализирован");
             }
         }
 
@@ -44,16 +44,16 @@ namespace Strimer.Services
                 if (response.IsSuccessStatusCode)
                 {
                     string responseText = response.Content.ReadAsStringAsync().Result;
-                    //Logger.Info($"Track info sent to MyServer: {responseText.Trim()}");
+                    //Logger.Info($"Информация о треке отправлена на MyServer: {responseText.Trim()}");
                 }
                 else
                 {
-                    Logger.Warning($"Failed to send track info: {response.StatusCode}");
+                    Logger.Warning($"Не удалось отправить информацию о треке: {response.StatusCode}");
                 }
             }
             catch (Exception ex)
             {
-                Logger.Error($"Error sending to MyServer: {ex.Message}");
+                Logger.Error($"Ошибка при отправке на MyServer: {ex.Message}");
             }
         }
     }

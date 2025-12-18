@@ -1,2 +1,0 @@
-F:\git\strimer\streamer\bin\Release\net6.0\list_creater -s "E:\Desktop\new" "/mnt/sd/radio/main/" "up6jlo4bj6e8yy96w6w3iq84" "http://pub.dlike.ru/add-track" "http://rpi.dlike.ru:82/download/main/"
-pause

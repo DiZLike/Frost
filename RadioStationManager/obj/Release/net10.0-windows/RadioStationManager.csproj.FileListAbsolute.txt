@@ -42,3 +42,7 @@ D:\DiZ\git\strimer\RadioStationManager\obj\Release\net10.0-windows\refint\RadioS
 D:\DiZ\git\strimer\RadioStationManager\obj\Release\net10.0-windows\RadioStationManager.pdb
 D:\DiZ\git\strimer\RadioStationManager\obj\Release\net10.0-windows\RadioStationManager.genruntimeconfig.cache
 D:\DiZ\git\strimer\RadioStationManager\obj\Release\net10.0-windows\ref\RadioStationManager.dll
+D:\Evgeny\git\strimer\RadioStationManager\bin\Release\net10.0-windows\BouncyCastle.Cryptography.dll
+D:\Evgeny\git\strimer\RadioStationManager\bin\Release\net10.0-windows\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+D:\Evgeny\git\strimer\RadioStationManager\bin\Release\net10.0-windows\Microsoft.Extensions.Logging.Abstractions.dll
+D:\Evgeny\git\strimer\RadioStationManager\bin\Release\net10.0-windows\Renci.SshNet.dll

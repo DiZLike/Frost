@@ -31,7 +31,7 @@ namespace Strimer.Broadcast
         {
             _mixer = mixer;
 
-            Logger.Info("Initializing IceCast client...");
+            Logger.Info("Инициализация IceCast клиента...");
 
             // Создаем энкодер
             _encoder = new OpusEncoder(_config, _mixer);
@@ -39,7 +39,7 @@ namespace Strimer.Broadcast
             // Подключаемся к IceCast серверу
             ConnectToIceCast();
 
-            Logger.Info("IceCast client initialized");
+            Logger.Info("IceCast клиент инициализирован");
         }
 
         private void ConnectToIceCast()
@@ -48,13 +48,13 @@ namespace Strimer.Broadcast
             {
                 if (_isReconnecting)
                 {
-                    Logger.Info("Reconnection in progress...");
+                    Logger.Info("Выполняется переподключение...");
                 }
 
                 string url = $"http://{_config.IceCastServer}:{_config.IceCastPort}/{_config.IceCastMount}";
                 string auth = $"{_config.IceCastUser}:{_config.IceCastPassword}";
 
-                Logger.Info($"Connecting to IceCast: {url}");
+                Logger.Info($"Подключение к IceCast: {url}");
 
                 // Инициализируем трансляцию через BASS Encoder
                 bool success = BassEnc.BASS_Encode_CastInit(
@@ -75,27 +75,27 @@ namespace Strimer.Broadcast
 
                     if (error == BASSError.BASS_ERROR_BUSY)
                     {
-                        Logger.Warning($"IceCast connection BUSY. Previous connection may not have closed properly.");
+                        Logger.Warning($"Подключение к IceCast занято. Предыдущее соединение могло закрыться некорректно.");
 
                         // Пробуем очистить и переподключиться
                         HandleBusyError();
                         return;
                     }
 
-                    throw new Exception($"Failed to initialize IceCast stream: {error}");
+                    throw new Exception($"Не удалось инициализировать IceCast поток: {error}");
                 }
 
                 IsConnected = true;
                 _isReconnecting = false;
 
-                Logger.Info($"✓ Connected to IceCast: {url}");
+                Logger.Info($"✓ Подключено к IceCast: {url}");
 
                 // Запускаем обновление статистики
                 StartStatsMonitoring();
             }
             catch (Exception ex)
             {
-                Logger.Error($"IceCast connection failed: {ex.Message}");
+                Logger.Error($"Не удалось подключиться к IceCast: {ex.Message}");
                 IsConnected = false;
 
                 // Запускаем автоматическое переподключение
@@ -107,12 +107,12 @@ namespace Strimer.Broadcast
         {
             try
             {
-                Logger.Info("Attempting to recover from BUSY error...");
+                Logger.Info("Попытка восстановления после ошибки BUSY...");
 
                 // 1. Останавливаем текущий энкодер
                 if (_encoder != null)
                 {
-                    Logger.Info("Stopping current encoder...");
+                    Logger.Info("Остановка текущего энкодера...");
                     _encoder.Dispose();
                     _encoder = null;
                 }
@@ -121,16 +121,16 @@ namespace Strimer.Broadcast
                 Thread.Sleep(2000);
 
                 // 3. Создаем новый энкодер
-                Logger.Info("Creating new encoder...");
+                Logger.Info("Создание нового энкодера...");
                 _encoder = new OpusEncoder(_config, _mixer);
 
                 // 4. Пробуем подключиться снова
-                Logger.Info("Retrying connection...");
+                Logger.Info("Повторное подключение...");
                 ConnectToIceCast();
             }
             catch (Exception ex)
             {
-                Logger.Error($"Failed to recover from BUSY error: {ex.Message}");
+                Logger.Error($"Не удалось восстановить соединение после ошибки BUSY: {ex.Message}");
                 ScheduleReconnect();
             }
         }
@@ -142,7 +142,7 @@ namespace Strimer.Broadcast
 
             _isReconnecting = true;
 
-            Logger.Info("Scheduling reconnect in 10 seconds...");
+            Logger.Info("Планирование переподключения через 10 секунд...");
 
             _reconnectThread = new Thread(() =>
             {
@@ -157,13 +157,13 @@ namespace Strimer.Broadcast
 
                     if (!_disposed && !IsConnected)
                     {
-                        Logger.Info("Attempting to reconnect to IceCast...");
+                        Logger.Info("Попытка переподключения к IceCast...");
                         ConnectToIceCast();
                     }
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error($"Reconnect thread error: {ex.Message}");
+                    Logger.Error($"Ошибка в потоке переподключения: {ex.Message}");
                 }
                 finally
                 {
@@ -245,7 +245,7 @@ namespace Strimer.Broadcast
         {
             if (!IsConnected || _encoder == null)
             {
-                Logger.Warning($"Cannot set metadata: IceCast is {(IsConnected ? "connected but encoder is null" : "not connected")}");
+                Logger.Warning($"Не удалось установить метаданные: IceCast {(IsConnected ? "подключен, но энкодер отсутствует" : "не подключен")}");
                 return;
             }
 
@@ -255,12 +255,12 @@ namespace Strimer.Broadcast
             }
             catch (Exception ex)
             {
-                Logger.Error($"Failed to set metadata: {ex.Message}");
+                Logger.Error($"Не удалось установить метаданные: {ex.Message}");
 
                 // Если ошибка связана с подключением, пробуем переподключиться
                 if (ex.Message.Contains("BASS_ERROR_HANDLE") || ex.Message.Contains("BASS_ERROR_BUSY"))
                 {
-                    Logger.Info("Metadata error suggests connection issue, scheduling reconnect...");
+                    Logger.Info("Ошибка метаданных указывает на проблемы с подключением, планирую переподключение...");
                     IsConnected = false;
                     ScheduleReconnect();
                 }
@@ -271,7 +271,7 @@ namespace Strimer.Broadcast
         {
             if (!IsConnected && !_isReconnecting)
             {
-                Logger.Info("IceCast connection lost, attempting to reconnect...");
+                Logger.Info("Соединение с IceCast потеряно, попытка переподключения...");
                 ScheduleReconnect();
             }
         }
@@ -291,7 +291,7 @@ namespace Strimer.Broadcast
             _encoder?.Dispose();
             _encoder = null;
 
-            Logger.Info("IceCast client disposed");
+            Logger.Info("IceCast клиент освобожден");
         }
     }
 }

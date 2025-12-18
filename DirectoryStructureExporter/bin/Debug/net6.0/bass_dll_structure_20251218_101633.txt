@@ -1,0 +1,55 @@
+﻿Структура каталога: D:\Evgeny\git\strimer\streamer\bass_dll
+Дата создания: 2025-12-18 10:16:33
+Игнорируемые папки: 0
+Игнорируемые файлы: 0
+============================================================
+
+📁 bass_dll/
+  │  📁 linux/
+  │    │  📁 aarch64/
+  │    │    ├── 📄 libbass_aac.so (218,77 KB)
+  │    │    ├── 📄 libbass_fx.so (71,61 KB)
+  │    │    ├── 📄 libbass.so (244,91 KB)
+  │    │    ├── 📄 libbassenc_mp3.so (131,13 KB)
+  │    │    ├── 📄 libbassenc_ogg.so (755,68 KB)
+  │    │    ├── 📄 libbassenc_opus.so (212,52 KB)
+  │    │    ├── 📄 libbassenc.so (46,51 KB)
+  │    │    ├── 📄 libbassmix.so (51,22 KB)
+  │    │    ├── 📄 libbassopus.so (111,52 KB)
+  │    │    └── 📄 libtags.so (41 KB)
+  │    │  📁 armhf/
+  │    │    ├── 📄 libbass_aac.so (216,22 KB)
+  │    │    ├── 📄 libbass_fx.so (79,19 KB)
+  │    │    ├── 📄 libbass.so (252,35 KB)
+  │    │    ├── 📄 libbassenc_mp3.so (123,96 KB)
+  │    │    ├── 📄 libbassenc_ogg.so (641,94 KB)
+  │    │    ├── 📄 libbassenc_opus.so (222,74 KB)
+  │    │    ├── 📄 libbassenc.so (50 KB)
+  │    │    ├── 📄 libbassmix.so (50,01 KB)
+  │    │    ├── 📄 libbassopus.so (110,38 KB)
+  │    │    └── 📄 libtags.so (31,2 KB)
+  │    │  📁 x86/
+  │    │    ├── 📄 libbass_aac.so (231,21 KB)
+  │    │    ├── 📄 libbass_fx.so (90,3 KB)
+  │    │    ├── 📄 libbass.so (234,89 KB)
+  │    │    ├── 📄 libbassenc_mp3.so (146,31 KB)
+  │    │    ├── 📄 libbassenc_ogg.so (676,56 KB)
+  │    │    ├── 📄 libbassenc_opus.so (228,77 KB)
+  │    │    ├── 📄 libbassenc.so (57,47 KB)
+  │    │    ├── 📄 libbassmix.so (43,77 KB)
+  │    │    ├── 📄 libbassopus.so (118,75 KB)
+  │    │    └── 📄 libtags.so (35,61 KB)
+  │       📁 x86_64/
+  │         ├── 📄 libbass_aac.so (224,04 KB)
+  │         ├── 📄 libbass_fx.so (83,79 KB)
+  │         ├── 📄 libbass.so (231,14 KB)
+  │         ├── 📄 libbassenc_mp3.so (137,55 KB)
+  │         ├── 📄 libbassenc_ogg.so (797,3 KB)
+  │         ├── 📄 libbassenc_opus.so (224,13 KB)
+  │         ├── 📄 libbassenc.so (50,4 KB)
+  │         ├── 📄 libbassmix.so (43,19 KB)
+  │         ├── 📄 libbassopus.so (115,73 KB)
+  │         └── 📄 libtags.so (40,01 KB)
+     📁 win/
+       │  📁 x64/
+          📁 x86/

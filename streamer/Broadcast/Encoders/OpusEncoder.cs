@@ -27,14 +27,14 @@ namespace Strimer.Broadcast.Encoders
 
         private void Initialize()
         {
-            Logger.Info("Initializing Opus encoder...");
+            Logger.Info("Инициализация Opus энкодера...");
 
             // Определяем путь к opusenc
             _encoderExe = GetOpusEncPath();
 
             if (!File.Exists(_encoderExe))
             {
-                throw new FileNotFoundException($"opusenc not found at: {_encoderExe}");
+                throw new FileNotFoundException($"opusenc не найден по пути: {_encoderExe}");
             }
 
             // Создаем строку параметров для opusenc
@@ -52,10 +52,10 @@ namespace Strimer.Broadcast.Encoders
             if (_encoderHandle == 0)
             {
                 var error = Bass.BASS_ErrorGetCode();
-                throw new Exception($"Failed to create Opus encoder: {error}");
+                throw new Exception($"Не удалось создать Opus энкодер: {error}");
             }
 
-            Logger.Info($"Opus encoder initialized: {_config.OpusBitrate}kbps {_config.OpusMode}");
+            Logger.Info($"Opus энкодер инициализирован: {_config.OpusBitrate}кбит/с {_config.OpusMode}");
         }
 
         private string GetOpusEncPath()
@@ -103,7 +103,7 @@ namespace Strimer.Broadcast.Encoders
 
             if (success)
             {
-                Logger.Info($"Metadata updated: {artist} - {title}");
+                Logger.Info($"Метаданные обновлены: {artist} - {title}");
             }
         }
 
@@ -115,7 +115,7 @@ namespace Strimer.Broadcast.Encoders
                 _encoderHandle = 0;
             }
 
-            Logger.Info("Opus encoder disposed");
+            Logger.Info("Opus энкодер освобожден");
         }
     }
 }

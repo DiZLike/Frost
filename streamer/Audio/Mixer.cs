@@ -13,9 +13,6 @@ namespace Strimer.Audio
 
         public Mixer(int sampleRate)
         {
-            // Убрали неправильную проверку
-            // BASS должен быть уже инициализирован к этому моменту
-
             // Создаем микшерный поток
             _handle = BassMix.BASS_Mixer_StreamCreate(
                 sampleRate,
@@ -26,10 +23,10 @@ namespace Strimer.Audio
             if (_handle == 0)
             {
                 var error = Bass.BASS_ErrorGetCode();
-                throw new Exception($"Failed to create mixer. Error: {error}");
+                throw new Exception($"Не удалось создать микшер. Ошибка: {error}");
             }
 
-            Logger.Info($"Mixer created (handle: {_handle})");
+            Logger.Info($"Микшер создан (хэндл: {_handle})");
         }
 
         public void AddStream(int stream)
@@ -46,12 +43,12 @@ namespace Strimer.Audio
             if (success)
             {
                 _streams.Add(stream);
-                Logger.Info($"Stream {stream} added to mixer");
+                Logger.Info($"Поток {stream} добавлен в микшер");
             }
             else
             {
                 var error = Bass.BASS_ErrorGetCode();
-                throw new Exception($"Failed to add stream to mixer: {error}");
+                throw new Exception($"Не удалось добавить поток в микшер: {error}");
             }
         }
 
@@ -61,7 +58,7 @@ namespace Strimer.Audio
             {
                 BassMix.BASS_Mixer_ChannelRemove(stream);
                 _streams.Remove(stream);
-                Logger.Info($"Stream {stream} removed from mixer");
+                Logger.Info($"Поток {stream} удален из микшера");
             }
         }
 
@@ -73,7 +70,7 @@ namespace Strimer.Audio
             }
 
             _streams.Clear();
-            Logger.Info("Mixer cleared");
+            Logger.Info("Микшер очищен");
         }
     }
 }

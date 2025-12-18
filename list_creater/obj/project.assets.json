@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\DiZ\\git\\strimer\\list_creater\\list_creater.csproj",
+      "projectUniqueName": "D:\\Evgeny\\git\\strimer\\list_creater\\list_creater.csproj",
       "projectName": "list_creater",
-      "projectPath": "D:\\DiZ\\git\\strimer\\list_creater\\list_creater.csproj",
+      "projectPath": "D:\\Evgeny\\git\\strimer\\list_creater\\list_creater.csproj",
       "packagesPath": "C:\\Users\\Evgeny\\.nuget\\packages\\",
-      "outputPath": "D:\\DiZ\\git\\strimer\\list_creater\\obj\\",
+      "outputPath": "D:\\Evgeny\\git\\strimer\\list_creater\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Evgeny\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -67,7 +67,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.101\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100\\RuntimeIdentifierGraph.json"
       }
     }
   }

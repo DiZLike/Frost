@@ -3,6 +3,7 @@ using Strimer.Core;
 using System.Reflection;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Fx;
+using Un4seen.Bass.AddOn.Mix;
 using Un4seen.Bass.AddOn.Tags;
 
 namespace Strimer.Audio
@@ -10,11 +11,13 @@ namespace Strimer.Audio
     public class Player : IDisposable
     {
         private readonly AppConfig _config;
-        private Mixer _mixer; // ← Сделать не readonly
+        private Mixer _mixer;
         private ReplayGain _replayGain;
 
         private int _currentStream;
         private bool _isInitialized;
+        private bool _loadCompleted = false;
+        private bool _isDisposed = false;
 
         public bool IsPlaying => _currentStream != 0 &&
             Bass.BASS_ChannelIsActive(_currentStream) == BASSActive.BASS_ACTIVE_PLAYING;
@@ -27,7 +30,7 @@ namespace Strimer.Audio
         public Player(AppConfig config)
         {
             _config = config;
-            // НЕ создаем Mixer и ReplayGain здесь!
+            Logger.Info($"[Плеер] Инициализирован с конфигурацией: Устройство={_config.AudioDevice}, Частота={_config.SampleRate}");
         }
 
         public void Initialize()
@@ -35,7 +38,7 @@ namespace Strimer.Audio
             if (_isInitialized)
                 return;
 
-            Logger.Info("Initializing audio system...");
+            Logger.Info("Инициализация аудио системы...");
 
             // 1. Инициализация BASS
             bool initSuccess = Bass.BASS_Init(
@@ -48,25 +51,20 @@ namespace Strimer.Audio
             if (!initSuccess)
             {
                 var error = Bass.BASS_ErrorGetCode();
-                throw new Exception($"Failed to initialize BASS: {error}");
+                throw new Exception($"Не удалось инициализировать BASS: {error}");
             }
 
-            // 2. Создаем микшер ПОСЛЕ инициализации BASS
             _mixer = new Mixer(_config.SampleRate);
-
-            // 3. Создаем ReplayGain
             _replayGain = new ReplayGain(_config.UseReplayGain, _config.UseCustomGain, _mixer.Handle);
-
-            // 4. Загружаем плагины
             LoadPlugins();
 
             _isInitialized = true;
-            Logger.Info("Audio system initialized successfully");
+            Logger.Info("Аудио система успешно инициализирована");
         }
 
         private void LoadPlugins()
         {
-            Logger.Info("Loading audio plugins...");
+            Logger.Info("Загрузка аудио плагинов...");
 
             string libPrefix = _config.OS == "Windows" ? "" : "lib";
             string libExtension = _config.OS == "Windows" ? ".dll" : ".so";
@@ -74,6 +72,8 @@ namespace Strimer.Audio
             // Загружаем плагины для разных форматов
             string[] plugins = { "bassopus", "bassaac", "bassflac", "basswv" };
 
+            List<string> loadedPlugins = new();
+            List<string> failedPlugins = new();
             foreach (var plugin in plugins)
             {
                 string pluginPath = Path.Combine(
@@ -86,14 +86,18 @@ namespace Strimer.Audio
                     int pluginHandle = Bass.BASS_PluginLoad(pluginPath);
                     if (pluginHandle != 0)
                     {
-                        Logger.Info($"  Loaded: {plugin}");
+                        loadedPlugins.Add(plugin);
                     }
                     else
                     {
-                        Logger.Warning($"  Failed to load: {plugin}");
+                        failedPlugins.Add(plugin);
                     }
                 }
             }
+            if (loadedPlugins.Count > 0)
+                Logger.Info($"[Плеер] Загруженные плагины: {string.Join(", ", loadedPlugins)}");
+            if (failedPlugins.Count > 0)
+                Logger.Warning($"[Плеер] Не удалось загрузить плагины: {string.Join(", ", failedPlugins)}");
         }
 
         public TrackInfo PlayTrack(string filePath)
@@ -101,14 +105,7 @@ namespace Strimer.Audio
             // Останавливаем текущий трек
             StopCurrentTrack();
 
-            // Проверяем файл
-            if (!File.Exists(filePath))
-            {
-                Logger.Error($"File not found: {filePath}");
-                return null;
-            }
-
-            // Создаем поток для файла - УБЕРИТЕ BASS_STREAM_DECODE!
+            // Не проверяем больше наличие файла. BASS_StreamCreateFile сам определит
             _currentStream = Bass.BASS_StreamCreateFile(
                 filePath,
                 0, 0,
@@ -118,7 +115,7 @@ namespace Strimer.Audio
             if (_currentStream == 0)
             {
                 var error = Bass.BASS_ErrorGetCode();
-                Logger.Error($"Failed to create stream for {Path.GetFileName(filePath)}: {error}");
+                Logger.Error($"Не удалось создать поток для {Path.GetFileName(filePath)}: {error}");
                 return null;
             }
 
@@ -136,12 +133,73 @@ namespace Strimer.Audio
             // Запускаем воспроизведение через микшер
             Bass.BASS_ChannelPlay(_mixer.Handle, false);
 
-            Logger.Info($"Now playing: {trackInfo.Artist} - {trackInfo.Title}");
+            Logger.Info($"Сейчас играет: {trackInfo.Artist} - {trackInfo.Title}");
 
             // Логируем ReplayGain значение для отладки
-            Logger.Info($"ReplayGain: {trackInfo.ReplayGain} dB, UseReplayGain: {_config.UseReplayGain}");
+            Logger.Info($"ReplayGain: {trackInfo.ReplayGain} дБ, UseReplayGain: {_config.UseReplayGain}");
 
             return trackInfo;
+        }
+
+        public TrackInfo PlayTrackWithSilence(string filePath)
+        {
+            if (_mixer == null)
+                throw new ArgumentNullException(nameof(_mixer));
+
+            // Запускаем тишину в отдельном потоке
+            var silenceThread = new Thread(() =>
+            {
+                try
+                {
+                    Logger.Info("[Плеер] Запуск воспроизведения тишины");
+
+                    // Создаем временный поток тишины
+                    using var silence = new SilenceGenerator(_config.SampleRate);
+
+                    // Добавляем в микшер и играем
+                    BassMix.BASS_Mixer_StreamAddChannel(_mixer.Handle, silence.Handle, BASSFlag.BASS_DEFAULT);
+                    Bass.BASS_ChannelPlay(silence.Handle, true);
+
+                    // Держим поток активным, пока не остановят извне
+                    while (!_loadCompleted && !_isDisposed)
+                    {
+                        Thread.Sleep(100);
+                    }
+
+                    // Останавливаем тишину
+                    Bass.BASS_ChannelStop(silence.Handle);
+                    BassMix.BASS_Mixer_ChannelRemove(silence.Handle);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error($"Ошибка в потоке тишины: {ex.Message}");
+                }
+            });
+
+            silenceThread.IsBackground = true;
+            silenceThread.Start();
+
+            // Даем время тишине запуститься
+            Thread.Sleep(100);
+
+            try
+            {
+                // Загружаем трек (тишина продолжает играть)
+                var trackInfo = PlayTrack(filePath);
+
+                // Сигнализируем, что загрузка завершена
+                _loadCompleted = true;
+
+                // Даем время тишине остановиться
+                Thread.Sleep(200);
+
+                return trackInfo;
+            }
+            catch (Exception)
+            {
+                _loadCompleted = true;
+                throw;
+            }
         }
 
         private TrackInfo CreateTrackInfo(TAG_INFO tagInfo, string filePath)
@@ -160,7 +218,7 @@ namespace Strimer.Audio
 
             return new TrackInfo
             {
-                Artist = !string.IsNullOrWhiteSpace(tagInfo.artist) ? tagInfo.artist : "Unknown Artist",
+                Artist = !string.IsNullOrWhiteSpace(tagInfo.artist) ? tagInfo.artist : "Неизвестный исполнитель",
                 Title = !string.IsNullOrWhiteSpace(tagInfo.title) ? tagInfo.title : Path.GetFileNameWithoutExtension(filePath),
                 Album = tagInfo.album ?? "",
                 Year = year,
@@ -232,6 +290,7 @@ namespace Strimer.Audio
             {
                 Bass.BASS_Free();
                 _isInitialized = false;
+                _isDisposed = true;
             }
         }
 
