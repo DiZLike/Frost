@@ -97,6 +97,9 @@ namespace Strimer.Services
             // Инициализируем IceCast
             _iceCast.Initialize(_player.Mixer);
 
+            // Запускаем мониторинг
+            MonitorStreamHealth();
+
             // Запускаем поток воспроизведения
             _playbackThread = new Thread(PlaybackLoop);
             _playbackThread.Start();
@@ -123,10 +126,15 @@ namespace Strimer.Services
             Logger.Info("Цикл воспроизведения запущен");
             DateTime trackStartTime = DateTime.Now;
 
+            int trackCounter = 0;  // Счетчик треков для отладки
+
             while (_isRunning)
             {
                 try
                 {
+                    trackCounter++;
+                    Logger.Debug($"Начало цикла трека #{trackCounter}");
+
                     if (_isPaused)
                     {
                         Thread.Sleep(1000);
@@ -134,7 +142,7 @@ namespace Strimer.Services
                     }
 
                     // Шаг 0: Обязательная проверка расписания перед любым треком
-                    trackStartTime = DateTime.Now;
+                    Logger.Debug($"Проверка расписания...");
                     _scheduleManager.CheckAndUpdatePlaylist();
 
                     // 1. Получаем следующий трек
@@ -143,13 +151,26 @@ namespace Strimer.Services
                     if (string.IsNullOrEmpty(trackFile))
                     {
                         Logger.Error("Нет доступных треков. Ожидание...");
+                        _scheduleManager.CheckAndUpdatePlaylist();
                         Thread.Sleep(500);
                         continue;
                     }
 
-                    // 2. Воспроизводим трек
+                    Logger.Debug($"Выбран трек: {Path.GetFileName(trackFile)}");
+
+                    // 2. Проверяем подключение к IceCast перед воспроизведением
+                    if (!_iceCast.IsConnected)
+                    {
+                        Logger.Warning($"IceCast не подключен, проверка подключения...");
+                        _iceCast.CheckConnection();
+                    }
+
+                    // 2.5. Воспроизводим трек
                     //_currentTrack = _player.PlayTrack(trackFile);
+                    Logger.Debug($"Начало воспроизведения трека...");
+                    trackStartTime = DateTime.Now;
                     _currentTrack = _player.PlayTrackWithSilence(trackFile);
+
 
                     if (_currentTrack == null)
                     {
@@ -180,7 +201,9 @@ namespace Strimer.Services
                     }
 
                     // 5. Ждем окончания трека
+                    Logger.Debug($"Ожидание окончания трека...");
                     WaitForTrackEnd();
+                    Logger.Debug($"Трек завершен, переход к следующему");
                 }
                 catch (Exception ex)
                 {
@@ -271,6 +294,52 @@ namespace Strimer.Services
                 _player.Resume();
                 Logger.Info("Воспроизведение возобновлено");
             }
+        }
+        private void MonitorStreamHealth()
+        {
+            Thread monitorThread = new Thread(() =>
+            {
+                while (_isRunning)
+                {
+                    try
+                    {
+                        // Проверяем состояние IceCast каждые 5 минут
+                        if (_iceCast != null)
+                        {
+                            Logger.Info($"[Мониторинг] Состояние IceCast: Connected={_iceCast.IsConnected}, Listeners={_iceCast.Listeners}");
+
+                            if (!_iceCast.IsConnected)
+                            {
+                                Logger.Warning("[Мониторинг] IceCast отключен, запуск проверки...");
+                                _iceCast.CheckConnection();
+                            }
+                        }
+
+                        // Проверяем состояние плеера
+                        if (_player != null)
+                        {
+                            bool isPlaying = _player.IsPlaying;
+                            bool isStopped = _player.IsStopped;
+                            Logger.Info($"[Мониторинг] Состояние плеера: IsPlaying={isPlaying}, IsStopped={isStopped}");
+
+                            if (!isPlaying && !isStopped && _currentTrack != null)
+                            {
+                                Logger.Warning("[Мониторинг] Плеер в неопределенном состоянии!");
+                            }
+                        }
+
+                        Thread.Sleep(5 * 60 * 1000); // Проверять каждые 30 секунд
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error($"[Мониторинг] Ошибка мониторинга: {ex.Message}");
+                        Thread.Sleep(10000);
+                    }
+                }
+            });
+
+            monitorThread.IsBackground = true;
+            monitorThread.Start();
         }
     }
 }

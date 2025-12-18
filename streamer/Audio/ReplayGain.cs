@@ -13,6 +13,7 @@ namespace Strimer.Audio
         private int _mixerHandle;
         private int _fxHandle;
         private BASS_BFX_COMPRESSOR2 _compressor;
+        private string source = String.Empty;
 
         public ReplayGain(bool useReplayGain, bool useCustomGain, int mixerHandle)
         {
@@ -73,7 +74,7 @@ namespace Strimer.Audio
             }
 
             float gainValue = 0f;
-            string source = "отсутствует";
+            source = "отсутствует";
             bool gainFound = false;
 
             // 1. Пробуем кастомное усиление из комментария (если включено)
@@ -136,7 +137,7 @@ namespace Strimer.Audio
             // Обновляем компрессор
             _compressor.fGain = gainValue;
 
-            Logger.Info($"ReplayGain финальное: {gainValue:F2} дБ (источник: {source})");
+            //Logger.Info($"ReplayGain финальное: {gainValue:F2} дБ (источник: {source})");
         }
 
         private float ExtractCustomGain(string comment)
@@ -201,10 +202,9 @@ namespace Strimer.Audio
             }
 
             bool success = Bass.BASS_FXSetParameters(_fxHandle, _compressor);
-
             if (success)
             {
-                Logger.Info($"ReplayGain применено: {_compressor.fGain:F2} дБ");
+                Logger.Info($"ReplayGain применено: {_compressor.fGain:F2} дБ (источник: {source})");
             }
             else
             {
@@ -212,7 +212,6 @@ namespace Strimer.Audio
                 Logger.Error($"Не удалось применить ReplayGain: {error}");
             }
         }
-
         public void Reset()
         {
             _compressor.fGain = 0f;

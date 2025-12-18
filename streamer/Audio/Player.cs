@@ -136,7 +136,7 @@ namespace Strimer.Audio
             Logger.Info($"Сейчас играет: {trackInfo.Artist} - {trackInfo.Title}");
 
             // Логируем ReplayGain значение для отладки
-            Logger.Info($"ReplayGain: {trackInfo.ReplayGain} дБ, UseReplayGain: {_config.UseReplayGain}");
+            //Logger.Info($"ReplayGain: {trackInfo.ReplayGain} дБ, UseReplayGain: {_config.UseReplayGain}");
 
             return trackInfo;
         }

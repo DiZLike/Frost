@@ -217,7 +217,7 @@ namespace Strimer.Services
             }
 
             // Всегда проверяем расписание перед получением трека
-            CheckAndUpdatePlaylist();
+            //CheckAndUpdatePlaylist();
 
             if (_currentPlaylist == null)
             {

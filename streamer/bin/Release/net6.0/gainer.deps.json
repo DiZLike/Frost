@@ -1,0 +1,53 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "gainer/1.0.0": {
+        "dependencies": {
+          "Bass.Net": "2.4.17.6",
+          "TagLib": "1.0.0.0"
+        },
+        "runtime": {
+          "gainer.dll": {}
+        }
+      },
+      "Bass.Net/2.4.17.6": {
+        "runtime": {
+          "Bass.Net.dll": {
+            "assemblyVersion": "2.4.17.6",
+            "fileVersion": "2.4.17.6"
+          }
+        }
+      },
+      "TagLib/1.0.0.0": {
+        "runtime": {
+          "TagLib.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "gainer/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Bass.Net/2.4.17.6": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "TagLib/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

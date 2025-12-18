@@ -132,12 +132,10 @@ D:\DiZ\git\strimer\streamer\bin\Release\net6.0\bass_dll\win\x86\bassopus.dll
 D:\DiZ\git\strimer\streamer\bin\Release\net6.0\bass_dll\win\x86\bass_aac.dll
 D:\DiZ\git\strimer\streamer\bin\Release\net6.0\bass_dll\win\x86\bass_fx.dll
 D:\DiZ\git\strimer\streamer\bin\Release\net6.0\bass_dll\win\x86\tags.dll
-D:\DiZ\git\strimer\streamer\bin\Release\net6.0\config\strimer.conf
 D:\DiZ\git\strimer\streamer\bin\Release\net6.0\encs\opus\win32\opusenc.exe
 D:\DiZ\git\strimer\streamer\bin\Release\net6.0\encs\opus\win64\opusenc.exe
 D:\DiZ\git\strimer\streamer\bin\Release\net6.0\libbass.so
 D:\DiZ\git\strimer\streamer\bin\Release\net6.0\strimer.exe
-D:\DiZ\git\strimer\streamer\bin\Release\net6.0\config\messages.conf
 D:\DiZ\git\strimer\streamer\bin\Release\net6.0\strimer.deps.json
 D:\DiZ\git\strimer\streamer\bin\Release\net6.0\strimer.runtimeconfig.json
 D:\DiZ\git\strimer\streamer\bin\Release\net6.0\strimer.dll

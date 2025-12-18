@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Evgeny\\git\\strimer\\streamer\\strimer.csproj": {}
+    "D:\\DiZ\\git\\strimer\\streamer\\strimer.csproj": {}
   },
   "projects": {
-    "D:\\Evgeny\\git\\strimer\\streamer\\strimer.csproj": {
+    "D:\\DiZ\\git\\strimer\\streamer\\strimer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Evgeny\\git\\strimer\\streamer\\strimer.csproj",
+        "projectUniqueName": "D:\\DiZ\\git\\strimer\\streamer\\strimer.csproj",
         "projectName": "strimer",
-        "projectPath": "D:\\Evgeny\\git\\strimer\\streamer\\strimer.csproj",
+        "projectPath": "D:\\DiZ\\git\\strimer\\streamer\\strimer.csproj",
         "packagesPath": "C:\\Users\\Evgeny\\.nuget\\packages\\",
-        "outputPath": "D:\\Evgeny\\git\\strimer\\streamer\\obj\\",
+        "outputPath": "D:\\DiZ\\git\\strimer\\streamer\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Evgeny\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -61,7 +61,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.101\\RuntimeIdentifierGraph.json"
         }
       }
     }

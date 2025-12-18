@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Evgeny\\git\\strimer\\DirectoryStructureExporter\\DirectoryStructureExporter.csproj",
+      "projectUniqueName": "D:\\DiZ\\git\\strimer\\DirectoryStructureExporter\\DirectoryStructureExporter.csproj",
       "projectName": "DirectoryStructureExporter",
-      "projectPath": "D:\\Evgeny\\git\\strimer\\DirectoryStructureExporter\\DirectoryStructureExporter.csproj",
+      "projectPath": "D:\\DiZ\\git\\strimer\\DirectoryStructureExporter\\DirectoryStructureExporter.csproj",
       "packagesPath": "C:\\Users\\Evgeny\\.nuget\\packages\\",
-      "outputPath": "D:\\Evgeny\\git\\strimer\\DirectoryStructureExporter\\obj\\",
+      "outputPath": "D:\\DiZ\\git\\strimer\\DirectoryStructureExporter\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Evgeny\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -67,7 +67,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.101\\RuntimeIdentifierGraph.json"
       }
     }
   }
