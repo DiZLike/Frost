@@ -1,6 +1,7 @@
 ## Игнорировать папки bin и obj во всех проектах
-[Bb]in/
-[Oo]bj/
+**/[Bb]in/
+**/[Oo]bj/
+**/strimer.conf
 
 ## Игнорировать папку .vs (настройки Visual Studio)
 .vs/
@@ -11,16 +12,6 @@
 *.suo
 *.userosscache
 *.sln.docstates
-
-# Файлы результатов сборки
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-bld/
-[Bb]in/
-[Oo]bj/
-[Ll]og/
 
 # Файлы пакетов NuGet
 packages/
@@ -45,6 +36,3 @@ NuGet.exe
 # Rider
 *.idea/
 *.sln.iml
-
-# Mac
-.DS_Store
