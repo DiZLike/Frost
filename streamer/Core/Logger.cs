@@ -1,4 +1,6 @@
-﻿using System;
+﻿using strimer.App;
+using Strimer.App;
+using System;
 using System.IO;
 
 namespace Strimer.Core
@@ -71,7 +73,8 @@ namespace Strimer.Core
 
         public static void Debug(string message)
         {
-            Log($"[DEBUG] {message}");
+            if (G.Config.DebubEnable)
+                Log($"[DEBUG] {message}");
         }
 
         public static void Warning(string message)

@@ -57,6 +57,9 @@ namespace Strimer.App
         public string MyAddSongInfoLinkVar { get; set; } = "";
         public string MyAddSongInfoLinkFolderOnServer { get; set; } = "";
 
+        // Debug
+        public bool DebubEnable { get; set; } = false;
+
         public AppConfig()
         {
             DetectOS();
@@ -281,6 +284,15 @@ namespace Strimer.App
                     }
                     break;
 
+                case "debug":
+                    switch (key)
+                    {
+                        case "enable":
+                            DebubEnable = value.ToLower() == "yes";
+                            break;
+                    }
+                    break;
+
                 default:
                     Core.Logger.Warning($"Неизвестная секция конфигурации: {section}");
                     break;
@@ -341,7 +353,9 @@ namespace Strimer.App
                     $"add_song_info_title_var={MyAddSongInfoTitleVar};",
                     $"add_song_info_artist_var={MyAddSongInfoArtistVar};",
                     $"add_song_info_link_var={MyAddSongInfoLinkVar};",
-                    $"add_song_info_link_folder_on_server={MyAddSongInfoLinkFolderOnServer};"
+                    $"add_song_info_link_folder_on_server={MyAddSongInfoLinkFolderOnServer};",
+                    $"[Debug]",
+                    $"enable={(DebubEnable ? "yes" : "no")};"
                 };
 
                 File.WriteAllLines(Path.Combine(ConfigDirectory, "strimer.conf"), lines);

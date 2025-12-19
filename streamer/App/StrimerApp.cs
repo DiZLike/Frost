@@ -1,4 +1,5 @@
-﻿using Strimer.Services;
+﻿using strimer.App;
+using Strimer.Services;
 using System.Runtime.InteropServices;
 
 namespace Strimer.App
@@ -53,10 +54,13 @@ namespace Strimer.App
                 Environment.Exit(0);
                 return; // Дополнительная гарантия выхода
             }
+            G.Config = _config;
 
             // 4. Запускаем радио сервис (только если уже настроено)
             Console.WriteLine("\n" + new string('═', 50));
             Console.WriteLine("  ЗАПУСК РАДИО-СТРИМА");
+            if (_config.DebubEnable)
+                Console.WriteLine($"Приложение запущено в режиме отладки!");
             Console.WriteLine(new string('═', 50) + "\n");
 
             _radioService = new RadioService(_config);
