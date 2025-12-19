@@ -66,14 +66,14 @@ password=hackme;      						# Пароль
 device=-1;           						# ID аудиоустройства (-1 для устройства по умолчанию)
 frequency=44100;     						# Частота дискретизации
 
-[Playlist] - настройки плейлиста
+[Playlist]									# Настройки плейлиста
 list=playlist.txt;               			# Путь к файлу плейлиста
 save_playlist_history=yes;       			# Сохранять историю воспроизведения
 dynamic_playlist=no;             			# Динамическое обновление плейлиста
 schedule_enable=no;              			# Включить расписание
 schedule=schedule.json;          			# Файл расписания
 
-[Encoder]									#Настройки кодирования Opus
+[Encoder]									# Настройки кодирования Opus
 bitrate=128;          						# Битрейт (кбит/с)
 bitrate_mode=vbr;     						# Режим битрейта (vbr/cbr)
 content_type=music;   						# Тип контента
@@ -95,7 +95,7 @@ add_song_info_artist_var=;					# Параметр для исполнителя
 add_song_info_link_var=;					# Параметр для ссылки
 add_song_info_link_folder_on_server=;		# Папка на сервере
 
-[Debug]										#Отладка
+[Debug]										# Отладка
 enable=no;  								# Включить режим отладки (детальные логи)
 ```
 
