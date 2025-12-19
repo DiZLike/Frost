@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RadioStationManager")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+be74934f2edfa0b91e89895d479706637a477109")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5c4ba53df4263fd8cd0f0d54af0842d238c22f1f")]
 [assembly: System.Reflection.AssemblyProductAttribute("RadioStationManager")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RadioStationManager")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

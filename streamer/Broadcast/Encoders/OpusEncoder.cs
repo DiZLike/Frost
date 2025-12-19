@@ -88,10 +88,10 @@ namespace Strimer.Broadcast.Encoders
             return parameters.ToString();
         }
 
-        public void SetMetadata(string artist, string title)
+        public bool SetMetadata(string artist, string title)
         {
             if (_encoderHandle == 0)
-                return;
+                return false;
 
             string metadata = $"--artist \"{artist}\" --title \"{title}\"";
 
@@ -101,10 +101,7 @@ namespace Strimer.Broadcast.Encoders
                 BASSEncode.BASS_ENCODE_FP_16BIT
             );
 
-            if (success)
-            {
-                Logger.Info($"Метаданные обновлены: {artist} - {title}");
-            }
+            return success;
         }
 
         public void Dispose()

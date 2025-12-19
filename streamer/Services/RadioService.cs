@@ -97,9 +97,6 @@ namespace Strimer.Services
             // Инициализируем IceCast
             _iceCast.Initialize(_player.Mixer);
 
-            // Запускаем мониторинг
-            MonitorStreamHealth();
-
             // Запускаем поток воспроизведения
             _playbackThread = new Thread(PlaybackLoop);
             _playbackThread.Start();
@@ -162,7 +159,6 @@ namespace Strimer.Services
                     if (!_iceCast.IsConnected)
                     {
                         Logger.Warning($"IceCast не подключен, проверка подключения...");
-                        _iceCast.CheckConnection();
                     }
 
                     // 2.5. Воспроизводим трек
@@ -294,52 +290,6 @@ namespace Strimer.Services
                 _player.Resume();
                 Logger.Info("Воспроизведение возобновлено");
             }
-        }
-        private void MonitorStreamHealth()
-        {
-            Thread monitorThread = new Thread(() =>
-            {
-                while (_isRunning)
-                {
-                    try
-                    {
-                        // Проверяем состояние IceCast каждые 5 минут
-                        if (_iceCast != null)
-                        {
-                            Logger.Info($"[Мониторинг] Состояние IceCast: Connected={_iceCast.IsConnected}, Listeners={_iceCast.Listeners}");
-
-                            if (!_iceCast.IsConnected)
-                            {
-                                Logger.Warning("[Мониторинг] IceCast отключен, запуск проверки...");
-                                _iceCast.CheckConnection();
-                            }
-                        }
-
-                        // Проверяем состояние плеера
-                        if (_player != null)
-                        {
-                            bool isPlaying = _player.IsPlaying;
-                            bool isStopped = _player.IsStopped;
-                            Logger.Info($"[Мониторинг] Состояние плеера: IsPlaying={isPlaying}, IsStopped={isStopped}");
-
-                            if (!isPlaying && !isStopped && _currentTrack != null)
-                            {
-                                Logger.Warning("[Мониторинг] Плеер в неопределенном состоянии!");
-                            }
-                        }
-
-                        Thread.Sleep(5 * 60 * 1000); // Проверять каждые 30 секунд
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Error($"[Мониторинг] Ошибка мониторинга: {ex.Message}");
-                        Thread.Sleep(10000);
-                    }
-                }
-            });
-
-            monitorThread.IsBackground = true;
-            monitorThread.Start();
         }
     }
 }
