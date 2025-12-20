@@ -32,8 +32,8 @@ namespace Strimer.Services
                 scheduleFile = Path.Combine(_config.BaseDirectory, scheduleFile);
             }
 
-            Logger.Info($"Поиск файла расписания: {scheduleFile}");
-            Logger.Info($"Файл существует: {File.Exists(scheduleFile)}");
+            Logger.Debug($"Поиск файла расписания: {scheduleFile}");
+            Logger.Debug($"Файл существует: {File.Exists(scheduleFile)}");
 
             if (!File.Exists(scheduleFile))
             {
@@ -46,11 +46,11 @@ namespace Strimer.Services
             {
                 // Читаем и логируем содержимое файла для отладки
                 string json = File.ReadAllText(scheduleFile);
-                Logger.Info($"Размер файла расписания: {json.Length} символов");
+                Logger.Debug($"Размер файла расписания: {json.Length} символов");
 
                 // Показываем начало файла для диагностики
                 string firstLines = string.Join("\n", json.Split('\n').Take(5));
-                Logger.Info($"Первые 5 строк:\n{firstLines}");
+                Logger.Debug($"Первые 5 строк:\n{firstLines}");
 
                 // Проверяем на BOM
                 if (json.Length > 0 && json[0] == '\uFEFF')
@@ -99,9 +99,9 @@ namespace Strimer.Services
                     // Логируем все элементы расписания
                     foreach (var item in _scheduleConfig.ScheduleItems)
                     {
-                        Logger.Info($"  - {item.Name}: {item.StartHour:00}:{item.StartMinute:00} - {item.EndHour:00}:{item.EndMinute:00}");
-                        Logger.Info($"    Плейлист: {item.PlaylistPath}");
-                        Logger.Info($"    Дни: {string.Join(", ", item.DaysOfWeek)}");
+                        Logger.Debug($"  - {item.Name}: {item.StartHour:00}:{item.StartMinute:00} - {item.EndHour:00}:{item.EndMinute:00}");
+                        Logger.Debug($"    Плейлист: {item.PlaylistPath}");
+                        Logger.Debug($"    Дни: {string.Join(", ", item.DaysOfWeek)}");
                     }
                 }
             }

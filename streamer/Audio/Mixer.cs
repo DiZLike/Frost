@@ -26,7 +26,7 @@ namespace Strimer.Audio
                 throw new Exception($"Не удалось создать микшер. Ошибка: {error}");
             }
 
-            Logger.Info($"Микшер создан (хэндл: {_handle})");
+            Logger.Debug($"Микшер создан (handle: {_handle})");
         }
 
         public void AddStream(int stream)

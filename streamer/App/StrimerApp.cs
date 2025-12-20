@@ -54,7 +54,6 @@ namespace Strimer.App
                 Environment.Exit(0);
                 return; // Дополнительная гарантия выхода
             }
-            G.Config = _config;
 
             // 4. Запускаем радио сервис (только если уже настроено)
             Console.WriteLine("\n" + new string('═', 50));

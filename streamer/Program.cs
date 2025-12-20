@@ -13,8 +13,8 @@ namespace Strimer
 
                 // Получаем версию из сборки
                 var version = Assembly.GetExecutingAssembly().GetName().Version;
-                Console.WriteLine($"Версия: {version?.Major}.{version?.Minor}.{version?.Build}");
-                Console.WriteLine($"Текущее время сервера: {DateTime.Now}");
+                Core.Logger.Info($"Версия: {version?.Major}.{version?.Minor}.{version?.Build}");
+                Core.Logger.Info($"Текущее время сервера: {DateTime.Now}");
 
                 // Создаем и запускаем приложение
                 var app = new StrimerApp();
@@ -35,13 +35,11 @@ namespace Strimer
                 // Останавливаем приложение
                 app.Stop();
 
-                Console.WriteLine("Приложение остановлено.");
+                Core.Logger.Warning("Приложение остановлено.");
             }
             catch (Exception ex)
             {
-                Core.Logger.Log($"Критическая ошибка: {ex}");
-                Console.WriteLine("\nНажмите любую клавишу для выхода...");
-                Console.ReadKey();
+                Core.Logger.Error($"Критическая ошибка: {ex}");
             }
         }
     }

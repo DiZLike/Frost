@@ -1,4 +1,5 @@
-﻿using Strimer.Core;
+﻿using strimer.App;
+using Strimer.Core;
 using System.Runtime.InteropServices;
 
 namespace Strimer.App
@@ -127,10 +128,11 @@ namespace Strimer.App
                         SetValue(currentSection, key, value);
                     }
                 }
+                G.Config = this;
 
-                Logger.Info($"[Конфигурация] Загружено: IceCast={IceCastServer}:{IceCastPort}, Плейлист={PlaylistFile}");
-                Logger.Info($"[Конфигурация] Аудио: Устройство={AudioDevice}, Частота={SampleRate}Гц");
-                Logger.Info($"[Конфигурация] Кодировщик: Opus {OpusBitrate}кбит/с {OpusMode}, RG={(UseReplayGain ? "Вкл" : "Выкл")}");
+                Logger.Debug($"[Конфигурация] Загружено: IceCast={IceCastServer}:{IceCastPort}, Плейлист={PlaylistFile}");
+                Logger.Debug($"[Конфигурация] Аудио: Устройство={AudioDevice}, Частота={SampleRate}Гц");
+                Logger.Debug($"[Конфигурация] Кодировщик: Opus {OpusBitrate}кбит/с {OpusMode}, RG={(UseReplayGain ? "Вкл" : "Выкл")}");
             }
             catch (Exception ex)
             {

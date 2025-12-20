@@ -87,7 +87,6 @@ namespace Strimer.Audio
                 {
                     source = "кастомный комментарий";
                     gainFound = true;
-                    Logger.Info($"Используется кастомное усиление из комментария: {gainValue:F2} дБ");
                 }
                 else
                 {

@@ -30,7 +30,7 @@ namespace Strimer.Audio
         public Player(AppConfig config)
         {
             _config = config;
-            Logger.Info($"[Плеер] Инициализирован с конфигурацией: Устройство={_config.AudioDevice}, Частота={_config.SampleRate}");
+            Logger.Debug($"[Плеер] Инициализирован с конфигурацией: Устройство={_config.AudioDevice}, Частота={_config.SampleRate}");
         }
 
         public void Initialize()
