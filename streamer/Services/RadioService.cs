@@ -180,7 +180,18 @@ namespace Strimer.Services
                     _trackStartTime = DateTime.Now;
 
                     // 3. Устанавливаем метаданные в поток IceCast
-                    _iceCast.SetMetadata(_currentTrack.Artist, _currentTrack.Title);
+                    try
+                    {
+                        if (_iceCast != null && _currentTrack != null)
+                        {
+                            _iceCast.SetMetadata(_currentTrack.Artist, _currentTrack.Title);
+                        }
+                    }
+                    catch (Exception metadataEx)
+                    {
+                        Logger.Error($"Ошибка установки метаданных: {metadataEx.Message}");
+                        // Не прерываем воспроизведение из-за ошибки метаданных
+                    }
 
                     // 4. Отправляем информацию на внешний сервер
                     if (_config.MyServerEnabled)

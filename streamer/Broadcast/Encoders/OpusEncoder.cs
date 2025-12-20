@@ -17,7 +17,7 @@ namespace Strimer.Broadcast.Encoders
 
         private bool _disposed = false;
         private readonly object _disposeLock = new object();
-
+        private bool _isValid = true;
         public int Handle => _encoderHandle;
 
         public OpusEncoder(AppConfig config, Mixer mixer)
@@ -60,6 +60,13 @@ namespace Strimer.Broadcast.Encoders
 
             Logger.Info($"Opus энкодер инициализирован: {_config.OpusBitrate}кбит/с {_config.OpusMode}");
         }
+        public bool IsValid()
+        {
+            lock (_disposeLock)
+            {
+                return !_disposed && _encoderHandle != 0 && _isValid;
+            }
+        }
 
         private string GetOpusEncPath()
         {
@@ -93,57 +100,63 @@ namespace Strimer.Broadcast.Encoders
 
         public bool SetMetadata(string artist, string title)
         {
-            if (_encoderHandle == 0)
-                return false;
+            lock (_disposeLock)
+            {
+                if (_disposed || _encoderHandle == 0)
+                {
+                    Logger.Warning("Попытка установить метаданные на недоступном энкодере");
+                    return false;
+                }
 
-            string metadata = $"--artist \"{artist}\" --title \"{title}\"";
+                try
+                {
+                    string metadata = $"--artist \"{artist}\" --title \"{title}\"";
 
-            bool success = BassEnc_Opus.BASS_Encode_OPUS_NewStream(
-                _encoderHandle,
-                metadata,
-                BASSEncode.BASS_ENCODE_FP_16BIT
-            );
+                    bool success = BassEnc_Opus.BASS_Encode_OPUS_NewStream(
+                        _encoderHandle,
+                        metadata,
+                        BASSEncode.BASS_ENCODE_FP_16BIT
+                    );
 
-            return success;
-        }
-        public bool IsValid()
-        {
-            return !_disposed && _encoderHandle != 0;
+                    if (!success)
+                    {
+                        var error = Bass.BASS_ErrorGetCode();
+                        Logger.Error($"Ошибка установки метаданных: {error}");
+                        _isValid = false;
+                    }
+                    return success;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error($"Исключение при установке метаданных: {ex.Message}");
+                    _isValid = false;
+                    return false;
+                }
+            }
         }
 
         public void Dispose()
         {
             lock (_disposeLock)
             {
-                if (_disposed || _encoderHandle == 0)
-                    return;
-
+                if (_disposed) return;
                 _disposed = true;
+                _isValid = false;
 
                 try
                 {
-                    // Сначала пытаемся корректно остановить энкодер
-                    if (BassEnc.BASS_Encode_Stop(_encoderHandle))
+                    // Принудительно останавливаем все
+                    if (_encoderHandle != 0)
                     {
-                        Logger.Debug("Opus энкодер корректно остановлен");
-                    }
-                    else
-                    {
-                        var error = Bass.BASS_ErrorGetCode();
-                        Logger.Warning($"Ошибка при остановке энкодера: {error}");
-
-                        // Принудительно освобождаем ресурсы
+                        BassEnc.BASS_Encode_Stop(_encoderHandle);
                         Bass.BASS_StreamFree(_encoderHandle);
+                        _encoderHandle = 0;
+                        Logger.Debug("Ресурсы энкодера освобождены");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error($"Исключение при освобождении энкодера: {ex.Message}");
-                }
-                finally
-                {
-                    _encoderHandle = 0;
-                    Logger.Info("Opus энкодер освобожден");
+                    Logger.Error($"Ошибка при освобождении энкодера: {ex.Message}");
                 }
             }
         }

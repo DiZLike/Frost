@@ -132,11 +132,7 @@ namespace Strimer.Audio
 
             // Запускаем воспроизведение через микшер
             Bass.BASS_ChannelPlay(_mixer.Handle, false);
-
             Logger.Info($"Сейчас играет: {trackInfo.Artist} - {trackInfo.Title}");
-
-            // Логируем ReplayGain значение для отладки
-            //Logger.Info($"ReplayGain: {trackInfo.ReplayGain} дБ, UseReplayGain: {_config.UseReplayGain}");
 
             return trackInfo;
         }
@@ -147,18 +143,17 @@ namespace Strimer.Audio
                 throw new ArgumentNullException(nameof(_mixer));
 
             // Запускаем тишину в отдельном потоке
+            ///     !!! КОНФЛИКТ !!!    ВОСПРОИЗВЕДЕНИЕ ДОЛЖНО БЫТЬ В SilenceGenerator  !!!
             var silenceThread = new Thread(() =>
             {
                 try
                 {
                     Logger.Info("[Плеер] Запуск воспроизведения тишины");
+                    Logger.Debug($"Трек загружен? {_loadCompleted}");
 
                     // Создаем временный поток тишины
                     using var silence = new SilenceGenerator(_config.SampleRate);
-
-                    // Добавляем в микшер и играем
-                    BassMix.BASS_Mixer_StreamAddChannel(_mixer.Handle, silence.Handle, BASSFlag.BASS_DEFAULT);
-                    Bass.BASS_ChannelPlay(silence.Handle, true);
+                    silence.StartPlaying(_mixer);
 
                     // Держим поток активным, пока не остановят извне
                     while (!_loadCompleted && !_isDisposed)
@@ -167,8 +162,8 @@ namespace Strimer.Audio
                     }
 
                     // Останавливаем тишину
-                    Bass.BASS_ChannelStop(silence.Handle);
-                    BassMix.BASS_Mixer_ChannelRemove(silence.Handle);
+                    silence.StopPlaying(_mixer);
+                    _loadCompleted = false;
                 }
                 catch (Exception ex)
                 {
@@ -181,18 +176,10 @@ namespace Strimer.Audio
 
             // Даем время тишине запуститься
             Thread.Sleep(100);
-
             try
             {
-                // Загружаем трек (тишина продолжает играть)
                 var trackInfo = PlayTrack(filePath);
-
-                // Сигнализируем, что загрузка завершена
-                _loadCompleted = true;
-
-                // Даем время тишине остановиться
-                Thread.Sleep(200);
-
+                _loadCompleted = true; // Сигнализируем, что загрузка завершена
                 return trackInfo;
             }
             catch (Exception)

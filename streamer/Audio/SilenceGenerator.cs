@@ -27,7 +27,7 @@ namespace Strimer.Audio
             try
             {
                 _silenceStream = Bass.BASS_StreamCreate(_sampleRate, 2,
-                    BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_STREAM_DECODE,
+                    BASSFlag.BASS_DEFAULT | BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_STREAM_DECODE,
                     StreamProc, IntPtr.Zero);
 
                 if (_silenceStream == 0)
@@ -80,7 +80,8 @@ namespace Strimer.Audio
                     // Запускаем воспроизведение
                     if (!Bass.BASS_ChannelPlay(_silenceStream, true))
                     {
-                        Logger.Error("Не удалось воспроизвести тишину");
+                        var error = Bass.BASS_ErrorGetCode();
+                        Logger.Error($"Не удалось воспроизвести тишину: {er}");
                         return;
                     }
 
