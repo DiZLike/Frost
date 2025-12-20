@@ -18,6 +18,10 @@ namespace Strimer.Broadcast
         private bool _disposed;
         private bool _shouldMonitor = true;
 
+        private CancellationTokenSource _cts;
+        private Task _monitoringTask;
+        private readonly object _reconnectLock = new object();
+
         public bool IsConnected { get; private set; }
         public int Listeners { get; private set; }
         public int PeakListeners { get; private set; }
@@ -30,16 +34,37 @@ namespace Strimer.Broadcast
         public void Initialize(Mixer mixer)
         {
             _mixer = mixer;
+            _cts = new CancellationTokenSource();
             Logger.Info("Инициализация IceCast клиента...");
 
             // Создаем энкодер
             _encoder = new OpusEncoder(_config, _mixer);
 
-            // Подключаемся к IceCast серверу
-            if (ConnectToIceCast())
+            StartConnection();
+        }
+
+        private void StartConnection()
+        {
+            try
             {
-                // Запускаем мониторинг соединения
-                StartMonitoring();
+                // Освобождаем старый энкодер, если он существует
+                _encoder?.Dispose();
+                _encoder = null;
+
+                // Создаем новый энкодер
+                _encoder = new OpusEncoder(_config, _mixer);
+
+                // Подключаемся к IceCast серверу
+                if (ConnectToIceCast())
+                {
+                    // Запускаем мониторинг соединения
+                    StartMonitoring();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Ошибка при запуске подключения: {ex.Message}");
+                ScheduleReconnect(5000);
             }
         }
 
@@ -51,6 +76,13 @@ namespace Strimer.Broadcast
 
                 string url = $"http://{_config.IceCastServer}:{_config.IceCastPort}/{_config.IceCastMount}";
                 string auth = $"{_config.IceCastUser}:{_config.IceCastPassword}";
+
+                // Останавливаем предыдущее подключение, если оно есть
+                if (_encoder != null && _encoder.Handle != 0)
+                {
+                    BassEnc.BASS_Encode_CastSetTitle(_encoder.Handle, String.Empty, String.Empty);
+                    // Не останавливаем полностью, только сбрасываем трансляцию
+                }
 
                 // Инициализируем трансляцию через BASS Encoder
                 bool success = BassEnc.BASS_Encode_CastInit(
@@ -70,12 +102,20 @@ namespace Strimer.Broadcast
                     var error = Bass.BASS_ErrorGetCode();
                     Logger.Error($"Не удалось подключиться к IceCast: {error}");
 
+                    // При ошибке ALREADY - полностью пересоздаем энкодер
+                    if (error == BASSError.BASS_ERROR_ALREADY)
+                    {
+                        Logger.Warning("Обнаружена ошибка ALREADY, пересоздаем энкодер...");
+                        ResetEncoder();
+                    }
+
                     // Пробуем переподключиться через 10 секунд
                     ScheduleReconnect(10000);
                     return false;
                 }
 
                 IsConnected = true;
+                Listeners = 0;
                 Logger.Info($"✓ Подключено к IceCast: {url}");
                 return true;
             }
@@ -86,25 +126,51 @@ namespace Strimer.Broadcast
                 return false;
             }
         }
+        private void ResetEncoder()
+        {
+            try
+            {
+                Logger.Info("Сброс энкодера...");
+
+                // Освобождаем старый энкодер
+                _encoder?.Dispose();
+                _encoder = null;
+
+                // Создаем новый
+                _encoder = new OpusEncoder(_config, _mixer);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Ошибка при сбросе энкодера: {ex.Message}");
+            }
+        }
 
         private void ScheduleReconnect(int delayMs)
         {
-            Thread reconnectThread = new Thread(() =>
+            // Используем lock для предотвращения множественных одновременных переподключений
+            lock (_reconnectLock)
             {
-                Thread.Sleep(delayMs);
-                if (!_disposed && !IsConnected)
-                {
-                    Logger.Info("Попытка переподключения к IceCast...");
-                    ConnectToIceCast();
-                }
-            });
+                if (_disposed || _cts.IsCancellationRequested)
+                    return;
 
-            reconnectThread.IsBackground = true;
-            reconnectThread.Start();
+                Task.Delay(delayMs, _cts.Token).ContinueWith(t =>
+                {
+                    if (!_disposed && !_cts.IsCancellationRequested && !IsConnected)
+                    {
+                        Logger.Info("Попытка переподключения к IceCast...");
+                        ConnectToIceCast();
+                    }
+                }, _cts.Token);
+            }
         }
 
         private void StartMonitoring()
         {
+            // Останавливаем предыдущий мониторинг
+            _shouldMonitor = false;
+            _monitoringThread?.Join(1000);
+
+            _shouldMonitor = true;
             _monitoringThread = new Thread(MonitorConnection);
             _monitoringThread.IsBackground = true;
             _monitoringThread.Start();
@@ -113,14 +179,14 @@ namespace Strimer.Broadcast
         private void MonitorConnection()
         {
             Logger.Info("Мониторинг точки монтирования icecast запущен");
-            while (_shouldMonitor && !_disposed)
+            while (_shouldMonitor && !_disposed && !_cts.IsCancellationRequested)
             {
                 try
                 {
                     // Проверяем соединение каждые 30 секунд
                     Thread.Sleep(30000);
 
-                    if (_disposed || !_shouldMonitor)
+                    if (_disposed || !_shouldMonitor || _cts.IsCancellationRequested)
                         break;
 
                     // Проверяем маунт-поинт
@@ -130,12 +196,21 @@ namespace Strimer.Broadcast
                     {
                         // Обновляем статистику слушателей
                         UpdateListenerStats();
+
+                        if (!IsConnected)
+                        {
+                            Logger.Info("Маунт-поинт найден, но IsConnected=false. Восстанавливаем соединение...");
+                            IsConnected = true;
+                        }
                     }
                     else if (IsConnected)
                     {
                         // Маунт-поинт не найден, значит соединение потеряно
                         Logger.Warning("Маунт-поинт не найден. Соединение потеряно.");
                         IsConnected = false;
+
+                        // Полностью пересоздаем энкодер при потере соединения
+                        ResetEncoder();
 
                         // Пробуем переподключиться
                         Logger.Info("Попытка восстановления соединения...");
@@ -245,12 +320,16 @@ namespace Strimer.Broadcast
         {
             _disposed = true;
             _shouldMonitor = false;
+
+            // Отменяем все задачи переподключения
+            _cts?.Cancel();
+
             IsConnected = false;
 
             // Останавливаем поток мониторинга
             if (_monitoringThread != null && _monitoringThread.IsAlive)
             {
-                _monitoringThread.Join(1000);
+                _monitoringThread.Join(2000);
             }
 
             // Освобождаем энкодер

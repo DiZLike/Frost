@@ -15,6 +15,9 @@ namespace Strimer.Broadcast.Encoders
         private int _encoderHandle;
         private string _encoderExe;
 
+        private bool _disposed = false;
+        private readonly object _disposeLock = new object();
+
         public int Handle => _encoderHandle;
 
         public OpusEncoder(AppConfig config, Mixer mixer)
@@ -103,16 +106,46 @@ namespace Strimer.Broadcast.Encoders
 
             return success;
         }
+        public bool IsValid()
+        {
+            return !_disposed && _encoderHandle != 0;
+        }
 
         public void Dispose()
         {
-            if (_encoderHandle != 0)
+            lock (_disposeLock)
             {
-                BassEnc.BASS_Encode_Stop(_encoderHandle);
-                _encoderHandle = 0;
-            }
+                if (_disposed || _encoderHandle == 0)
+                    return;
 
-            Logger.Info("Opus энкодер освобожден");
+                _disposed = true;
+
+                try
+                {
+                    // Сначала пытаемся корректно остановить энкодер
+                    if (BassEnc.BASS_Encode_Stop(_encoderHandle))
+                    {
+                        Logger.Debug("Opus энкодер корректно остановлен");
+                    }
+                    else
+                    {
+                        var error = Bass.BASS_ErrorGetCode();
+                        Logger.Warning($"Ошибка при остановке энкодера: {error}");
+
+                        // Принудительно освобождаем ресурсы
+                        Bass.BASS_StreamFree(_encoderHandle);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error($"Исключение при освобождении энкодера: {ex.Message}");
+                }
+                finally
+                {
+                    _encoderHandle = 0;
+                    Logger.Info("Opus энкодер освобожден");
+                }
+            }
         }
     }
 }
