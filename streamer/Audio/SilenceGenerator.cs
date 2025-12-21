@@ -81,7 +81,7 @@ namespace Strimer.Audio
                     if (!Bass.BASS_ChannelPlay(_silenceStream, true))
                     {
                         var error = Bass.BASS_ErrorGetCode();
-                        Logger.Error($"Не удалось воспроизвести тишину: {er}");
+                        Logger.Error($"Не удалось воспроизвести тишину: {error}");
                         return;
                     }
 

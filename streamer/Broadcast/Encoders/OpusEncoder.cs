@@ -1,7 +1,6 @@
 ﻿using Strimer.App;
 using Strimer.Audio;
 using Strimer.Core;
-using System.Text;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Enc;
 using Un4seen.Bass.AddOn.EncOpus;
@@ -10,155 +9,131 @@ namespace Strimer.Broadcast.Encoders
 {
     public class OpusEncoder : IDisposable
     {
-        private readonly AppConfig _config;
-        private readonly Mixer _mixer;
-        private int _encoderHandle;
-        private string _encoderExe;
+        private readonly AppConfig _config;       // Конфигурация приложения
+        private readonly Mixer _mixer;            // Микшер аудио
+        private int _encoderHandle;               // Хэндл энкодера BASS
+        private string _encoderExe;               // Путь к исполняемому файлу opusenc
+        private bool _disposed = false;           // Флаг освобождения ресурсов
+        private readonly object _disposeLock = new object();  // Блокировка для потокобезопасности
 
-        private bool _disposed = false;
-        private readonly object _disposeLock = new object();
-        private bool _isValid = true;
-        public int Handle => _encoderHandle;
+        public int Handle => _encoderHandle;      // Публичный доступ к хэндлу (только для чтения)
 
+        // Конструктор
         public OpusEncoder(AppConfig config, Mixer mixer)
         {
-            _config = config;
-            _mixer = mixer;
+            _config = config ?? throw new ArgumentNullException(nameof(config));  // Проверка аргументов
+            _mixer = mixer ?? throw new ArgumentNullException(nameof(mixer));
 
-            Initialize();
+            Initialize();  // Инициализация энкодера
         }
 
+        // Основная инициализация энкодера
         private void Initialize()
         {
             Logger.Info("Инициализация Opus энкодера...");
 
-            // Определяем путь к opusenc
-            _encoderExe = GetOpusEncPath();
-
+            _encoderExe = GetOpusEncPath();  // Получаем путь к opusenc
             if (!File.Exists(_encoderExe))
-            {
-                throw new FileNotFoundException($"opusenc не найден по пути: {_encoderExe}");
-            }
+                throw new FileNotFoundException($"opusenc не найден: {_encoderExe}");  // Проверка существования
 
-            // Создаем строку параметров для opusenc
-            string parameters = BuildParameters();
+            string parameters = BuildParameters();  // Строим параметры командной строки
 
-            // Создаем энкодер
+            // Создаем энкодер через BASS
             _encoderHandle = BassEnc_Opus.BASS_Encode_OPUS_Start(
-                _mixer.Handle,
-                parameters,
-                BASSEncode.BASS_ENCODE_FP_16BIT,
-                null,
-                IntPtr.Zero
+                _mixer.Handle,          // Хэндл микшера
+                parameters,             // Параметры запуска
+                BASSEncode.BASS_ENCODE_FP_16BIT,  // 16-битное кодирование
+                null,                   // Callback не нужен
+                IntPtr.Zero             // User data не нужен
             );
 
-            if (_encoderHandle == 0)
-            {
-                var error = Bass.BASS_ErrorGetCode();
-                throw new Exception($"Не удалось создать Opus энкодер: {error}");
-            }
+            if (_encoderHandle == 0)  // Проверка успешности создания
+                throw new Exception($"Не удалось создать Opus энкодер: {Bass.BASS_ErrorGetCode()}");
 
-            Logger.Info($"Opus энкодер инициализирован: {_config.OpusBitrate}кбит/с {_config.OpusMode}");
+            Logger.Info($"Opus энкодер: {_config.OpusBitrate}кбит/с {_config.OpusMode}");  // Лог успеха
         }
+
+        // Проверка валидности энкодера (потокобезопасная)
         public bool IsValid()
         {
-            lock (_disposeLock)
+            lock (_disposeLock)  // Защита от состояния гонки
             {
-                return !_disposed && _encoderHandle != 0 && _isValid;
+                return !_disposed && _encoderHandle != 0;  // Не освобожден и хэндл валиден
             }
         }
 
-        private string GetOpusEncPath()
-        {
-            string baseDir = _config.BaseDirectory;
-
-            if (_config.OS == "Windows")
-            {
-                string archFolder = _config.Architecture == "X64" ? "win64" : "win32";
-                return Path.Combine(baseDir, "encs", "opus", archFolder, "opusenc.exe");
-            }
-            else // Linux
-            {
-                return Path.Combine("/usr/bin/", "opusenc");
-            }
-        }
-
-        private string BuildParameters()
-        {
-            var parameters = new StringBuilder();
-
-            parameters.Append(_encoderExe);
-            parameters.Append($" --bitrate {_config.OpusBitrate}");
-            parameters.Append($" --{_config.OpusMode}");
-            parameters.Append($" --{_config.OpusContentType}");
-            parameters.Append($" --comp {_config.OpusComplexity}");
-            parameters.Append($" --framesize {_config.OpusFrameSize}");
-            parameters.Append(" - -"); // stdin -> stdout
-
-            return parameters.ToString();
-        }
-
+        // Установка метаданных (ID3 тегов)
         public bool SetMetadata(string artist, string title)
         {
-            lock (_disposeLock)
+            lock (_disposeLock)  // Потокобезопасность
             {
-                if (_disposed || _encoderHandle == 0)
+                if (_disposed || _encoderHandle == 0)  // Проверка доступности
                 {
                     Logger.Warning("Попытка установить метаданные на недоступном энкодере");
-                    return false;
+                    return false;  // Энкодер недоступен
                 }
 
-                try
-                {
-                    string metadata = $"--artist \"{artist}\" --title \"{title}\"";
+                string metadata = $"--artist \"{artist}\" --title \"{title}\"";  // Формируем метаданные
 
-                    bool success = BassEnc_Opus.BASS_Encode_OPUS_NewStream(
-                        _encoderHandle,
-                        metadata,
-                        BASSEncode.BASS_ENCODE_FP_16BIT
-                    );
+                // Отправляем метаданные в энкодер
+                return BassEnc_Opus.BASS_Encode_OPUS_NewStream(
+                    _encoderHandle,
+                    metadata,
+                    BASSEncode.BASS_ENCODE_FP_16BIT
+                );
+                // Возвращаем результат (true/false), ошибки логируются в вызывающем коде
+            }
+        }
 
-                    if (!success)
-                    {
-                        var error = Bass.BASS_ErrorGetCode();
-                        Logger.Error($"Ошибка установки метаданных: {error}");
-                        _isValid = false;
-                    }
-                    return success;
-                }
-                catch (Exception ex)
+        // Освобождение ресурсов (IDisposable реализация)
+        public void Dispose()
+        {
+            lock (_disposeLock)  // Потокобезопасное освобождение
+            {
+                if (_disposed) return;  // Уже освобождено
+                _disposed = true;       // Помечаем как освобожденное
+
+                if (_encoderHandle != 0)  // Если хэндл валиден
                 {
-                    Logger.Error($"Исключение при установке метаданных: {ex.Message}");
-                    _isValid = false;
-                    return false;
+                    BassEnc.BASS_Encode_Stop(_encoderHandle);  // Останавливаем кодирование
+                    Bass.BASS_StreamFree(_encoderHandle);      // Освобождаем ресурсы BASS
+                    _encoderHandle = 0;                        // Обнуляем хэндл
+                    Logger.Debug("Ресурсы энкодера освобождены");  // Лог
                 }
             }
         }
 
-        public void Dispose()
+        // Получение пути к opusenc в зависимости от ОС
+        private string GetOpusEncPath()
         {
-            lock (_disposeLock)
+            if (_config.OS == "Windows")  // Windows
             {
-                if (_disposed) return;
-                _disposed = true;
-                _isValid = false;
-
-                try
-                {
-                    // Принудительно останавливаем все
-                    if (_encoderHandle != 0)
-                    {
-                        BassEnc.BASS_Encode_Stop(_encoderHandle);
-                        Bass.BASS_StreamFree(_encoderHandle);
-                        _encoderHandle = 0;
-                        Logger.Debug("Ресурсы энкодера освобождены");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error($"Ошибка при освобождении энкодера: {ex.Message}");
-                }
+                string archFolder = _config.Architecture == "X64" ? "win64" : "win32";  // Архитектура
+                return Path.Combine(
+                    _config.BaseDirectory,  // Базовый каталог приложения
+                    "encs",                 // Папка с энкодерами
+                    "opus",                 // Папка Opus
+                    archFolder,             // win64 или win32
+                    "opusenc.exe"           // Исполняемый файл
+                );
             }
+            else  // Linux (и другие Unix-подобные)
+            {
+                return "/usr/bin/opusenc";  // Стандартный путь в Linux
+            }
+        }
+
+        // Формирование параметров командной строки для opusenc
+        private string BuildParameters()
+        {
+            // Собираем все параметры в одну строку
+            return $"{_encoderExe} " +                      // Исполняемый файл
+                   $"--bitrate {_config.OpusBitrate} " +    // Битрейт
+                   $"--{_config.OpusMode} " +               // Режим (VBR/CBR)
+                   $"--{_config.OpusContentType} " +        // Тип контента (audio/voip)
+                   $"--comp {_config.OpusComplexity} " +    // Сложность кодирования
+                   $"--framesize {_config.OpusFrameSize} " + // Размер фрейма
+                   "- -";                                   // stdin -> stdout
         }
     }
 }

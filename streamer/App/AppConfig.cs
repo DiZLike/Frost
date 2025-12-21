@@ -1,5 +1,4 @@
-﻿using strimer.App;
-using Strimer.Core;
+﻿using Strimer.Core;
 using System.Runtime.InteropServices;
 
 namespace Strimer.App
@@ -124,11 +123,10 @@ namespace Strimer.App
                             Core.Logger.Warning($"Пустое значение для ключа '{key}' в секции '{currentSection}'. Используется значение по умолчанию.");
                             continue;
                         }
-
                         SetValue(currentSection, key, value);
                     }
                 }
-                G.Config = this;
+                Logger.AppConfig = this;
 
                 Logger.Debug($"[Конфигурация] Загружено: IceCast={IceCastServer}:{IceCastPort}, Плейлист={PlaylistFile}");
                 Logger.Debug($"[Конфигурация] Аудио: Устройство={AudioDevice}, Частота={SampleRate}Гц");

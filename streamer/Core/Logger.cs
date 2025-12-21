@@ -1,13 +1,18 @@
-﻿using strimer.App;
-using Strimer.App;
+﻿using Strimer.App;
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 
 namespace Strimer.Core
 {
     public static class Logger
     {
         private static readonly string LogsDirectory;
+
+        public static AppConfig AppConfig { get; set; }
 
         static Logger()
         {
@@ -41,19 +46,100 @@ namespace Strimer.Core
             return Path.Combine(LogsDirectory, $"strimer_{date}.log");
         }
 
-        public static void Log(string message)
+        private static string GetCallerChain(int skipFrames = 2, int maxDepth = 5)
+        {
+            if (AppConfig == null || !AppConfig.DebubEnable)
+                return "";
+
+            try
+            {
+                var stackTrace = new StackTrace(skipFrames: skipFrames, fNeedFileInfo: false);
+                var frames = stackTrace.GetFrames();
+
+                if (frames == null || frames.Length == 0)
+                    return "";
+
+                // Получаем методы в обратном порядке (от родителя к вызывающему)
+                var methods = frames
+                    .Take(maxDepth)
+                    .Where(frame => frame.GetMethod() != null)
+                    .Select(frame => frame.GetMethod())
+                    .Where(method =>
+                        method != null &&
+                        method.DeclaringType != null &&
+                        !method.DeclaringType.FullName.StartsWith("System.") &&
+                        !method.DeclaringType.FullName.StartsWith("Microsoft."))
+                    .Reverse() // Меняем порядок на обратный
+                    .ToList();
+
+                if (methods.Count == 0)
+                    return "";
+
+                var sb = new StringBuilder();
+
+                for (int i = 0; i < methods.Count; i++)
+                {
+                    var method = methods[i];
+                    string className = method.DeclaringType.Name;
+                    string methodName = method.Name;
+
+                    // Пропускаем методы самого Logger
+                    if (className == "Logger" && methodName.StartsWith("Log"))
+                        continue;
+
+                    // Добавляем разделитель между методами
+                    if (sb.Length > 0)
+                    {
+                        sb.Append(" > ");
+                    }
+
+                    sb.Append($"{className}.{methodName}");
+                }
+
+                // Если получилась пустая строка (все методы были Logger)
+                if (sb.Length == 0)
+                {
+                    var firstMethod = frames.FirstOrDefault()?.GetMethod();
+                    if (firstMethod != null)
+                    {
+                        sb.Append($"{firstMethod.DeclaringType?.Name}.{firstMethod.Name}");
+                    }
+                }
+
+                return sb.ToString();
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        private static string FormatMessage(string level, string message, bool includeCaller = true)
         {
             string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            string logMessage = $"[{timestamp}] {message}";
 
-            // В консоль
-            Console.WriteLine(logMessage);
+            if (AppConfig != null && AppConfig.DebubEnable && includeCaller)
+            {
+                string callerChain = GetCallerChain(3);
+                if (!string.IsNullOrEmpty(callerChain))
+                {
+                    return $"[{timestamp}] [{level}] [{callerChain}]\r\n{message}";
+                }
+            }
 
-            // В файл
+            return $"[{timestamp}] [{level}] {message}";
+        }
+
+        private static void WriteToLog(string message, string consoleMessage = null)
+        {
+            // В консоль - упрощенный формат
+            Console.WriteLine(consoleMessage ?? message);
+
+            // В файл - полный формат
             try
             {
                 string logFile = GetDailyLogFileName();
-                File.AppendAllText(logFile, logMessage + Environment.NewLine);
+                File.AppendAllText(logFile, message + Environment.NewLine);
             }
             catch
             {
@@ -61,25 +147,55 @@ namespace Strimer.Core
             }
         }
 
+        public static void Log(string message)
+        {
+            string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            string consoleMessage = $"[{timestamp}] [LOG] {message}";
+            string fileMessage = FormatMessage("LOG", message, false);
+            WriteToLog(fileMessage, consoleMessage);
+        }
+
         public static void Error(string message)
         {
-            Log($"[ERROR] {message}");
+            string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            string consoleMessage = $"[{timestamp}] [ERROR] {message}";
+            string fileMessage = FormatMessage("ERROR", message);
+            WriteToLog(fileMessage, consoleMessage);
         }
 
         public static void Info(string message)
         {
-            Log($"[INFO] {message}");
+            string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            string consoleMessage = $"[{timestamp}] [INFO] {message}";
+            string fileMessage = FormatMessage("INFO", message);
+            WriteToLog(fileMessage, consoleMessage);
         }
 
         public static void Debug(string message)
         {
-            if (G.Config.DebubEnable)
-                Log($"[DEBUG] {message}");
+            if (AppConfig != null && AppConfig.DebubEnable)
+            {
+                string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                string consoleMessage = $"[{timestamp}] [DEBUG] {message}";
+                string fileMessage = FormatMessage("DEBUG", message);
+                WriteToLog(fileMessage, consoleMessage);
+            }
         }
 
         public static void Warning(string message)
         {
-            Log($"[WARNING] {message}");
+            string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            string consoleMessage = $"[{timestamp}] [WARNING] {message}";
+            string fileMessage = FormatMessage("WARNING", message);
+            WriteToLog(fileMessage, consoleMessage);
+        }
+
+        // Метод для прямого вызова без форматирования
+        public static void Raw(string message)
+        {
+            string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            string logMessage = $"[{timestamp}] {message}";
+            WriteToLog(logMessage, logMessage);
         }
     }
 }

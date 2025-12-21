@@ -1,5 +1,4 @@
-﻿using strimer.App;
-using Strimer.Services;
+﻿using Strimer.Services;
 using System.Runtime.InteropServices;
 
 namespace Strimer.App

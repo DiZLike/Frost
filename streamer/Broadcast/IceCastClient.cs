@@ -2,6 +2,7 @@
 using Strimer.Audio;
 using Strimer.Broadcast.Encoders;
 using Strimer.Core;
+using System.Diagnostics;
 using System.Net;
 using System.Text;
 using Un4seen.Bass;
@@ -11,269 +12,204 @@ namespace Strimer.Broadcast
 {
     public class IceCastClient : IDisposable
     {
-        private readonly AppConfig _config;
-        private OpusEncoder _encoder;
-        private Mixer _mixer;
-        private Thread _monitoringThread;
-        private bool _disposed;
-        private bool _shouldMonitor = true;
+        private readonly AppConfig _config;                 // Конфигурация приложения
+        private OpusEncoder _encoder;                       // Аудио энкодер
+        private Mixer _mixer;                               // Микшер аудио
+        private Thread _monitoringThread;                   // Поток мониторинга соединения
+        private bool _disposed;                             // Флаг освобождения ресурсов
+        private bool _shouldMonitor = true;                 // Флаг работы мониторинга
+        private readonly object _lock = new object();       // Объект для синхронизации
+        private Stopwatch _reconnectTime = new Stopwatch(); // Таймер для измерения времени переподключения
+        private int _reconnectAttempts = 0;                 // Счётчик попыток переподключения
 
-        private CancellationTokenSource _cts;
-        private Task _monitoringTask;
-        private readonly object _reconnectLock = new object();
-        private readonly object _syncRoot = new object();
-        private bool _reconnectScheduled = false;
+        public bool IsConnected { get; private set; }       // Состояние подключения
+        public int Listeners { get; private set; }          // Текущее количество слушателей
+        public int PeakListeners { get; private set; }      // Максимальное количество слушателей
 
-        public bool IsConnected { get; private set; }
-        public int Listeners { get; private set; }
-        public int PeakListeners { get; private set; }
-
+        // Конструктор - принимает конфигурацию
         public IceCastClient(AppConfig config)
         {
             _config = config;
         }
 
+        // Инициализация клиента
         public void Initialize(Mixer mixer)
         {
-            _mixer = mixer;
-            _cts = new CancellationTokenSource();
+            _mixer = mixer;                               // Сохраняем микшер
             Logger.Info("Инициализация IceCast клиента...");
 
-            // Создаем энкодер
-            _encoder = new OpusEncoder(_config, _mixer);
-
-            StartConnection();
+            ConnectToIceCast();                           // Подключаемся к серверу
+            StartMonitoring();                            // Запускаем мониторинг
         }
 
-        private void StartConnection()
-        {
-            try
-            {
-                // Освобождаем старый энкодер, если он существует
-                _encoder?.Dispose();
-                _encoder = null;
-
-                // Создаем новый энкодер
-                _encoder = new OpusEncoder(_config, _mixer);
-
-                // Подключаемся к IceCast серверу
-                if (ConnectToIceCast())
-                {
-                    // Запускаем мониторинг соединения
-                    StartMonitoring();
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Error($"Ошибка при запуске подключения: {ex.Message}");
-                ScheduleReconnect(5000);
-            }
-        }
-
+        // Подключение к IceCast серверу
         private bool ConnectToIceCast()
         {
-            lock (_syncRoot)
+            lock (_lock)                                  // Защита от параллельных вызовов
             {
                 try
                 {
+                    // Логируем параметры подключения
                     Logger.Info($"Подключение к IceCast: {_config.IceCastServer}:{_config.IceCastPort}/{_config.IceCastMount}");
 
-                    // 1. Останавливаем предыдущее подключение
-                    if (_encoder != null)
-                    {
-                        Logger.Debug("Остановка предыдущего энкодера...");
-                        _encoder.Dispose();
-                        _encoder = null;
-                    }
+                    _encoder?.Dispose();                  // Освобождаем старый энкодер
+                    _encoder = new OpusEncoder(_config, _mixer); // Создаем новый энкодер
+                    Thread.Sleep(100);                    // Даем время на инициализацию
 
-                    // 2. Создаем новый энкодер
-                    _encoder = new OpusEncoder(_config, _mixer);
-
-                    // 3. Даем время на инициализацию
-                    Thread.Sleep(100);
-
-                    // 4. Подключаемся
+                    // Формируем URL и авторизацию
                     string url = $"http://{_config.IceCastServer}:{_config.IceCastPort}/{_config.IceCastMount}";
                     string auth = $"{_config.IceCastUser}:{_config.IceCastPassword}";
 
+                    // Инициализируем трансляцию через BASS
                     bool success = BassEnc.BASS_Encode_CastInit(
-                        _encoder.Handle,
-                        url,
-                        auth,
-                        "audio/ogg",
-                        _config.IceCastName,
-                        _config.IceCastGenre,
-                        null, null, null,
-                        _config.OpusBitrate,
-                        BASSEncodeCast.BASS_ENCODE_CAST_PUT
+                        _encoder.Handle,                  // Хэндл энкодера
+                        url,                              // URL сервера
+                        auth,                             // Логин:пароль
+                        "audio/ogg",                      // Тип контента
+                        _config.IceCastName,              // Название потока
+                        _config.IceCastGenre,             // Жанр
+                        null, null, null,                 // Дополнительные параметры
+                        _config.OpusBitrate,              // Битрейт
+                        BASSEncodeCast.BASS_ENCODE_CAST_PUT // Метод отправки
                     );
 
-                    if (!success)
+                    if (!success)                         // Если подключение не удалось
                     {
-                        var error = Bass.BASS_ErrorGetCode();
-                        Logger.Error($"Не удалось подключиться к IceCast: {error}");
+                        var error = Bass.BASS_ErrorGetCode(); // Получаем код ошибки BASS
+                        Logger.Error($"Не удалось подключиться: {error}");
 
-                        // При ошибке ALREADY - ждем и пробуем еще раз
+                        // При ошибке "уже используется" ждем и пробуем снова
                         if (error == BASSError.BASS_ERROR_ALREADY)
                         {
-                            Logger.Warning("Ошибка ALREADY, ожидание освобождения ресурсов...");
+                            Logger.Warning("Ресурсы заняты, ждем 2 секунды...");
                             Thread.Sleep(2000);
-                            return ConnectToIceCast(); // Рекурсивная попытка
+                            return ConnectToIceCast();    // Рекурсивный повтор
                         }
 
-                        return false;
+                        return false;                     // Возвращаем неудачу
                     }
 
-                    IsConnected = true;
-                    Listeners = 0;
-                    Logger.Info($"✓ Подключено к IceCast: {url}");
-                    return true;
+                    IsConnected = true;                   // Устанавливаем флаг подключения
+                    Logger.Info($"Подключено к IceCast: {url}");
+                    return true;                          // Успешное подключение
                 }
-                catch (Exception ex)
+                catch (Exception ex)                      // Обработка исключений
                 {
-                    Logger.Error($"Не удалось подключиться к IceCast: {ex.Message}");
+                    Logger.Error($"Ошибка подключения: {ex.Message}");
                     IsConnected = false;
                     return false;
                 }
             }
         }
-        private void ResetEncoder()
-        {
-            try
-            {
-                Logger.Info("Сброс энкодера...");
 
-                // Освобождаем старый энкодер
-                _encoder?.Dispose();
-                _encoder = null;
-
-                // Создаем новый
-                _encoder = new OpusEncoder(_config, _mixer);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error($"Ошибка при сбросе энкодера: {ex.Message}");
-            }
-        }
-
-        private void ScheduleReconnect(int delayMs)
-        {
-            // Предотвращаем множественные переподключения
-            lock (_syncRoot)
-            {
-                if (_disposed || _cts.IsCancellationRequested || _reconnectScheduled)
-                    return;
-
-                _reconnectScheduled = true;
-            }
-
-            Task.Delay(delayMs, _cts.Token).ContinueWith(t =>
-            {
-                lock (_syncRoot)
-                {
-                    _reconnectScheduled = false;
-
-                    if (!_disposed && !_cts.IsCancellationRequested && !IsConnected)
-                    {
-                        Logger.Info("Попытка переподключения к IceCast...");
-                        ConnectToIceCast();
-                    }
-                }
-            }, _cts.Token);
-        }
-
+        // Запуск мониторинга соединения
         private void StartMonitoring()
         {
-            // Останавливаем предыдущий мониторинг
-            _shouldMonitor = false;
-            _monitoringThread?.Join(1000);
-
-            _shouldMonitor = true;
-            _monitoringThread = new Thread(MonitorConnection);
-            _monitoringThread.IsBackground = true;
-            _monitoringThread.Start();
+            _shouldMonitor = true;                        // Разрешаем мониторинг
+            _monitoringThread = new Thread(MonitorConnection); // Создаем поток
+            _monitoringThread.IsBackground = true;        // Фоновый поток
+            _monitoringThread.Start();                    // Запускаем поток
         }
 
+        // Основной цикл мониторинга
         private void MonitorConnection()
         {
-            Logger.Info("Мониторинг точки монтирования icecast запущен");
-            while (_shouldMonitor && !_disposed && !_cts.IsCancellationRequested)
+            Logger.Info("Мониторинг запущен");
+
+            while (_shouldMonitor && !_disposed)            // Основной цикл мониторинга
             {
                 try
                 {
-                    // Проверяем соединение каждые 30 секунд
-                    Thread.Sleep(30000);
-
-                    if (_disposed || !_shouldMonitor || _cts.IsCancellationRequested)
+                    Thread.Sleep(15000);                    // Пауза между проверками - 15 секунд
+                    if (_disposed || !_shouldMonitor)       // Проверка флагов остановки
                         break;
 
-                    // Проверяем маунт-поинт
-                    bool mountPointExists = CheckMountPoint();
+                    bool isAlive = CheckMountPoint();       // Проверка доступности mount point
 
-                    if (mountPointExists)
+                    if (isAlive)                            // Если соединение активно
                     {
-                        // Обновляем статистику слушателей
-                        UpdateListenerStats();
-
-                        if (!IsConnected)
+                        UpdateListenerStats();              // Обновление статистики
+                        if (!IsConnected)                   // Если флаг соединения не установлен
                         {
-                            Logger.Info("Маунт-поинт найден, но IsConnected=false. Восстанавливаем соединение...");
-                            IsConnected = true;
+                            IsConnected = true;             // Устанавливаем флаг соединения
+                            _reconnectAttempts = 0;         // Сбрасываем счётчик попыток
+                            _reconnectTime.Stop();          // Останавливаем таймер переподключения
+                            Logger.Info("Соединение восстановлено (обнаружено при проверке)");
                         }
                     }
-                    else if (IsConnected)
+                    else                                    // Если соединение неактивно
                     {
-                        // Маунт-поинт не найден, значит соединение потеряно
-                        Logger.Warning("Маунт-поинт не найден. Соединение потеряно.");
-                        IsConnected = false;
-
-                        // Полностью пересоздаем энкодер при потере соединения
-                        ResetEncoder();
-
-                        // Пробуем переподключиться
-                        Logger.Info("Попытка восстановления соединения...");
-                        if (ConnectToIceCast())
+                        if (IsConnected)                    // Если соединение только что потеряно
                         {
-                            Logger.Info("Соединение восстановлено");
+                            _reconnectTime.Restart();       // Запускаем/сбрасываем таймер переподключения
+                            _reconnectAttempts = 1;         // Начинаем первую попытку
+                            IsConnected = false;            // Сбрасываем флаг соединения
+                            Logger.Warning("Соединение потеряно. Начинаем переподключение...");
+                        }
+                        else if (_reconnectTime.IsRunning)  // Если уже пытаемся переподключиться
+                            _reconnectAttempts++;           // Увеличиваем счётчик попыток
+
+                        // Пытаемся переподключиться
+                        Logger.Info($"Попытка переподключения #{_reconnectAttempts}");
+                        if (ConnectToIceCast())             // Вызываем метод подключения
+                        {
+                            IsConnected = true;             // Устанавливаем флаг при успехе
+                            _reconnectAttempts = 0;         // Сбрасываем счётчик попыток
+                            _reconnectTime.Stop();          // Останавливаем таймер
+                            Logger.Info($"Соединение восстановлено за {_reconnectTime.Elapsed.TotalSeconds:F1} секунд");
+                        }
+                        else                                // Если переподключение не удалось
+                        {
+                            Logger.Warning($"Переподключение не удалось (попытка #{_reconnectAttempts})");
+                            // Здесь можно добавить задержку между попытками
+                            // Thread.Sleep(5000);
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (Exception ex)                        // Обработка исключений в мониторинге
                 {
-                    Logger.Error($"Ошибка мониторинга IceCast: {ex.Message}");
-
-                    if (IsConnected)
-                    {
-                        IsConnected = false;
-                        ScheduleReconnect(5000);
-                    }
+                    Logger.Error($"Ошибка мониторинга: {ex.Message}");
+                    Thread.Sleep(10000);                    // Увеличенная пауза при ошибке
                 }
             }
+
+            _reconnectTime.Stop();                          // Останавливаем таймер при выходе
+            Logger.Info("Мониторинг остановлен");
         }
 
+        // Метод для получения времени текущего переподключения (опционально)
+        public TimeSpan GetCurrentReconnectTime()
+        {
+            return _reconnectTime.Elapsed;                  // Возвращаем прошедшее время
+        }
+
+        // Проверка доступности mount point
         private bool CheckMountPoint()
         {
             try
             {
                 string statsUrl = $"http://{_config.IceCastServer}:{_config.IceCastPort}/status-json.xsl";
-
                 using (var client = new HttpClient())
                 {
-                    client.Timeout = TimeSpan.FromSeconds(5);
-                    string json = client.GetStringAsync(statsUrl).Result;
-
-                    // Проверяем наличие нашего mount point в статистике
-                    string mountPoint = $"/{_config.IceCastMount}";
-                    return json.Contains(mountPoint);
+                    client.Timeout = new TimeSpan(0, 0, 5);                 // Таймаут 5 секунд
+                    string json = client.GetStringAsync(statsUrl).Result;   // Загружаем статистику
+                    return json.Contains($"/{_config.IceCastMount}");       // Ищем наш mount point
                 }
+
+                //using (var client = new WebClient())      // Создаем WebClient
+                //{
+                //    client.Timeout = 5000;                // Таймаут 5 секунд
+                //    string json = client.DownloadString(statsUrl); // Загружаем статистику
+                //    return json.Contains($"/{_config.IceCastMount}"); // Ищем наш mount point
+                //}
             }
-            catch (Exception ex)
+            catch
             {
-                Logger.Error($"Ошибка проверки mount point: {ex.Message}");
-                return false;
+                return false;                             // При ошибке считаем недоступным
             }
         }
 
+        // Обновление статистики слушателей
         private void UpdateListenerStats()
         {
             try
@@ -285,85 +221,65 @@ namespace Strimer.Broadcast
                     string json = client.DownloadString(statsUrl);
                     string mountPoint = $"/{_config.IceCastMount}";
 
-                    if (json.Contains(mountPoint))
+                    if (json.Contains(mountPoint))        // Если наш mount point существует
                     {
-                        // Ищем количество слушателей
-                        int listenersStart = json.IndexOf("\"listeners\":", StringComparison.Ordinal);
-                        if (listenersStart != -1)
-                        {
-                            listenersStart += 12;
-                            int listenersEnd = json.IndexOf(",", listenersStart, StringComparison.Ordinal);
-                            if (listenersEnd != -1)
-                            {
-                                string listenersStr = json.Substring(listenersStart, listenersEnd - listenersStart);
-                                if (int.TryParse(listenersStr, out int currentListeners))
-                                {
-                                    Listeners = currentListeners;
+                        // Ищем значение listeners в JSON
+                        int start = json.IndexOf("\"listeners\":") + 12;
+                        int end = json.IndexOf(",", start);
 
-                                    if (currentListeners > PeakListeners)
-                                        PeakListeners = currentListeners;
-                                }
+                        if (start > 12 && end > start)    // Если нашли
+                        {
+                            string listenersStr = json.Substring(start, end - start);
+                            if (int.TryParse(listenersStr, out int current))
+                            {
+                                Listeners = current;      // Обновляем текущее значение
+                                if (current > PeakListeners)
+                                    PeakListeners = current; // Обновляем пиковое значение
                             }
                         }
                     }
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                Logger.Error($"Ошибка обновления статистики: {ex.Message}");
+                // Игнорируем ошибки при обновлении статистики
             }
         }
 
+        // Установка метаданных (название трека)
         public void SetMetadata(string artist, string title)
         {
-            lock (_syncRoot)
-            {
-                if (!IsConnected || _encoder == null || _disposed)
-                {
-                    Logger.Warning($"Не удалось установить метаданные: энкодер недоступен");
-                    return;
-                }
+            if (!IsConnected || _encoder == null || _disposed) // Проверка доступности
+                return;
 
-                try
-                {
-                    bool success = _encoder.SetMetadata(artist, title);
-                    if (success)
-                        Logger.Info($"Метаданные обновлены: {artist} - {title}");
-                    else
-                        Logger.Warning($"Не удалось обновить метаданные");
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error($"Не удалось установить метаданные: {ex.Message}");
-                }
+            try
+            {
+                _encoder.SetMetadata(artist, title);      // Отправка метаданных
+                Logger.Info($"Метаданные: {artist} - {title}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Ошибка метаданных: {ex.Message}");
             }
         }
-
+        // Освобождение ресурсов
         public void Dispose()
         {
-            lock (_syncRoot)
+            lock (_lock)                                  // Защита от параллельного вызова
             {
-                if (_disposed) return;
-                _disposed = true;
+                if (_disposed) return;                   // Если уже освобождено
+                _disposed = true;                         // Устанавливаем флаг
 
-                _shouldMonitor = false;
-                _cts?.Cancel();
+                _shouldMonitor = false;                   // Останавливаем мониторинг
 
-                // Останавливаем поток мониторинга
+                // Ждем завершения потока мониторинга
                 if (_monitoringThread != null && _monitoringThread.IsAlive)
                 {
-                    _monitoringThread.Join(3000);
+                    _monitoringThread.Join(1000);         // Даем 1 секунду на завершение
                 }
 
-                // Освобождаем энкодер
-                if (_encoder != null)
-                {
-                    _encoder.Dispose();
-                    _encoder = null;
-                }
-
-                _cts?.Dispose();
-                Logger.Info("IceCast клиент освобожден");
+                _encoder?.Dispose();                      // Освобождаем энкодер
+                Logger.Info("IceCast клиент остановлен"); // Логируем остановку
             }
         }
     }
