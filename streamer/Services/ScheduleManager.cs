@@ -32,12 +32,12 @@ namespace Strimer.Services
                 scheduleFile = Path.Combine(_config.BaseDirectory, scheduleFile);
             }
 
-            Logger.Debug($"Поиск файла расписания: {scheduleFile}");
-            Logger.Debug($"Файл существует: {File.Exists(scheduleFile)}");
+            Logger.Debug($"[ScheduleManager] Поиск файла расписания: {scheduleFile}");
+            Logger.Debug($"[ScheduleManager] Файл существует: {File.Exists(scheduleFile)}");
 
             if (!File.Exists(scheduleFile))
             {
-                Logger.Warning($"Файл расписания не найден: {scheduleFile}");
+                Logger.Warning($"[ScheduleManager] Файл расписания не найден: {scheduleFile}");
                 _scheduleConfig = new ScheduleConfig();
                 return;
             }
@@ -46,16 +46,12 @@ namespace Strimer.Services
             {
                 // Читаем и логируем содержимое файла для отладки
                 string json = File.ReadAllText(scheduleFile);
-                Logger.Debug($"Размер файла расписания: {json.Length} символов");
-
-                // Показываем начало файла для диагностики
-                string firstLines = string.Join("\n", json.Split('\n').Take(5));
-                Logger.Debug($"Первые 5 строк:\n{firstLines}");
+                Logger.Debug($"[ScheduleManager] Размер файла расписания: {json.Length} символов");
 
                 // Проверяем на BOM
                 if (json.Length > 0 && json[0] == '\uFEFF')
                 {
-                    Logger.Warning("Файл имеет UTF-8 BOM, удаляю...");
+                    Logger.Warning("[ScheduleManager] Файл имеет UTF-8 BOM, удаляю...");
                     json = json.Substring(1);
                 }
 
@@ -68,30 +64,30 @@ namespace Strimer.Services
 
                 _scheduleConfig = System.Text.Json.JsonSerializer.Deserialize<ScheduleConfig>(json, options) ?? new ScheduleConfig();
 
-                Logger.Info($"Расписание загружено: {_scheduleConfig.ScheduleItems.Count} элементов из {scheduleFile}");
+                Logger.Info($"[ScheduleManager] Расписание загружено: {_scheduleConfig.ScheduleItems.Count} элементов из {scheduleFile}");
 
                 if (_scheduleConfig.ScheduleItems.Count == 0)
                 {
-                    Logger.Warning("Расписание загружено, но содержит 0 элементов. Возможно проблема с парсингом JSON.");
+                    Logger.Warning("[ScheduleManager] Расписание загружено, но содержит 0 элементов. Возможно проблема с парсингом JSON.");
 
                     // Пробуем десериализовать вручную для диагностики
                     try
                     {
                         using var doc = System.Text.Json.JsonDocument.Parse(json);
-                        Logger.Info($"Корневой элемент JSON: {doc.RootElement.ValueKind}");
+                        Logger.Info($"[ScheduleManager] Корневой элемент JSON: {doc.RootElement.ValueKind}");
 
                         if (doc.RootElement.TryGetProperty("ScheduleItems", out var items))
                         {
-                            Logger.Info($"ScheduleItems найдены: {items.ValueKind}, количество: {items.GetArrayLength()}");
+                            Logger.Info($"[ScheduleManager] ScheduleItems найдены: {items.ValueKind}, количество: {items.GetArrayLength()}");
                         }
                         else
                         {
-                            Logger.Error("Свойство 'ScheduleItems' не найдено в JSON");
+                            Logger.Error("[ScheduleManager] Свойство 'ScheduleItems' не найдено в JSON");
                         }
                     }
                     catch (Exception parseEx)
                     {
-                        Logger.Error($"Ручной парсинг JSON не удался: {parseEx.Message}");
+                        Logger.Error($"[ScheduleManager] Ручной парсинг JSON не удался: {parseEx.Message}");
                     }
                 }
                 else
@@ -99,26 +95,26 @@ namespace Strimer.Services
                     // Логируем все элементы расписания
                     foreach (var item in _scheduleConfig.ScheduleItems)
                     {
-                        Logger.Debug($"  - {item.Name}: {item.StartHour:00}:{item.StartMinute:00} - {item.EndHour:00}:{item.EndMinute:00}");
-                        Logger.Debug($"    Плейлист: {item.PlaylistPath}");
-                        Logger.Debug($"    Дни: {string.Join(", ", item.DaysOfWeek)}");
+                        Logger.Debug($"[ScheduleManager] {item.Name}: {item.StartHour:00}:{item.StartMinute:00} - {item.EndHour:00}:{item.EndMinute:00}");
+                        Logger.Debug($"[ScheduleManager] Плейлист: {item.PlaylistPath}");
+                        Logger.Debug($"[ScheduleManager] Дни: {string.Join(", ", item.DaysOfWeek)}");
                     }
                 }
             }
             catch (System.Text.Json.JsonException jsonEx)
             {
-                Logger.Error($"Ошибка парсинга JSON: {jsonEx.Message}");
-                Logger.Error($"Строка: {jsonEx.LineNumber}, Позиция: {jsonEx.BytePositionInLine}");
+                Logger.Error($"[ScheduleManager] Ошибка парсинга JSON: {jsonEx.Message}");
+                Logger.Error($"[ScheduleManager] Строка: {jsonEx.LineNumber}, Позиция: {jsonEx.BytePositionInLine}");
                 _scheduleConfig = new ScheduleConfig();
             }
             catch (Exception ex)
             {
-                Logger.Error($"Не удалось загрузить расписание: {ex.Message}");
-                Logger.Error($"Тип исключения: {ex.GetType().FullName}");
+                Logger.Error($"[ScheduleManager] Не удалось загрузить расписание: {ex.Message}");
+                Logger.Error($"[ScheduleManager] Тип исключения: {ex.GetType().FullName}");
 
                 if (ex.InnerException != null)
                 {
-                    Logger.Error($"Внутреннее исключение: {ex.InnerException.Message}");
+                    Logger.Error($"[ScheduleManager] Внутреннее исключение: {ex.InnerException.Message}");
                 }
 
                 _scheduleConfig = new ScheduleConfig();
@@ -129,21 +125,21 @@ namespace Strimer.Services
         {
             if (!_config.ScheduleEnable)
             {
-                Logger.Info("Расписание отключено в конфигурации");
+                Logger.Info("[ScheduleManager] Расписание отключено в конфигурации");
                 return;
             }
 
             // Если нет элементов в расписании
             if (_scheduleConfig.ScheduleItems.Count == 0)
             {
-                Logger.Warning("Расписание пустое. Нет плейлистов для воспроизведения.");
+                Logger.Warning("[ScheduleManager] Расписание пустое. Нет плейлистов для воспроизведения.");
                 return;
             }
 
             DateTime now = DateTime.Now;
             _lastCheckTime = now;
 
-            Logger.Info($"Проверка расписания в {now:HH:mm} в {now.DayOfWeek}");
+            Logger.Info($"[ScheduleManager] Проверка расписания в {now:HH:mm} в {now.DayOfWeek}");
 
             // Находим активный элемент расписания
             var activeSchedule = _scheduleConfig.ScheduleItems
@@ -152,20 +148,20 @@ namespace Strimer.Services
             // Если нет активного расписания
             if (activeSchedule == null)
             {
-                Logger.Warning($"Активное расписание не найдено в {now:HH:mm} в {now.DayOfWeek}");
+                Logger.Warning($"[ScheduleManager] Активное расписание не найдено в {now:HH:mm} в {now.DayOfWeek}");
 
                 // Показываем все расписания для отладки
                 Logger.Info("Все расписания:");
                 foreach (var item in _scheduleConfig.ScheduleItems)
                 {
-                    Logger.Info($"  - {item.Name}: {item.StartHour:00}:{item.StartMinute:00} - {item.EndHour:00}:{item.EndMinute:00}");
-                    Logger.Info($"    Дни: {string.Join(", ", item.DaysOfWeek)}");
-                    Logger.Info($"    Активно: {item.IsActive(now)}");
+                    Logger.Info($"[ScheduleManager] {item.Name}: {item.StartHour:00}:{item.StartMinute:00} - {item.EndHour:00}:{item.EndMinute:00}");
+                    Logger.Info($"[ScheduleManager] Дни: {string.Join(", ", item.DaysOfWeek)}");
+                    Logger.Info($"[ScheduleManager] Активно: {item.IsActive(now)}");
                 }
 
                 if (_currentPlaylist != null)
                 {
-                    Logger.Warning("Остановка воспроизведения - нет активного расписания");
+                    Logger.Warning("[ScheduleManager] Остановка воспроизведения - нет активного расписания");
                     _currentPlaylist = null;
                     _currentSchedule = null;
                 }
@@ -180,8 +176,8 @@ namespace Strimer.Services
             // Проверяем существование файла плейлиста
             if (!File.Exists(activeSchedule.PlaylistPath))
             {
-                Logger.Error($"Файл плейлиста не найден: {activeSchedule.PlaylistPath}");
-                Logger.Error($"Файл существует: {File.Exists(activeSchedule.PlaylistPath)}");
+                Logger.Error($"[ScheduleManager] Файл плейлиста не найден: {activeSchedule.PlaylistPath}");
+                Logger.Error($"[ScheduleManager] Файл существует: {File.Exists(activeSchedule.PlaylistPath)}");
                 return;
             }
 
@@ -197,14 +193,14 @@ namespace Strimer.Services
                 _currentSchedule = activeSchedule;
                 _lastPlaylistPath = activeSchedule.PlaylistPath;
 
-                Logger.Info($"Расписание изменено на: {activeSchedule.Name}");
-                Logger.Info($"Текущий плейлист: {activeSchedule.PlaylistPath} ({_currentPlaylist.TotalTracks} треков)");
-                Logger.Info($"Активное время: {activeSchedule.StartTime:hh\\:mm} - {activeSchedule.EndTime:hh\\:mm}");
-                Logger.Info($"Дни: {string.Join(", ", activeSchedule.DaysOfWeek)}");
+                Logger.Info($"[ScheduleManager] Расписание изменено на: {activeSchedule.Name}");
+                Logger.Info($"[ScheduleManager] Текущий плейлист: {activeSchedule.PlaylistPath} ({_currentPlaylist.TotalTracks} треков)");
+                Logger.Info($"[ScheduleManager] Активное время: {activeSchedule.StartTime:hh\\:mm} - {activeSchedule.EndTime:hh\\:mm}");
+                Logger.Info($"[ScheduleManager] Дни: {string.Join(", ", activeSchedule.DaysOfWeek)}");
             }
             catch (Exception ex)
             {
-                Logger.Error($"Не удалось переключить плейлист: {ex.Message}");
+                Logger.Error($"[ScheduleManager] Не удалось переключить плейлист: {ex.Message}");
             }
         }
 
@@ -212,7 +208,7 @@ namespace Strimer.Services
         {
             if (_scheduleConfig.ScheduleItems.Count == 0)
             {
-                Logger.Warning("Расписание пустое, невозможно получить трек");
+                Logger.Warning("[ScheduleManager] Расписание пустое, невозможно получить трек");
                 return null;
             }
 
@@ -221,7 +217,7 @@ namespace Strimer.Services
 
             if (_currentPlaylist == null)
             {
-                Logger.Warning("Нет активного плейлиста");
+                Logger.Warning("[ScheduleManager] Нет активного плейлиста");
                 return null;
             }
 
@@ -234,25 +230,6 @@ namespace Strimer.Services
                 return "Нет активного расписания";
 
             return $"{_currentSchedule.Name} ({_currentSchedule.StartTime:hh\\:mm} - {_currentSchedule.EndTime:hh\\:mm})";
-        }
-
-        public string[] GetUpcomingSchedules(int count = 5)
-        {
-            var now = DateTime.Now;
-            var upcoming = new List<string>();
-
-            foreach (var item in _scheduleConfig.ScheduleItems)
-            {
-                if (item.IsActive(now) || item.StartTime > now.TimeOfDay)
-                {
-                    upcoming.Add($"{item.Name} ({item.StartTime:hh\\:mm}-{item.EndTime:hh\\:mm})");
-
-                    if (upcoming.Count >= count)
-                        break;
-                }
-            }
-
-            return upcoming.ToArray();
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Strimer.App
 
         public void Run()
         {
-            Core.Logger.Info("[Приложение] Запуск Strimer Radio...");
+            Core.Logger.Info("[App] Запуск Strimer Radio...");
 
             // 1. Загрузка конфигурации
             _config = new AppConfig();
@@ -21,7 +21,7 @@ namespace Strimer.App
             // 2. Если не настроено - автоматически копируем библиотеки и устанавливаем базовые настройки
             if (!_config.IsConfigured)
             {
-                Core.Logger.Info("Приложение не настроено. Выполняется автоматическая настройка...");
+                Core.Logger.Info("[App] Приложение не настроено. Выполняется автоматическая настройка...");
 
                 // Копируем нативные библиотеки
                 CopyNativeLibraries();
@@ -32,7 +32,7 @@ namespace Strimer.App
                 // Перезагружаем конфигурацию
                 _config = new AppConfig();
 
-                Core.Logger.Info("Автоматическая настройка завершена");
+                Core.Logger.Info("[App] Автоматическая настройка завершена");
 
                 // 3. Выводим сообщение о необходимости настройки и завершаем работу
                 Console.WriteLine("\n" + new string('═', 50));
@@ -57,7 +57,7 @@ namespace Strimer.App
             // 4. Запускаем радио сервис (только если уже настроено)
             Console.WriteLine("\n" + new string('═', 50));
             Console.WriteLine("  ЗАПУСК РАДИО-СТРИМА");
-            if (_config.DebubEnable)
+            if (_config.DebugEnable)
                 Console.WriteLine($"Приложение запущено в режиме отладки!");
             Console.WriteLine(new string('═', 50) + "\n");
 
@@ -74,12 +74,12 @@ namespace Strimer.App
 
             _radioService.Stop();
             _isRunning = false;
-            Core.Logger.Info("=== Strimer Radio остановлен ===");
+            Core.Logger.Info("[App] === Strimer Radio остановлен ===");
         }
 
         private void CopyNativeLibraries()
         {
-            Core.Logger.Info("Копирование нативных библиотек для текущей платформы...");
+            Core.Logger.Info("[App] Копирование нативных библиотек для текущей платформы...");
 
             try
             {
@@ -89,7 +89,7 @@ namespace Strimer.App
 
                 if (!Directory.Exists(libsFolder))
                 {
-                    Core.Logger.Error($"Папка с библиотеками не найдена: {libsFolder}");
+                    Core.Logger.Error($"[App] Папка с библиотеками не найдена: {libsFolder}");
                     Console.WriteLine($"\nОШИБКА: Папка с библиотеками не найдена: {libsFolder}");
                     Console.WriteLine("Убедитесь, что папка 'bass_dll' существует с подпапками для платформ.");
                     Environment.Exit(1);
@@ -108,27 +108,27 @@ namespace Strimer.App
                     try
                     {
                         File.Copy(file, destPath, true);
-                        Core.Logger.Info($"  Скопировано: {fileName}");
+                        Core.Logger.Info($"[App] Скопировано: {fileName}");
                         copiedAny = true;
                     }
                     catch (Exception ex)
                     {
-                        Core.Logger.Error($"  Не удалось скопировать {fileName}: {ex.Message}");
+                        Core.Logger.Error($"[App] Не удалось скопировать {fileName}: {ex.Message}");
                     }
                 }
 
                 if (copiedAny)
                 {
-                    Core.Logger.Info("Нативные библиотеки успешно скопированы");
+                    Core.Logger.Info("[App] Нативные библиотеки успешно скопированы");
                 }
                 else
                 {
-                    Core.Logger.Warning("Ни одна библиотека не была скопирована");
+                    Core.Logger.Warning("[App] Ни одна библиотека не была скопирована");
                 }
             }
             catch (Exception ex)
             {
-                Core.Logger.Error($"Не удалось скопировать библиотеки: {ex.Message}");
+                Core.Logger.Error($"[App] Не удалось скопировать библиотеки: {ex.Message}");
                 Console.WriteLine($"\nОШИБКА: Не удалось скопировать библиотеки: {ex.Message}");
                 Environment.Exit(1);
             }
@@ -138,7 +138,7 @@ namespace Strimer.App
         {
             try
             {
-                Core.Logger.Info("Установка конфигурации по умолчанию...");
+                Core.Logger.Info("[App] Установка конфигурации по умолчанию...");
 
                 // Создаем директорию для конфигурации
                 Directory.CreateDirectory(_config.ConfigDirectory);
@@ -181,7 +181,7 @@ namespace Strimer.App
                 // Сохраняем конфигурацию
                 _config.Save();
 
-                Core.Logger.Info("Конфигурация по умолчанию сохранена");
+                Core.Logger.Info("[App] Конфигурация по умолчанию сохранена");
 
                 // Создаем пустой файл плейлиста если его нет
                 if (!File.Exists(_config.PlaylistFile))
@@ -198,15 +198,13 @@ namespace Strimer.App
                     }
                     catch (Exception ex)
                     {
-                        Core.Logger.Error($"Не удалось создать файл плейлиста: {ex.Message}");
-                        Console.WriteLine($"\nПРЕДУПРЕЖДЕНИЕ: Не удалось создать файл плейлиста: {ex.Message}");
+                        Core.Logger.Error($"[App] Не удалось создать файл плейлиста: {ex.Message}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                Core.Logger.Error($"Не удалось установить конфигурацию по умолчанию: {ex.Message}");
-                Console.WriteLine($"\nОШИБКА: Не удалось установить конфигурацию по умолчанию: {ex.Message}");
+                Core.Logger.Error($"[App] Не удалось установить конфигурацию по умолчанию: {ex.Message}");
                 Environment.Exit(1);
             }
         }

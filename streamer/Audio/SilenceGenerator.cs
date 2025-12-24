@@ -33,12 +33,12 @@ namespace Strimer.Audio
                 if (_silenceStream == 0)
                 {
                     var error = Bass.BASS_ErrorGetCode();
-                    Logger.Error($"Не удалось создать поток тишины: {error}");
+                    Logger.Error($"[SilenceGenerator] Не удалось создать поток тишины: {error}");
                 }
             }
             catch (Exception ex)
             {
-                Logger.Error($"Ошибка при создании потока тишины: {ex.Message}");
+                Logger.Error($"[SilenceGenerator] Ошибка при создании потока тишины: {ex.Message}");
             }
         }
 
@@ -68,12 +68,12 @@ namespace Strimer.Audio
             {
                 try
                 {
-                    Logger.Debug("Запуск воспроизведения тишины");
+                    Logger.Debug("[SilenceGenerator] Запуск воспроизведения тишины");
 
                     // Добавляем поток тишины в микшер
                     if (!BassMix.BASS_Mixer_StreamAddChannel(mixer.Handle, _silenceStream, BASSFlag.BASS_DEFAULT))
                     {
-                        Logger.Error("Не удалось добавить тишину в микшер");
+                        Logger.Error("[SilenceGenerator] Не удалось добавить тишину в микшер");
                         return;
                     }
 
@@ -81,18 +81,18 @@ namespace Strimer.Audio
                     if (!Bass.BASS_ChannelPlay(_silenceStream, true))
                     {
                         var error = Bass.BASS_ErrorGetCode();
-                        Logger.Error($"Не удалось воспроизвести тишину: {error}");
+                        Logger.Error($"[SilenceGenerator] Не удалось воспроизвести тишину: {error}");
                         return;
                     }
 
-                    Logger.Debug("Тишина теперь воспроизводится");
+                    Logger.Debug("[SilenceGenerator] Тишина теперь воспроизводится");
 
                     // Ждем сигнала остановки
                     _stopEvent.WaitOne();
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error($"Ошибка в потоке воспроизведения тишины: {ex.Message}");
+                    Logger.Error($"[SilenceGenerator] Ошибка в потоке воспроизведения тишины: {ex.Message}");
                 }
                 finally
                 {
@@ -109,7 +109,7 @@ namespace Strimer.Audio
             if (!_isPlaying)
                 return;
 
-            Logger.Debug("Остановка воспроизведения тишины");
+            Logger.Debug("[SilenceGenerator] Остановка воспроизведения тишины");
             _stopEvent.Set();
             _isPlaying = false;
 
@@ -125,12 +125,12 @@ namespace Strimer.Audio
                 {
                     Bass.BASS_ChannelStop(_silenceStream);
                     BassMix.BASS_Mixer_ChannelRemove(_silenceStream);
-                    Logger.Debug("Тишина остановлена и удалена из микшера");
+                    Logger.Debug("[SilenceGenerator] Тишина остановлена и удалена из микшера");
                 }
             }
             catch (Exception ex)
             {
-                Logger.Error($"Ошибка при остановке тишины: {ex.Message}");
+                Logger.Error($"[SilenceGenerator] Ошибка при остановке тишины: {ex.Message}");
             }
         }
 

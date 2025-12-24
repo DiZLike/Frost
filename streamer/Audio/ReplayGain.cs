@@ -8,12 +8,13 @@ namespace Strimer.Audio
 {
     public class ReplayGain
     {
-        private bool _useReplayGain;
-        private bool _useCustomGain;
-        private int _mixerHandle;
-        private int _fxHandle;
-        private BASS_BFX_COMPRESSOR2 _compressor;
-        private string source = String.Empty;
+        private readonly bool _useReplayGain;           // Включен ли ReplayGain
+        private readonly bool _useCustomGain;           // Использовать кастомное усиление
+        private readonly int _mixerHandle;              // Хэндл микшера Bass
+        private int _fxHandle;                          // Хэндл эффекта компрессора
+        private readonly BASS_BFX_COMPRESSOR2 _compressor; // Настройки компрессора
+        private string _gainSource = String.Empty;      // Источник текущего усиления (для логов)
+        private string _fileName = String.Empty;
 
         public ReplayGain(bool useReplayGain, bool useCustomGain, int mixerHandle)
         {
@@ -21,122 +22,103 @@ namespace Strimer.Audio
             _useCustomGain = useCustomGain;
             _mixerHandle = mixerHandle;
 
-            Logger.Info($"ReplayGain инициализирован: UseReplayGain={useReplayGain}, UseCustomGain={useCustomGain}");
+            Logger.Debug($"[ReplayGain] ReplayGain инициализирован: UseReplayGain={useReplayGain}, UseCustomGain={useCustomGain}");
+
+            // Инициализация компрессора один раз (настройки постоянные)
+            _compressor = new BASS_BFX_COMPRESSOR2
+            {
+                fAttack = 0.01f,    // Атака 0.01 секунды
+                fRelease = 100f,    // Релиз 100 секунд
+                fThreshold = -3f,   // Порог -3 дБ
+                fRatio = 100f,      // Коэффициент 100:1
+                fGain = 0f          // Начальное усиление 0 дБ
+            };
 
             if (_useReplayGain)
             {
-                SetupCompressor();
+                SetupCompressor();  // Настраиваем компрессор если включен
             }
         }
 
         private void SetupCompressor()
         {
+            // Эта проверка может быть важна для инициализации BassFx
             int version = BassFx.BASS_FX_GetVersion();
-            Logger.Info($"BassFx: {version}");
-            // Удаляем старый эффект если есть
+            Logger.Debug($"[ReplayGain] BassFx версия: {version}");
+
+            // Удаляем старый эффект если был
             if (_fxHandle != 0)
-            {
                 Bass.BASS_ChannelRemoveFX(_mixerHandle, _fxHandle);
-            }
 
             // Создаем эффект компрессора для Replay Gain
             _fxHandle = Bass.BASS_ChannelSetFX(
                 _mixerHandle,
                 BASSFXType.BASS_FX_BFX_COMPRESSOR2,
-                1
+                1  // Приоритет 1
             );
 
-            if (_fxHandle == 0)
+            if (_fxHandle == 0)  // Проверяем успешность создания
             {
                 var error = Bass.BASS_ErrorGetCode();
-                Logger.Error($"Не удалось создать компрессор ReplayGain: {error}");
+                Logger.Error($"[ReplayGain] Не удалось создать компрессор ReplayGain: {error}");
                 return;
             }
 
-            _compressor = new BASS_BFX_COMPRESSOR2
-            {
-                fAttack = 0.01f,
-                fRelease = 100f,
-                fThreshold = -3f,
-                fRatio = 100f,
-                fGain = 0f  // Начальное значение
-            };
-
-            Logger.Info($"Компрессор ReplayGain создан (handle: {_fxHandle})");
+            Logger.Debug($"[ReplayGain] Компрессор ReplayGain создан (handle: {_fxHandle})");
         }
 
         public void SetGain(TAG_INFO tagInfo)
         {
-            if (!_useReplayGain)
+            if (!_useReplayGain)  // Если ReplayGain выключен
             {
-                Logger.Info("ReplayGain отключен, пропускаем регулировку усиления");
+                Logger.Info("[ReplayGain] ReplayGain отключен, пропускаем регулировку усиления");
                 return;
             }
 
+            _fileName = tagInfo.filename;
             float gainValue = 0f;
-            source = "отсутствует";
-            bool gainFound = false;
+            _gainSource = "отсутствует";
 
             // 1. Пробуем кастомное усиление из комментария (если включено)
-            if (_useCustomGain && !string.IsNullOrEmpty(tagInfo.comment))
+            if (_useCustomGain)
             {
                 gainValue = ExtractCustomGain(tagInfo.comment);
-
-                // Проверяем, действительно ли нашли усиление (не 0 и не ошибка парсинга)
-                if (Math.Abs(gainValue) > 0.001f)
+                if (Math.Abs(gainValue) > 0.001f)  // Если нашли кастомное усиление
                 {
-                    source = "кастомный комментарий";
-                    gainFound = true;
+                    _gainSource = "кастомный комментарий";
+                    ApplyGainValue(gainValue);  // Применяем и выходим
+                    return;
                 }
-                else
+                else if (!string.IsNullOrEmpty(tagInfo.comment))
                 {
-                    // Усиление не найдено в комментарии, но это не ошибка
-                    Logger.Info($"Кастомное усиление не найдено в комментарии: '{tagInfo.comment}'");
+                    Logger.Debug($"[ReplayGain] Кастомное усиление не найдено в комментарии: '{tagInfo.comment}'");
                 }
             }
-            else if (_useCustomGain && string.IsNullOrEmpty(tagInfo.comment))
+
+            // 2. Пробуем ReplayGain из тегов
+            float tagGain = tagInfo.replaygain_track_gain;
+
+            // Проверяем на разумные пределы и игнорируем специальные значения
+            if (Math.Abs(tagGain) > 0.001f &&        // Не ноль
+                Math.Abs(tagGain - 100f) > 0.01f &&  // Не специальное значение (100)
+                tagGain >= -24f &&                   // Не меньше -24 дБ
+                tagGain <= 24f)                      // Не больше +24 дБ
             {
-                Logger.Info("Кастомное усиление включено, но комментарий пуст");
+                gainValue = tagGain;
+                _gainSource = "тег трека";
+                Logger.Info($"[ReplayGain] Используется ReplayGain из тегов: {gainValue:F2} дБ");
+                ApplyGainValue(gainValue);
+                return;
             }
-
-            // 2. Если кастомное усиление не найдено ИЛИ не включено, пробуем теги
-            if (!gainFound)
+            else if (Math.Abs(tagGain) > 0.001f)  // Есть значение, но отфильтровано
             {
-                float tagGain = tagInfo.replaygain_track_gain;
-
-                // Проверяем на разумные пределы и игнорируем специальные значения
-                if (Math.Abs(tagGain) > 0.001f &&
-                    Math.Abs(tagGain - 100f) > 0.01f &&
-                    tagGain >= -24f &&
-                    tagGain <= 24f)
-                {
-                    gainValue = tagGain;
-                    source = "тег трека";
-                    gainFound = true;
-                    Logger.Info($"Используется ReplayGain из тегов: {gainValue:F2} дБ");
-                }
-                else if (Math.Abs(tagGain) > 0.001f)
-                {
-                    // Есть значение, но оно отфильтровано
-                    Logger.Info($"Трек имеет ReplayGain {tagGain:F2} дБ, но значение отфильтровано " +
-                                $"(диапазон: {-24}..{+24}, специальные значения игнорируются)");
-                }
+                Logger.Info($"[ReplayGain] Трек имеет ReplayGain {tagGain:F2} дБ, но значение отфильтровано");
             }
 
             // 3. Если ничего не найдено
-            if (!gainFound)
-            {
-                Logger.Info("Данные ReplayGain не найдены, используется 0 дБ");
-                source = "по умолчанию (0 дБ)";
-            }
-
-            // Единое ограничение для безопасности
-            gainValue = Math.Max(-24f, Math.Min(24f, gainValue));
-
-            // Обновляем компрессор
-            _compressor.fGain = gainValue;
-
-            //Logger.Info($"ReplayGain финальное: {gainValue:F2} дБ (источник: {source})");
+            Logger.Info("[ReplayGain] Данные ReplayGain не найдены, используется 0 дБ");
+            _gainSource = "по умолчанию (0 дБ)";
+            ApplyGainValue(0f);
         }
 
         private float ExtractCustomGain(string comment)
@@ -144,79 +126,88 @@ namespace Strimer.Audio
             if (string.IsNullOrEmpty(comment))
                 return 0f;
 
-            // Ищем оба формата: "gain=" и "replay-gain=" в нижнем регистре
-            string[] gainMarkers = { "replay-gain=", "gain=" };
             string lowerComment = comment.ToLowerInvariant();
 
-            foreach (var marker in gainMarkers)
+            // Ищем оба формата: "replay-gain=" и "gain="
+            int markerIndex = lowerComment.IndexOf("replay-gain=");
+            if (markerIndex == -1)
+                markerIndex = lowerComment.IndexOf("gain=");
+
+            if (markerIndex == -1)
+                return 0f;  // Маркер не найден
+
+            // Находим начало числа
+            int startIndex = markerIndex + (lowerComment.Contains("replay-gain=") ? "replay-gain=".Length : "gain=".Length);
+
+            // Ищем конец числа (до первого нечислового символа кроме знаков и точки/запятой)
+            int endIndex = startIndex;
+            while (endIndex < comment.Length &&
+                   (char.IsDigit(comment[endIndex]) ||
+                    comment[endIndex] == '.' ||
+                    comment[endIndex] == ',' ||
+                    comment[endIndex] == '-' ||
+                    comment[endIndex] == '+'))
             {
-                int markerIndex = lowerComment.IndexOf(marker);
-                if (markerIndex == -1)
-                    continue;
-
-                int startIndex = markerIndex + marker.Length;
-
-                // Ищем конец числа (цифры, точка, запятая, минус, плюс)
-                int endIndex = startIndex;
-                while (endIndex < comment.Length)
-                {
-                    char c = comment[endIndex];
-                    if (char.IsDigit(c) || c == '.' || c == ',' || c == '-' || c == '+')
-                    {
-                        endIndex++;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                if (endIndex > startIndex)
-                {
-                    string gainStr = comment.Substring(startIndex, endIndex - startIndex)
-                        .Replace(',', '.'); // Заменяем запятую на точку
-
-                    if (float.TryParse(gainStr, NumberStyles.Float,
-                        CultureInfo.InvariantCulture, out float result))
-                    {
-                        // Согласовано с SetGain: -24..+24 dB
-                        return Math.Max(-24f, Math.Min(24f, result));
-                    }
-                }
-
-                // Если нашли маркер, но не смогли распарсить, прекращаем поиск
-                // (чтобы не искать второй маркер в той же строке)
-                break;
+                endIndex++;
             }
 
-            return 0f;
+            if (endIndex <= startIndex)  // Не нашли число
+                return 0f;
+
+            // Извлекаем и парсим число
+            string gainStr = comment.Substring(startIndex, endIndex - startIndex)
+                .Replace(',', '.');  // Заменяем запятую на точку для парсинга
+
+            if (float.TryParse(gainStr, NumberStyles.Float,
+                CultureInfo.InvariantCulture, out float result))
+            {
+                return result;  // Ограничение диапазона будет в SetGain
+            }
+
+            return 0f;  // Ошибка парсинга
+        }
+
+        private void ApplyGainValue(float gainValue)
+        {
+            // Ограничиваем значение для безопасности
+            gainValue = Math.Max(-24f, Math.Min(24f, gainValue));
+
+            // Устанавливаем усиление в компрессор
+            _compressor.fGain = gainValue;
+
+            // Применяем сразу
+            ApplyGain();
         }
 
         public void ApplyGain()
         {
-            if (!_useReplayGain || _fxHandle == 0)
+            if (!_useReplayGain || _fxHandle == 0)  // Проверяем доступность
             {
-                Logger.Warning("Не удалось применить усиление: ReplayGain отключен или отсутствует FX handle");
+                Logger.Warning("[ReplayGain] Не удалось применить усиление: ReplayGain отключен или отсутствует FX handle");
                 return;
             }
 
             bool success = Bass.BASS_FXSetParameters(_fxHandle, _compressor);
             if (success)
             {
-                Logger.Info($"ReplayGain применено: {_compressor.fGain:F2} дБ (источник: {source})");
+                Logger.Info($"[ReplayGain] ReplayGain применен к {Path.GetFileName(_fileName)}: {_compressor.fGain:F2} дБ (источник: {_gainSource})");
             }
             else
             {
                 var error = Bass.BASS_ErrorGetCode();
-                Logger.Error($"Не удалось применить ReplayGain: {error}");
+                Logger.Error($"[ReplayGain] Не удалось применить ReplayGain: {error}");
             }
         }
+
         public void Reset()
         {
-            _compressor.fGain = 0f;
-            if (_fxHandle != 0)
+            _compressor.fGain = 0f;          // Сбрасываем усиление на 0
+            _gainSource = "сброс (0 дБ)";    // Обновляем источник
+
+            if (_fxHandle != 0)              // Применяем если есть хэндл
             {
                 Bass.BASS_FXSetParameters(_fxHandle, _compressor);
+                Logger.Info("[ReplayGain] ReplayGain сброшен к 0 дБ");
             }
         }
     }

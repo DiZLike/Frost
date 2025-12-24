@@ -1,233 +1,182 @@
 ﻿using Strimer.App;
 using Strimer.Core;
-using System.Reflection;
-using Un4seen.Bass;
-using Un4seen.Bass.AddOn.Fx;
-using Un4seen.Bass.AddOn.Mix;
-using Un4seen.Bass.AddOn.Tags;
+using Strimer.Services;
+using System.Diagnostics;
 
 namespace Strimer.Audio
 {
     public class Player : IDisposable
     {
         private readonly AppConfig _config;
-        private Mixer _mixer;
-        private ReplayGain _replayGain;
+        private readonly JingleService _jingleService;
+        private readonly BassAudioEngine _audioEngine;
+        private readonly Mixer _mixer;
+        private readonly ReplayGain _replayGain;
+        private readonly TrackLoader _trackLoader;
+        private readonly JinglePlayerSlowLoad _jinglePlayer;
 
         private int _currentStream;
-        private bool _isInitialized;
-        private bool _loadCompleted = false;
         private bool _isDisposed = false;
+        private CancellationTokenSource _silenceCts;
 
-        public bool IsPlaying => _currentStream != 0 &&
-            Bass.BASS_ChannelIsActive(_currentStream) == BASSActive.BASS_ACTIVE_PLAYING;
-
-        public bool IsStopped => _currentStream == 0 ||
-            Bass.BASS_ChannelIsActive(_currentStream) == BASSActive.BASS_ACTIVE_STOPPED;
-
+        public bool IsPlaying => _audioEngine.IsStreamPlaying(_currentStream);
         public Mixer Mixer => _mixer;
 
-        public Player(AppConfig config)
+        public Player(AppConfig config, JingleService jingleService)
         {
             _config = config;
-            Logger.Debug($"[Плеер] Инициализирован с конфигурацией: Устройство={_config.AudioDevice}, Частота={_config.SampleRate}");
+            _jingleService = jingleService;
+
+            _audioEngine = new BassAudioEngine(config);
+            _mixer = new Mixer(_config.SampleRate);
+            _replayGain = new ReplayGain(_config.UseReplayGain, _config.UseCustomGain, _mixer.Handle);
+            _trackLoader = new TrackLoader(_audioEngine, _replayGain);
+            _jinglePlayer = new JinglePlayerSlowLoad(config, jingleService, _audioEngine, _mixer, _replayGain);
+
+            Logger.Debug("[Player] Инициализирован с модульной архитектурой");
         }
 
         public void Initialize()
         {
-            if (_isInitialized)
-                return;
-
-            Logger.Info("Инициализация аудио системы...");
-
-            // 1. Инициализация BASS
-            bool initSuccess = Bass.BASS_Init(
-                _config.AudioDevice,
-                _config.SampleRate,
-                BASSInit.BASS_DEVICE_DEFAULT,
-                IntPtr.Zero
-            );
-
-            if (!initSuccess)
-            {
-                var error = Bass.BASS_ErrorGetCode();
-                throw new Exception($"Не удалось инициализировать BASS: {error}");
-            }
-
-            _mixer = new Mixer(_config.SampleRate);
-            _replayGain = new ReplayGain(_config.UseReplayGain, _config.UseCustomGain, _mixer.Handle);
-            LoadPlugins();
-
-            _isInitialized = true;
-            Logger.Info("Аудио система успешно инициализирована");
-        }
-
-        private void LoadPlugins()
-        {
-            Logger.Info("Загрузка аудио плагинов...");
-
-            string libPrefix = _config.OS == "Windows" ? "" : "lib";
-            string libExtension = _config.OS == "Windows" ? ".dll" : ".so";
-
-            // Загружаем плагины для разных форматов
-            string[] plugins = { "bassopus", "bassaac", "bassflac", "basswv" };
-
-            List<string> loadedPlugins = new();
-            List<string> failedPlugins = new();
-            foreach (var plugin in plugins)
-            {
-                string pluginPath = Path.Combine(
-                    _config.BaseDirectory,
-                    $"{libPrefix}{plugin}{libExtension}"
-                );
-
-                if (File.Exists(pluginPath))
-                {
-                    int pluginHandle = Bass.BASS_PluginLoad(pluginPath);
-                    if (pluginHandle != 0)
-                    {
-                        loadedPlugins.Add(plugin);
-                    }
-                    else
-                    {
-                        failedPlugins.Add(plugin);
-                    }
-                }
-            }
-            if (loadedPlugins.Count > 0)
-                Logger.Info($"[Плеер] Загруженные плагины: {string.Join(", ", loadedPlugins)}");
-            if (failedPlugins.Count > 0)
-                Logger.Warning($"[Плеер] Не удалось загрузить плагины: {string.Join(", ", failedPlugins)}");
+            _audioEngine.Initialize();
         }
 
         public TrackInfo PlayTrack(string filePath)
         {
-            // Останавливаем текущий трек
             StopCurrentTrack();
 
-            // Не проверяем больше наличие файла. BASS_StreamCreateFile сам определит
-            _currentStream = Bass.BASS_StreamCreateFile(
-                filePath,
-                0, 0,
-                BASSFlag.BASS_DEFAULT | BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_STREAM_DECODE
-            );
-
-            if (_currentStream == 0)
-            {
-                var error = Bass.BASS_ErrorGetCode();
-                Logger.Error($"Не удалось создать поток для {Path.GetFileName(filePath)}: {error}");
+            var loadedTrack = _trackLoader.LoadTrack(filePath);
+            if (loadedTrack == null || loadedTrack.StreamHandle == 0)
                 return null;
+
+            _currentStream = loadedTrack.StreamHandle;
+            _mixer.AddStream(_currentStream);
+            _audioEngine.PlayStream(_mixer.Handle);
+
+            Logger.Info($"[Player] Сейчас играет: {loadedTrack.TrackInfo.Artist} - {loadedTrack.TrackInfo.Title}");
+
+            return loadedTrack.TrackInfo;
+        }
+
+        public TrackInfo PlayTrackWithJingleIfSlow(string filePath)
+        {
+            if (!_audioEngine.IsInitialized)
+                throw new InvalidOperationException("Аудиосистема не инициализирована");
+
+            TrackInfo trackInfo = null;
+            int trackStream = 0;
+            bool jinglePlayed = false;
+            List<string> playedJingles = new();
+
+            using (ManualResetEvent trackLoadedEvent = new ManualResetEvent(false))
+            using (CancellationTokenSource jingleCts = new CancellationTokenSource())
+            using (ManualResetEvent jingleCycleFinishedEvent = new ManualResetEvent(false))
+            {
+                Thread loadThread = null;
+                Thread jingleThread = null;
+
+                try
+                {
+                    // 1. Запускаем загрузку трека в отдельном потоке
+                    loadThread = new Thread(() => LoadTrackInBackground(filePath, trackLoadedEvent, ref trackInfo, ref trackStream));
+                    loadThread.IsBackground = true;
+                    loadThread.Start();
+
+                    // 2. Ждем 2 секунды
+                    bool loadedInTime = trackLoadedEvent.WaitOne(TimeSpan.FromSeconds(2));
+
+                    // 3. Если медленно и есть джинглы - запускаем цикл джинглов
+                    if (!loadedInTime && _config.JinglesEnable && _jingleService.HasJingles)
+                    {
+                        jinglePlayed = true;
+
+                        jingleThread = new Thread(() =>
+                        {
+                            _jinglePlayer.PlayJingleCycleWhileLoading(trackLoadedEvent, jingleCts, out playedJingles, filePath);
+                            jingleCycleFinishedEvent.Set();
+                        });
+
+                        jingleThread.IsBackground = true;
+                        jingleThread.Start();
+
+                        // 4. Ждем загрузки трека
+                        trackLoadedEvent.WaitOne();
+
+                        // 5. Отменяем будущие джинглы
+                        jingleCts.Cancel();
+
+                        // 6. Ждем завершения текущего джингла
+                        jingleCycleFinishedEvent.WaitOne(TimeSpan.FromSeconds(30));
+                    }
+                    else if (!loadedInTime)
+                    {
+                        // Просто ждем загрузки если джинглы отключены
+                        trackLoadedEvent.WaitOne();
+                    }
+
+                    // 7. Воспроизводим загруженный трек
+                    if (trackInfo != null && trackStream != 0)
+                    {
+                        return PlayLoadedTrack(trackInfo, trackStream, jinglePlayed);
+                    }
+
+                    return null;
+                }
+                finally
+                {
+                    // Гарантированная очистка
+                    jingleCts.Cancel();
+                    _jinglePlayer.CleanupCurrentJingle();
+
+                    WaitForThread(loadThread, "загрузки трека", 5);
+                    WaitForThread(jingleThread, "джинглов", 2);
+                }
+            }
+        }
+
+        private void LoadTrackInBackground(string filePath, ManualResetEvent trackLoadedEvent,
+                                          ref TrackInfo trackInfo, ref int trackStream)
+        {
+            try
+            {
+                StopCurrentTrack();
+                var loadedTrack = _trackLoader.LoadTrack(filePath);
+
+                if (loadedTrack != null)
+                {
+                    trackInfo = loadedTrack.TrackInfo;
+                    trackStream = loadedTrack.StreamHandle;
+                }
+            }
+            finally
+            {
+                trackLoadedEvent.Set();
+            }
+        }
+
+        private TrackInfo PlayLoadedTrack(TrackInfo trackInfo, int streamHandle, bool cleanupJingle)
+        {
+            Logger.Info($"[Player] Воспроизведение трека: {trackInfo.Artist} - {trackInfo.Title}");
+
+            StopCurrentTrack();
+            _currentStream = streamHandle;
+
+            if (cleanupJingle)
+            {
+                _jinglePlayer.CleanupCurrentJingle();
             }
 
-            // Получаем информацию о треке
-            var tagInfo = BassTags.BASS_TAG_GetFromFile(filePath);
-            var trackInfo = CreateTrackInfo(tagInfo, filePath);
-
-            // Применяем Replay Gain
-            _replayGain.SetGain(tagInfo);
-            _replayGain.ApplyGain();
-
-            // Добавляем поток в микшер
             _mixer.AddStream(_currentStream);
-
-            // Запускаем воспроизведение через микшер
-            Bass.BASS_ChannelPlay(_mixer.Handle, false);
-            Logger.Info($"Сейчас играет: {trackInfo.Artist} - {trackInfo.Title}");
+            _audioEngine.PlayStream(_mixer.Handle);
 
             return trackInfo;
         }
 
-        public TrackInfo PlayTrackWithSilence(string filePath)
+        private void WaitForThread(Thread thread, string threadName, int seconds)
         {
-            if (_mixer == null)
-                throw new ArgumentNullException(nameof(_mixer));
-
-            // Запускаем тишину в отдельном потоке
-            ///     !!! КОНФЛИКТ !!!    ВОСПРОИЗВЕДЕНИЕ ДОЛЖНО БЫТЬ В SilenceGenerator  !!!
-            var silenceThread = new Thread(() =>
+            if (thread != null && thread.IsAlive && !thread.Join(TimeSpan.FromSeconds(seconds)))
             {
-                try
-                {
-                    Logger.Info("[Плеер] Запуск воспроизведения тишины");
-                    Logger.Debug($"Трек загружен? {_loadCompleted}");
-
-                    // Создаем временный поток тишины
-                    using var silence = new SilenceGenerator(_config.SampleRate);
-                    silence.StartPlaying(_mixer);
-
-                    // Держим поток активным, пока не остановят извне
-                    while (!_loadCompleted && !_isDisposed)
-                    {
-                        Thread.Sleep(100);
-                    }
-
-                    // Останавливаем тишину
-                    silence.StopPlaying(_mixer);
-                    _loadCompleted = false;
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error($"Ошибка в потоке тишины: {ex.Message}");
-                }
-            });
-
-            silenceThread.IsBackground = true;
-            silenceThread.Start();
-
-            // Даем время тишине запуститься
-            Thread.Sleep(100);
-            try
-            {
-                var trackInfo = PlayTrack(filePath);
-                _loadCompleted = true; // Сигнализируем, что загрузка завершена
-                return trackInfo;
-            }
-            catch (Exception)
-            {
-                _loadCompleted = true;
-                throw;
-            }
-        }
-
-        private TrackInfo CreateTrackInfo(TAG_INFO tagInfo, string filePath)
-        {
-            // Пытаемся преобразовать год из строки в число
-            int year = 0;
-            if (!string.IsNullOrEmpty(tagInfo.year))
-            {
-                // Убираем нечисловые символы
-                string yearStr = new string(tagInfo.year.Where(char.IsDigit).ToArray());
-                if (!string.IsNullOrEmpty(yearStr))
-                {
-                    int.TryParse(yearStr, out year);
-                }
-            }
-
-            return new TrackInfo
-            {
-                Artist = !string.IsNullOrWhiteSpace(tagInfo.artist) ? tagInfo.artist : "Неизвестный исполнитель",
-                Title = !string.IsNullOrWhiteSpace(tagInfo.title) ? tagInfo.title : Path.GetFileNameWithoutExtension(filePath),
-                Album = tagInfo.album ?? "",
-                Year = year,
-                Genre = tagInfo.genre ?? "",
-                ReplayGain = tagInfo.replaygain_track_gain,
-                Comment = tagInfo.comment ?? ""
-            };
-        }
-
-        public void Pause()
-        {
-            if (_currentStream != 0)
-            {
-                Bass.BASS_ChannelPause(_mixer.Handle);
-            }
-        }
-
-        public void Resume()
-        {
-            if (_currentStream != 0)
-            {
-                Bass.BASS_ChannelPlay(_mixer.Handle, false);
+                Logger.Warning($"[Player] Поток {threadName} не завершился за {seconds} секунд");
             }
         }
 
@@ -235,55 +184,29 @@ namespace Strimer.Audio
         {
             if (_currentStream != 0)
             {
+                _audioEngine.StopStream(_currentStream);
                 _mixer.RemoveStream(_currentStream);
-                Bass.BASS_StreamFree(_currentStream);
+                _audioEngine.FreeStream(_currentStream);
                 _currentStream = 0;
             }
-        }
-
-        public string GetCurrentTime()
-        {
-            if (_currentStream == 0)
-                return "00:00";
-
-            long position = Bass.BASS_ChannelGetPosition(_currentStream);
-            double seconds = Bass.BASS_ChannelBytes2Seconds(_currentStream, position);
-
-            return FormatTime(seconds);
-        }
-
-        public string GetTotalTime()
-        {
-            if (_currentStream == 0)
-                return "00:00";
-
-            long length = Bass.BASS_ChannelGetLength(_currentStream);
-            double seconds = Bass.BASS_ChannelBytes2Seconds(_currentStream, length);
-
-            return FormatTime(seconds);
-        }
-
-        private string FormatTime(double seconds)
-        {
-            TimeSpan time = TimeSpan.FromSeconds(seconds);
-            return $"{(int)time.TotalMinutes:00}:{time.Seconds:00}";
         }
 
         public void Stop()
         {
             StopCurrentTrack();
-
-            if (_isInitialized)
-            {
-                Bass.BASS_Free();
-                _isInitialized = false;
-                _isDisposed = true;
-            }
+            _jinglePlayer.CleanupCurrentJingle();
+            _silenceCts?.Cancel();
         }
 
         public void Dispose()
         {
-            Stop();
+            if (!_isDisposed)
+            {
+                Stop();
+                _silenceCts?.Dispose();
+                _audioEngine.Dispose();
+                _isDisposed = true;
+            }
         }
     }
 }

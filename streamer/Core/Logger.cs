@@ -48,7 +48,7 @@ namespace Strimer.Core
 
         private static string GetCallerChain(int skipFrames = 2, int maxDepth = 5)
         {
-            if (AppConfig == null || !AppConfig.DebubEnable)
+            if (AppConfig == null || (!AppConfig.DebugEnable && !AppConfig.DebugStackView))
                 return "";
 
             try
@@ -118,7 +118,7 @@ namespace Strimer.Core
         {
             string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-            if (AppConfig != null && AppConfig.DebubEnable && includeCaller)
+            if (AppConfig != null && AppConfig.DebugStackView && includeCaller)
             {
                 string callerChain = GetCallerChain(3);
                 if (!string.IsNullOrEmpty(callerChain))
@@ -132,10 +132,13 @@ namespace Strimer.Core
 
         private static void WriteToLog(string message, string consoleMessage = null)
         {
-            // В консоль - упрощенный формат
-            Console.WriteLine(consoleMessage ?? message);
+            // В консоль - упрощенный формат с временем в формате HH:mm:ss
+            string consoleTime = DateTime.Now.ToString("HH:mm:ss");
+            string formattedConsoleMessage = $"[{consoleTime}] {consoleMessage ?? message}";
 
-            // В файл - полный формат
+            Console.WriteLine(formattedConsoleMessage);
+
+            // В файл - полный формат с датой и временем
             try
             {
                 string logFile = GetDailyLogFileName();
@@ -150,7 +153,7 @@ namespace Strimer.Core
         public static void Log(string message)
         {
             string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            string consoleMessage = $"[{timestamp}] [LOG] {message}";
+            string consoleMessage = $"[LOG]\t{message}";
             string fileMessage = FormatMessage("LOG", message, false);
             WriteToLog(fileMessage, consoleMessage);
         }
@@ -158,7 +161,7 @@ namespace Strimer.Core
         public static void Error(string message)
         {
             string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            string consoleMessage = $"[{timestamp}] [ERROR] {message}";
+            string consoleMessage = $"[ERROR]\t{message}";
             string fileMessage = FormatMessage("ERROR", message);
             WriteToLog(fileMessage, consoleMessage);
         }
@@ -166,17 +169,17 @@ namespace Strimer.Core
         public static void Info(string message)
         {
             string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            string consoleMessage = $"[{timestamp}] [INFO] {message}";
+            string consoleMessage = $"[INFO]\t{message}";
             string fileMessage = FormatMessage("INFO", message);
             WriteToLog(fileMessage, consoleMessage);
         }
 
         public static void Debug(string message)
         {
-            if (AppConfig != null && AppConfig.DebubEnable)
+            if (AppConfig != null && AppConfig.DebugEnable)
             {
                 string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                string consoleMessage = $"[{timestamp}] [DEBUG] {message}";
+                string consoleMessage = $"[DEBUG]\t{message}";
                 string fileMessage = FormatMessage("DEBUG", message);
                 WriteToLog(fileMessage, consoleMessage);
             }
@@ -185,7 +188,7 @@ namespace Strimer.Core
         public static void Warning(string message)
         {
             string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            string consoleMessage = $"[{timestamp}] [WARNING] {message}";
+            string consoleMessage = $"[WARNING]\t{message}";
             string fileMessage = FormatMessage("WARNING", message);
             WriteToLog(fileMessage, consoleMessage);
         }
@@ -195,7 +198,8 @@ namespace Strimer.Core
         {
             string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             string logMessage = $"[{timestamp}] {message}";
-            WriteToLog(logMessage, logMessage);
+            string consoleMessage = message; // Для Raw выводим без временной метки в начале
+            WriteToLog(logMessage, consoleMessage);
         }
     }
 }

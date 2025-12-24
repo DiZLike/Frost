@@ -57,8 +57,15 @@ namespace Strimer.App
         public string MyAddSongInfoLinkVar { get; set; } = "";
         public string MyAddSongInfoLinkFolderOnServer { get; set; } = "";
 
+        // Джинглы
+        public bool JinglesEnable { get; set; } = false;                    // Включены ли джинглы
+        public string JingleConfigFile { get; set; } = "jingles.json";     // Путь к файлу конфигурации джинглов
+        public int JingleFrequency { get; set; } = 3;                      // Частота джинглов (каждый N-й трек)
+        public bool JinglesRandom { get; set; } = true;                    // Случайный порядок джинглов
+
         // Debug
-        public bool DebubEnable { get; set; } = false;
+        public bool DebugEnable { get; set; } = false;
+        public bool DebugStackView { get; set; } = false;
 
         public AppConfig()
         {
@@ -77,7 +84,7 @@ namespace Strimer.App
 
             Architecture = RuntimeInformation.ProcessArchitecture.ToString();
 
-            Core.Logger.Info($"Обнаружена ОС: {OS} ({Architecture})");
+            Core.Logger.Info($"[AppConfig] Обнаружена ОС: {OS} ({Architecture})");
         }
 
         private void LoadConfig()
@@ -86,7 +93,7 @@ namespace Strimer.App
 
             if (!File.Exists(configFile))
             {
-                Core.Logger.Warning("Файл конфигурации не найден. Используются значения по умолчанию.");
+                Core.Logger.Warning("[AppConfig] Файл конфигурации не найден. Используются значения по умолчанию.");
                 IsConfigured = false;
                 return;
             }
@@ -120,7 +127,7 @@ namespace Strimer.App
                         // Обработка пустых значений
                         if (string.IsNullOrEmpty(value))
                         {
-                            Core.Logger.Warning($"Пустое значение для ключа '{key}' в секции '{currentSection}'. Используется значение по умолчанию.");
+                            Core.Logger.Warning($"[AppConfig] Пустое значение для ключа '{key}' в секции '{currentSection}'. Используется значение по умолчанию.");
                             continue;
                         }
                         SetValue(currentSection, key, value);
@@ -128,13 +135,13 @@ namespace Strimer.App
                 }
                 Logger.AppConfig = this;
 
-                Logger.Debug($"[Конфигурация] Загружено: IceCast={IceCastServer}:{IceCastPort}, Плейлист={PlaylistFile}");
-                Logger.Debug($"[Конфигурация] Аудио: Устройство={AudioDevice}, Частота={SampleRate}Гц");
-                Logger.Debug($"[Конфигурация] Кодировщик: Opus {OpusBitrate}кбит/с {OpusMode}, RG={(UseReplayGain ? "Вкл" : "Выкл")}");
+                Logger.Debug($"[AppConfig] Загружено: IceCast={IceCastServer}:{IceCastPort}, Плейлист={PlaylistFile}");
+                Logger.Debug($"[AppConfig] Аудио: Устройство={AudioDevice}, Частота={SampleRate}Гц");
+                Logger.Debug($"[AppConfig] Кодировщик: Opus {OpusBitrate}кбит/с {OpusMode}, RG={(UseReplayGain ? "Вкл" : "Выкл")}");
             }
             catch (Exception ex)
             {
-                Core.Logger.Error($"Не удалось загрузить конфигурацию: {ex.Message}");
+                Core.Logger.Error($"[AppConfig] Не удалось загрузить конфигурацию: {ex.Message}");
                 IsConfigured = false;
             }
         }
@@ -284,17 +291,40 @@ namespace Strimer.App
                     }
                     break;
 
+                case "jingles":
+                    switch (key)
+                    {
+                        case "enable":
+                            JinglesEnable = value.ToLower() == "yes";
+                            break;
+                        case "file":
+                            JingleConfigFile = value;
+                            break;
+                        case "frequency":
+                            if (int.TryParse(value, out int frequency))
+                                JingleFrequency = frequency;
+                            break;
+                        case "random":
+                            JinglesRandom = value.ToLower() == "yes";
+                            break;
+                    }
+                    break;
+           
+
                 case "debug":
                     switch (key)
                     {
                         case "enable":
-                            DebubEnable = value.ToLower() == "yes";
+                            DebugEnable = value.ToLower() == "yes";
+                            break;
+                        case "stack_view":
+                            DebugStackView = value.ToLower() == "yes";
                             break;
                     }
                     break;
 
                 default:
-                    Core.Logger.Warning($"Неизвестная секция конфигурации: {section}");
+                    Core.Logger.Warning($"[AppConfig] Неизвестная секция конфигурации: {section}");
                     break;
             }
         }
@@ -354,16 +384,24 @@ namespace Strimer.App
                     $"add_song_info_artist_var={MyAddSongInfoArtistVar};",
                     $"add_song_info_link_var={MyAddSongInfoLinkVar};",
                     $"add_song_info_link_folder_on_server={MyAddSongInfoLinkFolderOnServer};",
+                    "",
+                    $"[Jingles]",
+                    $"enable={(JinglesEnable ? "yes" : "no")};",
+                    $"file={JingleConfigFile}",
+                    $"frequency={JingleFrequency}",
+                    $"random={(JinglesRandom ? "yes" : "no")};",
+                    "",
                     $"[Debug]",
-                    $"enable={(DebubEnable ? "yes" : "no")};"
+                    $"enable={(DebugEnable ? "yes" : "no")};",
+                    $"stack_view={(DebugStackView ? "yes" : "no")};"
                 };
 
                 File.WriteAllLines(Path.Combine(ConfigDirectory, "strimer.conf"), lines);
-                Core.Logger.Info("Конфигурация сохранена");
+                Core.Logger.Info("[AppConfig] Конфигурация сохранена");
             }
             catch (Exception ex)
             {
-                Core.Logger.Error($"Не удалось сохранить конфигурацию: {ex.Message}");
+                Core.Logger.Error($"[AppConfig] Не удалось сохранить конфигурацию: {ex.Message}");
             }
         }
     }

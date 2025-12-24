@@ -36,7 +36,7 @@ namespace Strimer.Broadcast
         public void Initialize(Mixer mixer)
         {
             _mixer = mixer;                               // Сохраняем микшер
-            Logger.Info("Инициализация IceCast клиента...");
+            Logger.Info("[IceCastClient] Инициализация IceCast клиента...");
 
             ConnectToIceCast();                           // Подключаемся к серверу
             StartMonitoring();                            // Запускаем мониторинг
@@ -50,7 +50,7 @@ namespace Strimer.Broadcast
                 try
                 {
                     // Логируем параметры подключения
-                    Logger.Info($"Подключение к IceCast: {_config.IceCastServer}:{_config.IceCastPort}/{_config.IceCastMount}");
+                    Logger.Info($"[IceCastClient] Подключение к IceCast: {_config.IceCastServer}:{_config.IceCastPort}/{_config.IceCastMount}");
 
                     _encoder?.Dispose();                  // Освобождаем старый энкодер
                     _encoder = new OpusEncoder(_config, _mixer); // Создаем новый энкодер
@@ -76,12 +76,12 @@ namespace Strimer.Broadcast
                     if (!success)                         // Если подключение не удалось
                     {
                         var error = Bass.BASS_ErrorGetCode(); // Получаем код ошибки BASS
-                        Logger.Error($"Не удалось подключиться: {error}");
+                        Logger.Error($"[IceCastClient] Не удалось подключиться: {error}");
 
                         // При ошибке "уже используется" ждем и пробуем снова
                         if (error == BASSError.BASS_ERROR_ALREADY)
                         {
-                            Logger.Warning("Ресурсы заняты, ждем 2 секунды...");
+                            Logger.Warning("[IceCastClient] Ресурсы заняты, ждем 2 секунды...");
                             Thread.Sleep(2000);
                             return ConnectToIceCast();    // Рекурсивный повтор
                         }
@@ -90,12 +90,12 @@ namespace Strimer.Broadcast
                     }
 
                     IsConnected = true;                   // Устанавливаем флаг подключения
-                    Logger.Info($"Подключено к IceCast: {url}");
+                    Logger.Info($"[IceCastClient] Подключено к IceCast: {url}");
                     return true;                          // Успешное подключение
                 }
                 catch (Exception ex)                      // Обработка исключений
                 {
-                    Logger.Error($"Ошибка подключения: {ex.Message}");
+                    Logger.Error($"[IceCastClient] Ошибка подключения: {ex.Message}");
                     IsConnected = false;
                     return false;
                 }
@@ -114,7 +114,7 @@ namespace Strimer.Broadcast
         // Основной цикл мониторинга
         private void MonitorConnection()
         {
-            Logger.Info("Мониторинг запущен");
+            Logger.Info("[IceCastClient] Мониторинг запущен");
 
             while (_shouldMonitor && !_disposed)            // Основной цикл мониторинга
             {
@@ -134,7 +134,7 @@ namespace Strimer.Broadcast
                             IsConnected = true;             // Устанавливаем флаг соединения
                             _reconnectAttempts = 0;         // Сбрасываем счётчик попыток
                             _reconnectTime.Stop();          // Останавливаем таймер переподключения
-                            Logger.Info("Соединение восстановлено (обнаружено при проверке)");
+                            Logger.Info("[IceCastClient] Соединение восстановлено (обнаружено при проверке)");
                         }
                     }
                     else                                    // Если соединение неактивно
@@ -144,23 +144,23 @@ namespace Strimer.Broadcast
                             _reconnectTime.Restart();       // Запускаем/сбрасываем таймер переподключения
                             _reconnectAttempts = 1;         // Начинаем первую попытку
                             IsConnected = false;            // Сбрасываем флаг соединения
-                            Logger.Warning("Соединение потеряно. Начинаем переподключение...");
+                            Logger.Warning("[IceCastClient] Соединение потеряно. Начинаем переподключение...");
                         }
                         else if (_reconnectTime.IsRunning)  // Если уже пытаемся переподключиться
                             _reconnectAttempts++;           // Увеличиваем счётчик попыток
 
                         // Пытаемся переподключиться
-                        Logger.Info($"Попытка переподключения #{_reconnectAttempts}");
+                        Logger.Info($"[IceCastClient] Попытка переподключения #{_reconnectAttempts}");
                         if (ConnectToIceCast())             // Вызываем метод подключения
                         {
                             IsConnected = true;             // Устанавливаем флаг при успехе
                             _reconnectAttempts = 0;         // Сбрасываем счётчик попыток
                             _reconnectTime.Stop();          // Останавливаем таймер
-                            Logger.Info($"Соединение восстановлено за {_reconnectTime.Elapsed.TotalSeconds:F1} секунд");
+                            Logger.Info($"[Производительность] Соединение восстановлено за {_reconnectTime.Elapsed.TotalSeconds:F1} секунд");
                         }
                         else                                // Если переподключение не удалось
                         {
-                            Logger.Warning($"Переподключение не удалось (попытка #{_reconnectAttempts})");
+                            Logger.Warning($"[IceCastClient] Переподключение не удалось (попытка #{_reconnectAttempts})");
                             // Здесь можно добавить задержку между попытками
                             // Thread.Sleep(5000);
                         }
@@ -168,13 +168,13 @@ namespace Strimer.Broadcast
                 }
                 catch (Exception ex)                        // Обработка исключений в мониторинге
                 {
-                    Logger.Error($"Ошибка мониторинга: {ex.Message}");
+                    Logger.Error($"[IceCastClient] Ошибка мониторинга: {ex.Message}");
                     Thread.Sleep(10000);                    // Увеличенная пауза при ошибке
                 }
             }
 
             _reconnectTime.Stop();                          // Останавливаем таймер при выходе
-            Logger.Info("Мониторинг остановлен");
+            Logger.Info("[IceCastClient] Мониторинг остановлен");
         }
 
         // Метод для получения времени текущего переподключения (опционально)
@@ -255,11 +255,11 @@ namespace Strimer.Broadcast
             try
             {
                 _encoder.SetMetadata(artist, title);      // Отправка метаданных
-                Logger.Info($"Метаданные: {artist} - {title}");
+                Logger.Info($"[IceCastClient] Метаданные: {artist} - {title}");
             }
             catch (Exception ex)
             {
-                Logger.Error($"Ошибка метаданных: {ex.Message}");
+                Logger.Error($"[IceCastClient] Ошибка метаданных: {ex.Message}");
             }
         }
         // Освобождение ресурсов
@@ -279,7 +279,7 @@ namespace Strimer.Broadcast
                 }
 
                 _encoder?.Dispose();                      // Освобождаем энкодер
-                Logger.Info("IceCast клиент остановлен"); // Логируем остановку
+                Logger.Info("[IceCastClient] IceCast клиент остановлен"); // Логируем остановку
             }
         }
     }

@@ -30,7 +30,7 @@ namespace Strimer.Broadcast.Encoders
         // Основная инициализация энкодера
         private void Initialize()
         {
-            Logger.Info("Инициализация Opus энкодера...");
+            Logger.Info("[OpusEncoder] Инициализация Opus энкодера...");
 
             _encoderExe = GetOpusEncPath();  // Получаем путь к opusenc
             if (!File.Exists(_encoderExe))
@@ -50,7 +50,7 @@ namespace Strimer.Broadcast.Encoders
             if (_encoderHandle == 0)  // Проверка успешности создания
                 throw new Exception($"Не удалось создать Opus энкодер: {Bass.BASS_ErrorGetCode()}");
 
-            Logger.Info($"Opus энкодер: {_config.OpusBitrate}кбит/с {_config.OpusMode}");  // Лог успеха
+            Logger.Info($"[OpusEncoder] Opus энкодер: {_config.OpusBitrate}кбит/с {_config.OpusMode}");  // Лог успеха
         }
 
         // Проверка валидности энкодера (потокобезопасная)
@@ -69,7 +69,7 @@ namespace Strimer.Broadcast.Encoders
             {
                 if (_disposed || _encoderHandle == 0)  // Проверка доступности
                 {
-                    Logger.Warning("Попытка установить метаданные на недоступном энкодере");
+                    Logger.Warning("[OpusEncoder] Попытка установить метаданные на недоступном энкодере");
                     return false;  // Энкодер недоступен
                 }
 
@@ -98,7 +98,7 @@ namespace Strimer.Broadcast.Encoders
                     BassEnc.BASS_Encode_Stop(_encoderHandle);  // Останавливаем кодирование
                     Bass.BASS_StreamFree(_encoderHandle);      // Освобождаем ресурсы BASS
                     _encoderHandle = 0;                        // Обнуляем хэндл
-                    Logger.Debug("Ресурсы энкодера освобождены");  // Лог
+                    Logger.Debug("[OpusEncoder] Ресурсы энкодера освобождены");  // Лог
                 }
             }
         }

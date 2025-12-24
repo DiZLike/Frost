@@ -7,299 +7,232 @@ namespace Strimer.Services
 {
     public class RadioService
     {
-        private readonly AppConfig _config;
-        private readonly Player _player;
-        private readonly ScheduleManager _scheduleManager;
-        private readonly Playlist? _fallbackPlaylist;
-        private readonly IceCastClient _iceCast;
-        private readonly MyServerClient _myServer;
+        private readonly AppConfig _config;               // Конфигурация приложения
+        private readonly Player _player;                  // Проигрыватель аудио
+        private readonly ScheduleManager _scheduleManager;// Менеджер расписания
+        private readonly Playlist? _fallbackPlaylist;     // Резервный плейлист (если расписание отключено)
+        private readonly IceCastClient _iceCast;          // Клиент для IceCast стриминга
+        private readonly MyServerClient _myServer;        // Клиент для внешнего сервера
+        private readonly JingleService _jingleService;    // Сервис джинглов
 
-        private Thread _playbackThread;
-        private bool _isRunning;
-        private bool _isPaused;
+        private Thread _playbackThread;                   // Поток воспроизведения
+        private bool _isRunning;                          // Флаг работы сервиса
+        private bool _isPaused;                           // Флаг паузы
+        private int _trackCounter;                        // Счетчик треков для джингло
 
         // Текущая информация о треке
-        private TrackInfo? _currentTrack;
-        private DateTime _trackStartTime;
+        private TrackInfo? _currentTrack;                 // Текущий воспроизводимый трек
+        private DateTime _trackStartTime;                 // Время начала текущего трека
 
-        public bool IsRunning => _isRunning;
-        public bool IsPaused => _isPaused;
-        public TrackInfo? CurrentTrack => _currentTrack;
-        public IceCastClient IceCast => _iceCast;
+        public bool IsRunning => _isRunning;              // Свойство: работает ли сервис
+        public bool IsPaused => _isPaused;                // Свойство: на паузе ли воспроизведение
+        public TrackInfo? CurrentTrack => _currentTrack;  // Свойство: текущий трек
+        public IceCastClient IceCast => _iceCast;         // Свойство: клиент IceCast
 
         public RadioService(AppConfig config)
         {
-            _config = config;
+            _config = config;                             // Сохраняем конфигурацию
 
-            Logger.Info("Инициализация радио сервиса...");
+            Logger.Info("[RadioService] Инициализация радио сервиса...");// Лог: начало инициализации
 
             // Инициализация компонентов
-            _player = new Player(config);
-            _iceCast = new IceCastClient(config);
-            _myServer = new MyServerClient(config);
+            _jingleService = new JingleService(config);   // Создаем сервис джинглов
+            _player = new Player(config, _jingleService); // Создаем проигрыватель
+            _iceCast = new IceCastClient(config);         // Создаем клиент IceCast
+            _myServer = new MyServerClient(config);       // Создаем клиент внешнего сервера
 
-            // Инициализация менеджера расписания
-            _scheduleManager = new ScheduleManager(config);
+            _scheduleManager = new ScheduleManager(config);// Создаем менеджер расписания
 
             // Резервный плейлист (если расписание отключено или не настроено)
             if (!config.ScheduleEnable || _scheduleManager.CurrentPlaylist == null)
             {
-                _fallbackPlaylist = new Playlist(
+                _fallbackPlaylist = new Playlist(         // Создаем резервный плейлист
                     config.PlaylistFile,
                     config.SavePlaylistHistory,
                     config.DynamicPlaylist
                 );
-                Logger.Info($"Резервный плейлист загружен: {_fallbackPlaylist.TotalTracks} треков");
+                Logger.Info($"[RadioService] Резервный плейлист: {_fallbackPlaylist.TotalTracks} треков"); // Лог: информация о плейлисте
             }
 
-            Logger.Info($"Расписание включено: {config.ScheduleEnable}");
+            Logger.Info($"[RadioService] Расписание включено: {config.ScheduleEnable}"); // Лог: статус расписания
         }
 
+        // Получение текущего активного плейлиста
         private Playlist? GetCurrentPlaylist()
         {
-            if (_config.ScheduleEnable)
-            {
-                return _scheduleManager.CurrentPlaylist;
-            }
-            else
-            {
-                return _fallbackPlaylist;
-            }
+            return _config.ScheduleEnable                // Если расписание включено
+                ? _scheduleManager.CurrentPlaylist       // Берем плейлист из расписания
+                : _fallbackPlaylist;                     // Иначе берем резервный
         }
 
+        // Получение следующего трека для воспроизведения
         private string? GetNextTrackFromPlaylist()
         {
-            if (_config.ScheduleEnable)
-            {
-                return _scheduleManager.GetNextTrack();
-            }
-            else if (_fallbackPlaylist != null)
-            {
-                return _fallbackPlaylist.GetRandomTrack();
-            }
-
-            return null;
+            return _config.ScheduleEnable                // Если расписание включено
+                ? _scheduleManager.GetNextTrack()        // Берем трек из расписания
+                : _fallbackPlaylist?.GetRandomTrack();   // Иначе случайный из резервного
         }
 
+        // Запуск сервиса
         public void Start()
         {
-            if (_isRunning)
-                return;
+            if (_isRunning)                              // Если уже работает
+                return;                                  // Выход
 
-            Logger.Info("[RadioService] Запуск...");
+            Logger.Info("[RadioService] Запуск...");     // Лог: запуск
 
-            _isRunning = true;
-            _isPaused = false;
+            _isRunning = true;                           // Устанавливаем флаг работы
+            _isPaused = false;                           // Снимаем флаг паузы
 
             // Инициализируем аудио систему
-            _player.Initialize();
+            _player.Initialize();                        // Инициализация проигрывателя
 
             // Инициализируем IceCast
-            _iceCast.Initialize(_player.Mixer);
+            _iceCast.Initialize(_player.Mixer);          // Передаем микшер в IceCast
 
             // Запускаем поток воспроизведения
-            _playbackThread = new Thread(PlaybackLoop);
-            _playbackThread.Start();
+            _playbackThread = new Thread(PlaybackLoop);  // Создаем поток для цикла воспроизведения
+            _playbackThread.Start();                     // Запускаем поток
         }
 
+        // Остановка сервиса
         public void Stop()
         {
-            if (!_isRunning)
-                return;
+            if (!_isRunning)                             // Если не работает
+                return;                                  // Выход
 
-            Logger.Info("Остановка радио сервиса...");
+            Logger.Info("[RadioService] Остановка радио сервиса...");   // Лог: остановка
 
-            _isRunning = false;
-            _playbackThread?.Join(3000); // Ждем завершения потока
+            _isRunning = false;                          // Сбрасываем флаг работы
+            _playbackThread?.Join(3000);                 // Ждем завершения потока (3 секунды)
 
-            _player.Stop();
-            _iceCast.Dispose();
+            _player.Stop();                              // Останавливаем проигрыватель
+            _iceCast.Dispose();                          // Освобождаем ресурсы IceCast
 
-            Logger.Info("Радио сервис остановлен");
+            Logger.Info("[RadioService] Радио сервис остановлен");      // Лог: сервис остановлен
         }
 
+        // Основной цикл воспроизведения
         private void PlaybackLoop()
         {
-            Logger.Info("Цикл воспроизведения запущен");
-            DateTime trackStartTime = DateTime.Now;
+            Logger.Info("[RadioService] Цикл воспроизведения запущен"); // Лог: цикл запущен
+            //DateTime trackStartTime = DateTime.Now;      // Время начала загрузки трека
 
-            int trackCounter = 0;  // Счетчик треков для отладки
-
-            while (_isRunning)
+            while (_isRunning)                           // Пока сервис работает
             {
                 try
                 {
-                    trackCounter++;
-                    Logger.Debug($"Начало цикла трека #{trackCounter}");
+                    Logger.Debug("[RadioService] Начало цикла воспроизведения"); // Лог: начало цикла
 
-                    if (_isPaused)
+                    if (_isPaused)                       // Если на паузе
                     {
-                        Thread.Sleep(1000);
-                        continue;
+                        Thread.Sleep(1000);              // Ждем 1 секунду
+                        continue;                        // Переход к следующей итерации
                     }
 
-                    // Шаг 0: Обязательная проверка расписания перед любым треком
-                    Logger.Debug($"Проверка расписания...");
-                    _scheduleManager.CheckAndUpdatePlaylist();
+                    // Шаг 0: Проверка расписания перед любым треком
+                    Logger.Debug("[RadioService] Проверка расписания..."); // Лог: проверка расписания
+                    _scheduleManager.CheckAndUpdatePlaylist(); // Обновление плейлиста по расписанию
+
+                    // Проверяем, нужно ли играть джингл перед треком
+                    if (_config.JinglesEnable && _jingleService.ShouldPlayJingle())
+                    {
+                        // ВЫЗОВ ПЕРЕМЕЩЕННОГО МЕТОДА ИЗ JingleService
+                        bool jinglePlayed = _jingleService.PlayJingle(_player, _iceCast);
+
+                        if (jinglePlayed)
+                        {
+                            // Ждем окончания джингла
+                            WaitForTrackEnd();
+                            Logger.Debug("[RadioService] Джингл завершен, переход к треку");
+                        }
+                    }
 
                     // 1. Получаем следующий трек
-                    string? trackFile = GetNextTrackFromPlaylist();
+                    string? trackFile = GetNextTrackFromPlaylist(); // Получаем путь к следующему треку
 
-                    if (string.IsNullOrEmpty(trackFile))
+                    if (string.IsNullOrEmpty(trackFile)) // Если трек не найден
                     {
-                        Logger.Error("Нет доступных треков. Ожидание...");
-                        _scheduleManager.CheckAndUpdatePlaylist();
-                        Thread.Sleep(500);
-                        continue;
+                        Logger.Error("[RadioService] Нет доступных треков. Ожидание..."); // Лог: ошибка
+                        Thread.Sleep(500);               // Ждем 0.5 секунды
+                        continue;                        // Переход к следующей итерации
                     }
 
-                    Logger.Debug($"Выбран трек: {Path.GetFileName(trackFile)}");
+                    Logger.Debug($"[RadioService] Выбран трек: {Path.GetFileName(trackFile)}"); // Лог: выбранный трек
 
                     // 2. Проверяем подключение к IceCast перед воспроизведением
-                    if (!_iceCast.IsConnected)
+                    if (!_iceCast.IsConnected)           // Если IceCast не подключен
                     {
-                        Logger.Warning($"IceCast не подключен, проверка подключения...");
+                        Logger.Warning("[RadioService] IceCast не подключен"); // Лог: предупреждение
                     }
 
                     // 2.5. Воспроизводим трек
-                    //_currentTrack = _player.PlayTrack(trackFile);
-                    Logger.Debug($"Начало воспроизведения трека...");
-                    trackStartTime = DateTime.Now;
-                    _currentTrack = _player.PlayTrackWithSilence(trackFile);
+                    Logger.Debug("[RadioService] Начало воспроизведения трека..."); // Лог: начало воспроизведения
+                    //trackStartTime = DateTime.Now;       // Засекаем время начала загрузки
+                    _currentTrack = _player.PlayTrackWithJingleIfSlow(trackFile); // Воспроизведение трека
 
-
-                    if (_currentTrack == null)
+                    if (_currentTrack == null)           // Если не удалось воспроизвести
                     {
-                        Logger.Error("Не удалось воспроизвести трек. Пропускаю...");
-                        Thread.Sleep(500);
-                        continue;
+                        Logger.Error("[RadioService] Не удалось воспроизвести трек. Пропускаю..."); // Лог: ошибка
+                        Thread.Sleep(500);               // Ждем 0.5 секунды
+                        continue;                        // Переход к следующей итерации
                     }
-                    TimeSpan loadTime = DateTime.Now - trackStartTime;
-                    Logger.Info($"[Производительность] Трек загружен за {loadTime.TotalMilliseconds:F0}мс");
 
-                    _trackStartTime = DateTime.Now;
+                    //TimeSpan loadTime = DateTime.Now - trackStartTime; // Время загрузки трека
+                    //Logger.Info($"[Производительность] Трек загружен за {loadTime.TotalMilliseconds:F0}мс"); // Лог: производительность
+
+                    _trackStartTime = DateTime.Now;      // Сохраняем время начала воспроизведения
 
                     // 3. Устанавливаем метаданные в поток IceCast
-                    try
+                    if (_currentTrack != null)           // Если есть текущий трек
                     {
-                        if (_iceCast != null && _currentTrack != null)
+                        try
                         {
-                            _iceCast.SetMetadata(_currentTrack.Artist, _currentTrack.Title);
+                            _iceCast.SetMetadata(_currentTrack.Artist, _currentTrack.Title); // Отправка метаданных
                         }
-                    }
-                    catch (Exception metadataEx)
-                    {
-                        Logger.Error($"Ошибка установки метаданных: {metadataEx.Message}");
-                        // Не прерываем воспроизведение из-за ошибки метаданных
+                        catch (Exception ex)              // Обработка ошибок
+                        {
+                            Logger.Error($"[RadioService] Ошибка метаданных: {ex.Message}"); // Лог: ошибка
+                        }
                     }
 
                     // 4. Отправляем информацию на внешний сервер
-                    if (_config.MyServerEnabled)
+                    if (_config.MyServerEnabled && _currentTrack != null) // Если внешний сервер включен и есть трек
                     {
-                        var currentPlaylist = GetCurrentPlaylist();
-                        int trackNumber = currentPlaylist?.CurrentIndex + 1 ?? 0;
-
-                        _myServer.SendTrackInfo(
-                            trackNumber,
-                            _currentTrack.Artist,
-                            _currentTrack.Title,
-                            Path.GetFileName(trackFile)
+                        var currentPlaylist = GetCurrentPlaylist(); // Получаем текущий плейлист
+                        _myServer.SendTrackInfo(           // Отправка информации о треке
+                            (currentPlaylist?.CurrentIndex + 1) ?? 0, // Номер трека (начинается с 1)
+                            _currentTrack.Artist,          // Исполнитель
+                            _currentTrack.Title,           // Название трека
+                            Path.GetFileName(trackFile)    // Имя файла
                         );
                     }
 
                     // 5. Ждем окончания трека
-                    Logger.Debug($"Ожидание окончания трека...");
-                    WaitForTrackEnd();
-                    Logger.Debug($"Трек завершен, переход к следующему");
+                    Logger.Debug("[RadioService] Ожидание окончания трека..."); // Лог: ожидание окончания
+                    WaitForTrackEnd();                    // Ожидание завершения трека
+
+                    // Увеличиваем счетчик треков
+                    _jingleService.IncrementTrackCounter();
+
+                    Logger.Debug($"[RadioService] Трек завершен, счетчик: {_jingleService.GetTrackCounter()}");
                 }
-                catch (Exception ex)
+                catch (Exception ex)                       // Общая обработка ошибок
                 {
-                    Logger.Error($"Ошибка в цикле воспроизведения: {ex.Message}");
-                    Thread.Sleep(5000); // Пауза перед повторной попыткой
+                    Logger.Error($"[RadioService] Ошибка в цикле воспроизведения: {ex.Message}"); // Лог: ошибка
+                    Thread.Sleep(2000);                   // Пауза 5 секунд перед повторной попыткой
                 }
             }
 
-            Logger.Info("Цикл воспроизведения завершен");
+            Logger.Info("[RadioService] Цикл воспроизведения завершен"); // Лог: цикл завершен
         }
 
+        // Ожидание завершения текущего трека
         private void WaitForTrackEnd()
         {
-            while (_player.IsPlaying && _isRunning && !_isPaused)
+            while (_player.IsPlaying && _isRunning && !_isPaused) // Пока трек играет, сервис работает и не на паузе
             {
-                Thread.Sleep(1000);
-            }
-        }
-
-        public string GetStatus()
-        {
-            var currentPlaylist = GetCurrentPlaylist();
-            var status = new System.Text.StringBuilder();
-
-            status.AppendLine($"Сервис: {(_isRunning ? "Работает" : "Остановлен")}");
-            status.AppendLine($"Воспроизведение: {(_isPaused ? "На паузе" : "Играет")}");
-            status.AppendLine($"IceCast: {(_iceCast.IsConnected ? "Подключен" : "Отключен")}");
-
-            if (currentPlaylist != null)
-            {
-                status.AppendLine($"Плейлист: {currentPlaylist.TotalTracks} треков");
-                status.AppendLine($"Текущий: {currentPlaylist.CurrentIndex + 1}/{currentPlaylist.TotalTracks}");
-            }
-
-            if (_currentTrack != null)
-            {
-                status.AppendLine($"Текущий трек: {_currentTrack.Artist} - {_currentTrack.Title}");
-                status.AppendLine($"Длительность: {_player.GetCurrentTime()} / {_player.GetTotalTime()}");
-            }
-
-            status.AppendLine($"Слушателей: {_iceCast.Listeners} (Пик: {_iceCast.PeakListeners})");
-
-            return status.ToString();
-        }
-
-        public string GetStreamInfo()
-        {
-            var info = new System.Text.StringBuilder();
-
-            info.AppendLine($"Сервер: {_config.IceCastServer}:{_config.IceCastPort}");
-            info.AppendLine($"Mount: /{_config.IceCastMount}");
-            info.AppendLine($"Битрейт: {_config.OpusBitrate} кбит/с ({_config.OpusMode})");
-            info.AppendLine($"Слушателей: {_iceCast.Listeners}");
-            info.AppendLine($"Пик: {_iceCast.PeakListeners}");
-
-            if (_currentTrack != null)
-            {
-                info.AppendLine();
-                info.AppendLine($"Текущий трек:");
-                info.AppendLine($"  Исполнитель: {_currentTrack.Artist}");
-                info.AppendLine($"  Название: {_currentTrack.Title}");
-                info.AppendLine($"  Длительность: {_player.GetTotalTime()}");
-            }
-
-            return info.ToString();
-        }
-
-        public void PlayNextTrack()
-        {
-            if (_player.IsPlaying)
-            {
-                _player.StopCurrentTrack();
-                Logger.Info("Переход к следующему треку...");
-            }
-        }
-
-        public void TogglePause()
-        {
-            _isPaused = !_isPaused;
-
-            if (_isPaused)
-            {
-                _player.Pause();
-                Logger.Info("Воспроизведение приостановлено");
-            }
-            else
-            {
-                _player.Resume();
-                Logger.Info("Воспроизведение возобновлено");
+                Thread.Sleep(1000);                       // Проверяем каждую секунду
             }
         }
     }
