@@ -21,6 +21,7 @@ namespace Strimer.Broadcast
         private readonly object _lock = new object();       // Объект для синхронизации
         private Stopwatch _reconnectTime = new Stopwatch(); // Таймер для измерения времени переподключения
         private int _reconnectAttempts = 0;                 // Счётчик попыток переподключения
+        public event Action? ConnectionRestored;
 
         public bool IsConnected { get; private set; }       // Состояние подключения
         public int Listeners { get; private set; }          // Текущее количество слушателей
@@ -156,6 +157,7 @@ namespace Strimer.Broadcast
                             IsConnected = true;             // Устанавливаем флаг при успехе
                             _reconnectAttempts = 0;         // Сбрасываем счётчик попыток
                             _reconnectTime.Stop();          // Останавливаем таймер
+                            ConnectionRestored?.Invoke();
                             Logger.Info($"[Производительность] Соединение восстановлено за {_reconnectTime.Elapsed.TotalSeconds:F1} секунд");
                         }
                         else                                // Если переподключение не удалось

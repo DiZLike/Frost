@@ -1,0 +1,16 @@
+{
+    "input_directory": "C:\\Users\\Evgeny\\Desktop\\out",
+    "output_directory": "C:\\Users\\Evgeny\\Desktop\\out",
+    "file_extensions": [".mp3", ".wav", ".flac", ".m4a", ".aac", ".opus"],
+    "opus_settings": {
+        "bitrate": 32,
+        "vbr_mode": "vbr",
+        "audio_type": "music",
+        "compression": 10,
+        "frame_size": 60
+    },
+    "copy_tags": true,
+    "delete_source": false,
+    "overwrite_existing": false,
+    "output_filename_pattern": "{artist} - {title}"
+}

@@ -23,6 +23,7 @@ namespace Strimer.Services
         // Текущая информация о треке
         private TrackInfo? _currentTrack;                 // Текущий воспроизводимый трек
         private DateTime _trackStartTime;                 // Время начала текущего трека
+        private bool _skipToNextTrack = false;
 
         public bool IsRunning => _isRunning;              // Свойство: работает ли сервис
         public bool IsPaused => _isPaused;                // Свойство: на паузе ли воспроизведение
@@ -40,6 +41,7 @@ namespace Strimer.Services
             _player = new Player(config, _jingleService); // Создаем проигрыватель
             _iceCast = new IceCastClient(config);         // Создаем клиент IceCast
             _myServer = new MyServerClient(config);       // Создаем клиент внешнего сервера
+            _iceCast.ConnectionRestored += _iceCast_ConnectionRestored;
 
             _scheduleManager = new ScheduleManager(config);// Создаем менеджер расписания
 
@@ -55,6 +57,11 @@ namespace Strimer.Services
             }
 
             Logger.Info($"[RadioService] Расписание включено: {config.ScheduleEnable}"); // Лог: статус расписания
+        }
+
+        private void _iceCast_ConnectionRestored()
+        {
+            _skipToNextTrack = true;
         }
 
         // Получение текущего активного плейлиста
@@ -230,9 +237,14 @@ namespace Strimer.Services
         // Ожидание завершения текущего трека
         private void WaitForTrackEnd()
         {
-            while (_player.IsPlaying && _isRunning && !_isPaused) // Пока трек играет, сервис работает и не на паузе
+            while (_player.IsPlaying && _isRunning && !_isPaused && !_skipToNextTrack)
             {
-                Thread.Sleep(1000);                       // Проверяем каждую секунду
+                Thread.Sleep(1000);
+            }
+            if (_skipToNextTrack)
+            {
+                Logger.Debug("[RadioService] Прерывание воспроизведения по флагу skip");
+                _skipToNextTrack = false;
             }
         }
     }

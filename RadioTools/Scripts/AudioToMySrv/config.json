@@ -1,0 +1,10 @@
+{
+  "songs_path": "./music",
+  "key": "your_secret_key",
+  "page": "http://example.com/api",
+  "server_path": "/var/www/music/",
+  "download_link": "http://example.com/download/",
+  "max_retries": 3,
+  "log_file": "logs/process.log",
+  "supported_formats": [".mp3", ".flac", ".wav", ".ogg", ".m4a"]
+}
