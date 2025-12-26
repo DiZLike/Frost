@@ -211,7 +211,7 @@ namespace Strimer.Services
                             (currentPlaylist?.CurrentIndex + 1) ?? 0, // Номер трека (начинается с 1)
                             _currentTrack.Artist,          // Исполнитель
                             _currentTrack.Title,           // Название трека
-                            Path.GetFileName(trackFile)    // Имя файла
+                            trackFile    // Имя файла
                         );
                     }
 

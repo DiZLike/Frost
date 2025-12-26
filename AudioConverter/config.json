@@ -1,9 +1,9 @@
 {
-    "input_directory": "C:\\Users\\Evgeny\\Desktop\\out",
+    "input_directory": "C:\\Users\\Evgeny\\Desktop\\in",
     "output_directory": "C:\\Users\\Evgeny\\Desktop\\out",
     "file_extensions": [".mp3", ".wav", ".flac", ".m4a", ".aac", ".opus"],
     "opus_settings": {
-        "bitrate": 32,
+        "bitrate": 128,
         "vbr_mode": "vbr",
         "audio_type": "music",
         "compression": 10,

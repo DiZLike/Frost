@@ -53,8 +53,19 @@ namespace Strimer.Services
                 queryParams[_config.MyAddSongInfoTitleVar] = title;   // Название трека
 
                 // 3. Формируем полный путь к файлу на сервере
-                string filePath = _config.MyAddSongInfoLinkFolderOnServer + filename;
-                queryParams[_config.MyAddSongInfoLinkVar] = filePath; // Путь к файлу
+                filename = filename.Replace('\\', '/');
+                string normalizedPrefix = _config.MyRemoveFilePrefix.Replace('\\', '/');
+                int prefixPos = filename.IndexOf(normalizedPrefix);
+                string relativePath;
+                if (prefixPos >= 0)
+                    relativePath = filename.Substring(prefixPos + normalizedPrefix.Length).TrimStart('/');
+                else
+                    relativePath = filename.TrimStart('/');
+                string baseUrl = _config.MyAddSongInfoLinkFolderOnServer.TrimEnd('/') + "/";
+                var correct_path = (baseUrl + relativePath).Replace('\\', '/');
+                correct_path = correct_path.Replace("//", "/").Replace("http:/", "http://").Replace("https:/", "https://");
+
+                queryParams[_config.MyAddSongInfoLinkVar] = correct_path; // Путь к файлу
 
                 // 4. Собираем полный URL с помощью UriBuilder
                 var uriBuilder = new UriBuilder(_config.MyServerUrl);

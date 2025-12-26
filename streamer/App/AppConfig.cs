@@ -56,6 +56,7 @@ namespace Strimer.App
         public string MyAddSongInfoArtistVar { get; set; } = "";
         public string MyAddSongInfoLinkVar { get; set; } = "";
         public string MyAddSongInfoLinkFolderOnServer { get; set; } = "";
+        public string MyRemoveFilePrefix { get; set; } = "";
 
         // Джинглы
         public bool JinglesEnable { get; set; } = false;                    // Включены ли джинглы
@@ -288,6 +289,9 @@ namespace Strimer.App
                         case "add_song_info_link_folder_on_server":
                             MyAddSongInfoLinkFolderOnServer = value;
                             break;
+                        case "remove_file_prefix":
+                            MyRemoveFilePrefix = value;
+                            break;
                     }
                     break;
 
@@ -374,7 +378,7 @@ namespace Strimer.App
                     $"use_replay_gain={(UseReplayGain ? "yes" : "no")};",
                     $"use_custom_gain={(UseCustomGain ? "yes" : "no")};",
                     "",
-                    "[MySrv]",  // Более краткое название
+                    "[MySrv]",
                     $"enable={(MyServerEnabled ? "yes" : "no")};",
                     $"server={MyServerUrl};",
                     $"key={MyServerKey};",
@@ -384,6 +388,7 @@ namespace Strimer.App
                     $"add_song_info_artist_var={MyAddSongInfoArtistVar};",
                     $"add_song_info_link_var={MyAddSongInfoLinkVar};",
                     $"add_song_info_link_folder_on_server={MyAddSongInfoLinkFolderOnServer};",
+                    $"remove_file_prefix={MyRemoveFilePrefix};",
                     "",
                     $"[Jingles]",
                     $"enable={(JinglesEnable ? "yes" : "no")};",

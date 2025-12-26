@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpusConverter", "AudioConve
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CueSplitter", "CueSplitter\CueSplitter.csproj", "{8224D9A2-CFB4-4B71-8834-50459743FB27}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrostPlayer", "FrostPlayer\FrostPlayer.csproj", "{2C65C8FA-6FFE-41BE-ACA6-1F78F099FD03}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -116,6 +118,18 @@ Global
 		{8224D9A2-CFB4-4B71-8834-50459743FB27}.Release|x64.Build.0 = Release|Any CPU
 		{8224D9A2-CFB4-4B71-8834-50459743FB27}.Release|x86.ActiveCfg = Release|Any CPU
 		{8224D9A2-CFB4-4B71-8834-50459743FB27}.Release|x86.Build.0 = Release|Any CPU
+		{2C65C8FA-6FFE-41BE-ACA6-1F78F099FD03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C65C8FA-6FFE-41BE-ACA6-1F78F099FD03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C65C8FA-6FFE-41BE-ACA6-1F78F099FD03}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2C65C8FA-6FFE-41BE-ACA6-1F78F099FD03}.Debug|x64.Build.0 = Debug|Any CPU
+		{2C65C8FA-6FFE-41BE-ACA6-1F78F099FD03}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2C65C8FA-6FFE-41BE-ACA6-1F78F099FD03}.Debug|x86.Build.0 = Debug|Any CPU
+		{2C65C8FA-6FFE-41BE-ACA6-1F78F099FD03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C65C8FA-6FFE-41BE-ACA6-1F78F099FD03}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C65C8FA-6FFE-41BE-ACA6-1F78F099FD03}.Release|x64.ActiveCfg = Release|Any CPU
+		{2C65C8FA-6FFE-41BE-ACA6-1F78F099FD03}.Release|x64.Build.0 = Release|Any CPU
+		{2C65C8FA-6FFE-41BE-ACA6-1F78F099FD03}.Release|x86.ActiveCfg = Release|Any CPU
+		{2C65C8FA-6FFE-41BE-ACA6-1F78F099FD03}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
