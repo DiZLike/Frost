@@ -7,10 +7,12 @@ namespace gainer.Tags
     public class TagWriter
     {
         private readonly string _filePath;
+        private readonly bool _autoTagEnabled;
 
-        public TagWriter(string filePath)
+        public TagWriter(string filePath, bool autoTagEnabled = false)
         {
             _filePath = filePath;
+            _autoTagEnabled = autoTagEnabled;
         }
 
         public void SaveReplayGain(double gain, bool useCustomTag)
@@ -24,11 +26,18 @@ namespace gainer.Tags
                 {
                     using (var file = TagLib.File.Create(_filePath))
                     {
+                        // Автоматическое заполнение тегов из пути
+                        if (_autoTagEnabled)
+                        {
+                            var autoTagger = new AutoTagger();
+                            var tags = autoTagger.ExtractFromPath(_filePath);
+                            autoTagger.ApplyTags(file, tags);
+                        }
+
                         if (useCustomTag)
                         {
                             // Кастомный тег в комментарии
                             file.Tag.Comment = $"replay-gain={gain}";
-                            //Console.WriteLine($"  Сохранен кастомный тег: replay-gain={gain}");
                         }
                         else
                         {
@@ -36,13 +45,11 @@ namespace gainer.Tags
                             {
                                 // Стандартный тег Replay Gain
                                 file.Tag.ReplayGainTrackGain = gain;
-                                //Console.WriteLine($"  Сохранен стандартный тег ReplayGain: {gain} dB");
                             }
                             catch (NotImplementedException)
                             {
                                 // Если формат не поддерживает стандартный тег, используем кастомный
                                 file.Tag.Comment = $"replay-gain={gain}";
-                                //Console.WriteLine($"  Формат не поддерживает ReplayGain тег, сохранено в комментарии: replay-gain={gain}");
                             }
                         }
 
@@ -55,17 +62,12 @@ namespace gainer.Tags
                     retryCount++;
                     if (retryCount >= maxRetries)
                     {
-                        //Console.WriteLine($"  Ошибка при сохранении тегов после {maxRetries} попыток: {ex.Message}");
                         return;
                     }
-
-                    // Ждем немного перед повторной попыткой
-                    //Console.WriteLine($"  Файл занят, повторная попытка {retryCount}/{maxRetries} через 100мс...");
                     Thread.Sleep(100);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    //Console.WriteLine($"  Ошибка при сохранении тегов: {ex.Message}");
                     return;
                 }
             }

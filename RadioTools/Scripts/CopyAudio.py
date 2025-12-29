@@ -21,10 +21,30 @@ DATE_PREFIX_PATTERNS = [
     re.compile(r'^\d{4}-\d{2}-\d{2}\s+'),
 ]
 
+def get_terminal_width():
+    """Получить ширину терминала"""
+    try:
+        return shutil.get_terminal_size().columns
+    except:
+        return 80  # значение по умолчанию
+
+def clear_line():
+    """Очистить текущую строку в терминале"""
+    width = get_terminal_width()
+    print(f"\r{' ' * width}\r", end="", flush=True)
+
+def print_progress(filename, current, total):
+    """Отобразить прогресс копирования"""
+    progress_text = f"Файл: {filename} ({current}/{total})"
+    width = get_terminal_width()
+    padding = max(0, width - len(progress_text))
+    print(f"\r{progress_text}{' ' * padding}", end="", flush=True)
+
 def print_header(title):
-    print(f"\n{'='*60}")
-    print(title)
-    print(f"{'='*60}")
+    width = get_terminal_width()
+    print(f"\n{'=' * width}")
+    print(title.center(width))
+    print(f"{'=' * width}")
 
 def print_report(title, new_count, skipped_count, new_tracks=None, skipped_tracks=None):
     print_header(title)
@@ -114,6 +134,20 @@ def get_existing_tracks_remote(sftp, server_folder):
     scan_directory(server_folder)
     return existing_tracks
 
+def get_audio_files_list(source_folder):
+    """Получить список всех аудиофайлов в исходной папке"""
+    source_path = Path(source_folder)
+    audio_files = []
+    
+    if not source_path.exists():
+        return audio_files
+    
+    for file_path in source_path.rglob('*'):
+        if file_path.is_file() and file_path.suffix.lower() in AUDIO_EXTENSIONS:
+            audio_files.append(file_path)
+    
+    return audio_files
+
 def copy_files_local(source_folder, target_folder):
     source_path = Path(source_folder)
     target_path = Path(target_folder)
@@ -125,33 +159,51 @@ def copy_files_local(source_folder, target_folder):
     target_path.mkdir(parents=True, exist_ok=True)
     existing_tracks = get_existing_tracks_local(target_folder)
     
+    # Получаем список всех аудиофайлов
+    audio_files = get_audio_files_list(source_folder)
+    total_files = len(audio_files)
+    
+    if total_files == 0:
+        print("В исходной папке не найдено аудиофайлов")
+        return False
+    
+    print(f"\nНайдено аудиофайлов: {total_files}")
+    
     new_tracks = []
     skipped_tracks = []
+    processed = 0
     
-    for file_path in source_path.rglob('*'):
-        if file_path.is_file() and file_path.suffix.lower() in AUDIO_EXTENSIONS:
-            track_name = file_path.stem
-            normalized_name = normalize_track_name(track_name)
-            
-            if normalized_name in existing_tracks:
-                skipped_tracks.append((file_path.name, normalized_name))
-                continue
-            
-            relative_path = file_path.relative_to(source_path)
-            target_file_path = target_path / relative_path
-            
-            new_filename = add_datetime_prefix(target_file_path.name)
-            target_file_path = target_file_path.parent / new_filename
-            
-            target_file_path.parent.mkdir(parents=True, exist_ok=True)
-            
-            try:
-                shutil.copy2(file_path, target_file_path)
-                new_tracks.append(new_filename)
-                existing_tracks[normalized_name] = new_filename
-            except Exception:
-                continue
+    for file_path in audio_files:
+        processed += 1
+        track_name = file_path.stem
+        normalized_name = normalize_track_name(track_name)
+        
+        # Отображаем прогресс
+        print_progress(file_path.name, processed, total_files)
+        
+        if normalized_name in existing_tracks:
+            skipped_tracks.append((file_path.name, normalized_name))
+            continue
+        
+        relative_path = file_path.relative_to(source_path)
+        target_file_path = target_path / relative_path
+        
+        new_filename = add_datetime_prefix(target_file_path.name)
+        target_file_path = target_file_path.parent / new_filename
+        
+        target_file_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        try:
+            shutil.copy2(file_path, target_file_path)
+            new_tracks.append(new_filename)
+            existing_tracks[normalized_name] = new_filename
+        except Exception as e:
+            clear_line()
+            print(f"\nОшибка при копировании {file_path.name}: {e}")
+            continue
     
+    # Очищаем строку прогресса
+    clear_line()
     print_report("ЛОКАЛЬНОЕ КОПИРОВАНИЕ", len(new_tracks), len(skipped_tracks), new_tracks, skipped_tracks)
     return len(new_tracks) > 0 or len(skipped_tracks) > 0
 
@@ -179,55 +231,76 @@ def copy_files_remote(source_folder, server_folder, hostname, username, password
         return False
     
     existing_tracks = get_existing_tracks_remote(sftp, server_folder)
+    
+    # Получаем список всех аудиофайлов
+    audio_files = get_audio_files_list(source_folder)
+    total_files = len(audio_files)
+    
+    if total_files == 0:
+        print("В исходной папке не найдено аудиофайлов")
+        sftp.close()
+        transport.close()
+        return False
+    
+    print(f"\nНайдено аудиофайлов: {total_files}")
+    
     new_tracks = []
     skipped_tracks = []
+    processed = 0
     
-    for file_path in source_path.rglob('*'):
-        if file_path.is_file() and file_path.suffix.lower() in AUDIO_EXTENSIONS:
-            normalized_name = normalize_track_name(file_path.stem)
+    for file_path in audio_files:
+        processed += 1
+        normalized_name = normalize_track_name(file_path.stem)
+        
+        # Отображаем прогресс
+        print_progress(file_path.name, processed, total_files)
+        
+        if normalized_name in existing_tracks:
+            skipped_tracks.append((file_path.name, normalized_name))
+            continue
+        
+        relative_path = file_path.relative_to(source_path)
+        relative_posix = PurePosixPath(str(relative_path).replace('\\', '/'))
+        
+        new_filename = add_datetime_prefix(relative_posix.name)
+        server_file_path = str(PurePosixPath(server_folder) / relative_posix.parent / new_filename)
+        server_dir = str(PurePosixPath(server_file_path).parent).replace('\\', '/')
+        server_file_path = server_file_path.replace('\\', '/')
+        
+        try:
+            sftp.stat(server_dir)
+        except FileNotFoundError:
+            parent_dirs = []
+            current_dir = server_dir
             
-            if normalized_name in existing_tracks:
-                skipped_tracks.append((file_path.name, normalized_name))
-                continue
-            
-            relative_path = file_path.relative_to(source_path)
-            relative_posix = PurePosixPath(str(relative_path).replace('\\', '/'))
-            
-            new_filename = add_datetime_prefix(relative_posix.name)
-            server_file_path = str(PurePosixPath(server_folder) / relative_posix.parent / new_filename)
-            server_dir = str(PurePosixPath(server_file_path).parent).replace('\\', '/')
-            server_file_path = server_file_path.replace('\\', '/')
-            
-            try:
-                sftp.stat(server_dir)
-            except FileNotFoundError:
-                parent_dirs = []
-                current_dir = server_dir
-                
-                while True:
-                    try:
-                        sftp.stat(current_dir)
+            while True:
+                try:
+                    sftp.stat(current_dir)
+                    break
+                except FileNotFoundError:
+                    parent_dirs.append(current_dir)
+                    current_dir = str(PurePosixPath(current_dir).parent)
+                    if current_dir in ('/', '', '.'):
                         break
-                    except FileNotFoundError:
-                        parent_dirs.append(current_dir)
-                        current_dir = str(PurePosixPath(current_dir).parent)
-                        if current_dir in ('/', '', '.'):
-                            break
-                
-                for dir_to_create in reversed(parent_dirs):
-                    try:
-                        sftp.mkdir(dir_to_create)
-                    except Exception:
-                        continue
             
-            try:
-                time.sleep(0.1)
-                sftp.put(str(file_path), server_file_path)
-                new_tracks.append(new_filename)
-                existing_tracks[normalized_name] = new_filename
-            except Exception:
-                continue
+            for dir_to_create in reversed(parent_dirs):
+                try:
+                    sftp.mkdir(dir_to_create)
+                except Exception:
+                    continue
+        
+        try:
+            time.sleep(0.1)
+            sftp.put(str(file_path), server_file_path)
+            new_tracks.append(new_filename)
+            existing_tracks[normalized_name] = new_filename
+        except Exception as e:
+            clear_line()
+            print(f"\nОшибка при копировании {file_path.name}: {e}")
+            continue
     
+    # Очищаем строку прогресса
+    clear_line()
     print_report("УДАЛЕННОЕ КОПИРОВАНИЕ", len(new_tracks), len(skipped_tracks), new_tracks, skipped_tracks)
     
     sftp.close()
@@ -238,7 +311,7 @@ def select_mode():
     print_header("ВЫБОР РЕЖИМА РАБОТЫ")
     print("1. Локальное копирование (в другую локальную папку)")
     print("2. Удаленное копирование (на сервер через SFTP)")
-    print(f"{'='*60}")
+    print(f"{'=' * get_terminal_width()}")
     
     while True:
         choice = input("Выберите режим (1 или 2): ").strip()

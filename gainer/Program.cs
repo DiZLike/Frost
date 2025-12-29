@@ -41,13 +41,14 @@ namespace gainer
 
         private static void PrintUsage()
         {
-            Console.WriteLine("Использование: gainer.exe -gain n/k -tag n/c -target -23 \"путь_к_папке\"");
-            Console.WriteLine("Пример: gainer.exe -gain k -tag c -target -23 \"C:\\Music\"");
+            Console.WriteLine("Использование: gainer.exe -gain n/k -tag n/c -target -23 -autotag on/off \"путь_к_папке\"");
+            Console.WriteLine("Пример: gainer.exe -gain k -tag c -target -23 -autotag on \"C:\\Music\"");
             Console.WriteLine();
             Console.WriteLine("Аргументы:");
             Console.WriteLine("  -gain n/k     : n - без K-фильтра, k - с K-фильтром");
             Console.WriteLine("  -tag n/c      : n - стандартные теги, c - кастомные теги");
             Console.WriteLine("  -target -23   : целевое значение LUFS (по умолчанию -23)");
+            Console.WriteLine("  -autotag on/off: автоматическое заполнение тегов из пути");
             Console.WriteLine("  \"путь\"        : путь к папке с аудиофайлами");
         }
 
@@ -59,6 +60,7 @@ namespace gainer
             Console.WriteLine($"K-фильтр: {(args.UseKFilter ? "ДА" : "НЕТ")}");
             Console.WriteLine($"Тип тегов: {(args.UseCustomTag ? "Кастомный" : "Стандартный")}");
             Console.WriteLine($"Целевое LUFS: {args.TargetLufs}");
+            Console.WriteLine($"Авто-теги: {(args.AutoTagEnabled ? "ВКЛ" : "ВЫКЛ")}");
         }
     }
 }

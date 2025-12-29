@@ -1,6 +1,8 @@
 ﻿using Strimer.App;
 using Strimer.Audio;
 using Strimer.Core;
+using System.IO;
+using System.Text;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Enc;
 using Un4seen.Bass.AddOn.EncOpus;
@@ -39,13 +41,21 @@ namespace Strimer.Broadcast.Encoders
             string parameters = BuildParameters();  // Строим параметры командной строки
 
             // Создаем энкодер через BASS
-            _encoderHandle = BassEnc_Opus.BASS_Encode_OPUS_Start(
-                _mixer.Handle,          // Хэндл микшера
-                parameters,             // Параметры запуска
-                BASSEncode.BASS_ENCODE_FP_16BIT,  // 16-битное кодирование
-                null,                   // Callback не нужен
-                IntPtr.Zero             // User data не нужен
-            );
+            //_encoderHandle = BassEnc_Opus.BASS_Encode_OPUS_Start(
+            //    _mixer.Handle,          // Хэндл микшера
+            //    parameters,             // Параметры запуска
+            //    BASSEncode.BASS_ENCODE_FP_16BIT,  // 16-битное кодирование
+            //    null,                   // Callback не нужен
+            //    IntPtr.Zero             // User data не нужен
+            //);
+
+            _encoderHandle = BassEnc.BASS_Encode_Start(
+                    _mixer.Handle,
+                    $"{parameters}",
+                    0,
+                    null,
+                    IntPtr.Zero
+                );
 
             if (_encoderHandle == 0)  // Проверка успешности создания
                 throw new Exception($"Не удалось создать Opus энкодер: {Bass.BASS_ErrorGetCode()}");
@@ -119,7 +129,7 @@ namespace Strimer.Broadcast.Encoders
             }
             else  // Linux (и другие Unix-подобные)
             {
-                return "/usr/bin/opusenc";  // Стандартный путь в Linux
+                return "/usr/local/bin/opusenc";
             }
         }
 

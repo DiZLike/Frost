@@ -2,6 +2,7 @@
 using Strimer.Audio;
 using Strimer.Broadcast;
 using Strimer.Core;
+using System.Collections.Concurrent;
 
 namespace Strimer.Services
 {
@@ -24,6 +25,10 @@ namespace Strimer.Services
         private TrackInfo? _currentTrack;                 // Текущий воспроизводимый трек
         private DateTime _trackStartTime;                 // Время начала текущего трека
         private bool _skipToNextTrack = false;
+
+        // История последних исполнителей (для предотвращения повторений)
+        private readonly ConcurrentQueue<string> _lastArtists = new();
+        private const int MAX_ARTIST_HISTORY = 5;         // Храним последних 5 исполнителей
 
         public bool IsRunning => _isRunning;              // Свойство: работает ли сервис
         public bool IsPaused => _isPaused;                // Свойство: на паузе ли воспроизведение
@@ -71,13 +76,99 @@ namespace Strimer.Services
                 ? _scheduleManager.CurrentPlaylist       // Берем плейлист из расписания
                 : _fallbackPlaylist;                     // Иначе берем резервный
         }
-
         // Получение следующего трека для воспроизведения
         private string? GetNextTrackFromPlaylist()
         {
             return _config.ScheduleEnable                // Если расписание включено
                 ? _scheduleManager.GetNextTrack()        // Берем трек из расписания
                 : _fallbackPlaylist?.GetRandomTrack();   // Иначе случайный из резервного
+        }
+        // Получение случайного трека с проверкой на повтор исполнителя
+        private string? GetRandomTrackWithArtistCheck()
+        {
+            if (_fallbackPlaylist == null)
+                return null;
+
+            string? selectedTrack = null;
+            string? selectedArtist = null;
+            int attempts = 0;
+            const int MAX_ATTEMPTS = 3; // Максимальное количество попыток найти трек с другим исполнителем
+
+            do
+            {
+                // Получаем случайный трек из плейлиста
+                selectedTrack = GetNextTrackFromPlaylist();
+
+                if (string.IsNullOrEmpty(selectedTrack))
+                {
+                    Logger.Warning("[RadioService] Не удалось получить трек из плейлиста");
+                    return null;
+                }
+
+                // Пытаемся загрузить теги для проверки исполнителя ДО воспроизведения
+                try
+                {
+                    var tagInfo = _player.GetTrackTags(selectedTrack);
+                    if (tagInfo != null)
+                    {
+                        selectedArtist = !string.IsNullOrWhiteSpace(tagInfo.artist)
+                            ? tagInfo.artist
+                            : "Unknown Artist";
+
+                        // Проверяем, был ли этот исполнитель недавно
+                        bool isArtistRepeated = _lastArtists.Contains(selectedArtist);
+
+                        if (isArtistRepeated && attempts < MAX_ATTEMPTS - 1)
+                        {
+                            Logger.Info($"[RadioService] Пропускаем трек {Path.GetFileName(selectedTrack)} - " +
+                                      $"исполнитель был недавно: {selectedArtist} (попытка {attempts + 1})");
+                            attempts++;
+                            continue; // Пробуем найти другой трек
+                        }
+                        else
+                        {
+                            // Нашли подходящий трек
+                            break;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error($"[RadioService] Ошибка при проверке тегов трека {selectedTrack}: {ex.Message}");
+                    // Если не удалось проверить теги, используем трек как есть
+                    selectedArtist = "Unknown Artist";
+                    break;
+                }
+
+            } while (attempts < MAX_ATTEMPTS);
+
+            if (attempts >= MAX_ATTEMPTS)
+            {
+                Logger.Warning($"[RadioService] Не удалось найти трек с другим исполнителем после {MAX_ATTEMPTS} попыток. " +
+                              $"Использую последний найденный: {Path.GetFileName(selectedTrack)}");
+            }
+
+            // Добавляем исполнителя в историю ДО воспроизведения
+            if (selectedArtist != null && selectedTrack != null)
+            {
+                AddArtistToHistory(selectedArtist);
+            }
+
+            return selectedTrack;
+        }
+
+        // Добавление исполнителя в историю
+        private void AddArtistToHistory(string artist)
+        {
+            _lastArtists.Enqueue(artist);
+
+            // Поддерживаем максимальный размер очереди
+            while (_lastArtists.Count > MAX_ARTIST_HISTORY)
+            {
+                _lastArtists.TryDequeue(out _);
+            }
+
+            Logger.Debug($"[RadioService] Исполнитель добавлен в историю: {artist} (всего: {_lastArtists.Count})");
         }
 
         // Запуск сервиса
@@ -123,7 +214,6 @@ namespace Strimer.Services
         private void PlaybackLoop()
         {
             Logger.Info("[RadioService] Цикл воспроизведения запущен"); // Лог: цикл запущен
-            //DateTime trackStartTime = DateTime.Now;      // Время начала загрузки трека
 
             while (_isRunning)                           // Пока сервис работает
             {
@@ -155,8 +245,8 @@ namespace Strimer.Services
                         }
                     }
 
-                    // 1. Получаем следующий трек
-                    string? trackFile = GetNextTrackFromPlaylist(); // Получаем путь к следующему треку
+                    // 1. Получаем следующий трек с проверкой исполнителя
+                    string? trackFile = GetRandomTrackWithArtistCheck();
 
                     if (string.IsNullOrEmpty(trackFile)) // Если трек не найден
                     {
@@ -165,7 +255,7 @@ namespace Strimer.Services
                         continue;                        // Переход к следующей итерации
                     }
 
-                    Logger.Debug($"[RadioService] Выбран трек: {Path.GetFileName(trackFile)}"); // Лог: выбранный трек
+                    Logger.Info($"[RadioService] Выбран трек: {Path.GetFileName(trackFile)}"); // Лог: выбранный трек
 
                     // 2. Проверяем подключение к IceCast перед воспроизведением
                     if (!_iceCast.IsConnected)           // Если IceCast не подключен
@@ -173,10 +263,9 @@ namespace Strimer.Services
                         Logger.Warning("[RadioService] IceCast не подключен"); // Лог: предупреждение
                     }
 
-                    // 2.5. Воспроизводим трек
+                    // 3. Воспроизводим трек (исполнитель уже проверен)
                     Logger.Debug("[RadioService] Начало воспроизведения трека..."); // Лог: начало воспроизведения
-                    //trackStartTime = DateTime.Now;       // Засекаем время начала загрузки
-                    _currentTrack = _player.PlayTrackWithJingleIfSlow(trackFile); // Воспроизведение трека
+                    _currentTrack = _player.PlayTrackWithJingleIfSlow(trackFile);
 
                     if (_currentTrack == null)           // Если не удалось воспроизвести
                     {
@@ -185,12 +274,9 @@ namespace Strimer.Services
                         continue;                        // Переход к следующей итерации
                     }
 
-                    //TimeSpan loadTime = DateTime.Now - trackStartTime; // Время загрузки трека
-                    //Logger.Info($"[Производительность] Трек загружен за {loadTime.TotalMilliseconds:F0}мс"); // Лог: производительность
-
                     _trackStartTime = DateTime.Now;      // Сохраняем время начала воспроизведения
 
-                    // 3. Устанавливаем метаданные в поток IceCast
+                    // 4. Устанавливаем метаданные в поток IceCast
                     if (_currentTrack != null)           // Если есть текущий трек
                     {
                         try
@@ -203,7 +289,7 @@ namespace Strimer.Services
                         }
                     }
 
-                    // 4. Отправляем информацию на внешний сервер
+                    // 5. Отправляем информацию на внешний сервер
                     if (_config.MyServerEnabled && _currentTrack != null) // Если внешний сервер включен и есть трек
                     {
                         var currentPlaylist = GetCurrentPlaylist(); // Получаем текущий плейлист
@@ -215,7 +301,7 @@ namespace Strimer.Services
                         );
                     }
 
-                    // 5. Ждем окончания трека
+                    // 6. Ждем окончания трека
                     Logger.Debug("[RadioService] Ожидание окончания трека..."); // Лог: ожидание окончания
                     WaitForTrackEnd();                    // Ожидание завершения трека
 
@@ -227,7 +313,7 @@ namespace Strimer.Services
                 catch (Exception ex)                       // Общая обработка ошибок
                 {
                     Logger.Error($"[RadioService] Ошибка в цикле воспроизведения: {ex.Message}"); // Лог: ошибка
-                    Thread.Sleep(2000);                   // Пауза 5 секунд перед повторной попыткой
+                    Thread.Sleep(2000);                   // Пауза 2 секунды перед повторной попыткой
                 }
             }
 

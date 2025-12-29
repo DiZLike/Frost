@@ -112,6 +112,10 @@ namespace Strimer.Audio
         {
             return BassTags.BASS_TAG_GetFromFile(filePath);
         }
+        public static BASSError GetBassError()
+        {
+            return Bass.BASS_ErrorGetCode();
+        }
 
         public bool IsStreamPlaying(int streamHandle)
         {

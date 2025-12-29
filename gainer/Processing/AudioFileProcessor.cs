@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -41,7 +41,6 @@ namespace gainer.Processing
                     audioReader.ProgressChanged += (progress) =>
                     {
                         int percent = (int)(progress * 100);
-                        // Обновляем только если процент изменился на 2 или больше
                         if (Math.Abs(percent - _lastPercentReported) >= 2 || percent == 50 || percent == 0)
                         {
                             _lastPercentReported = percent;
@@ -63,11 +62,9 @@ namespace gainer.Processing
 
                     // 2. Расчет Replay Gain
                     var replayGain = new ReplayGainCalculator(44100, _args.TargetLufs);
-                    // Подписываемся на прогресс анализа
                     replayGain.ProgressChanged += (progress, message) =>
                     {
                         int percent = (int)(progress * 100);
-                        // Обновляем только если процент изменился на 2 или больше
                         if (Math.Abs(percent - _lastPercentReported) >= 2 || percent >= 90 || percent <= 50)
                         {
                             _lastPercentReported = percent;
@@ -88,16 +85,18 @@ namespace gainer.Processing
                     _progressManager.UpdateThreadLine(lineIndex,
                         $"Поток {formattedThreadId}> 💾 {shortFileName} - сохранение тегов...",
                         ConsoleColor.Blue);
-                    var tagWriter = new TagWriter(filePath);
+
+                    var tagWriter = new TagWriter(filePath, _args.AutoTagEnabled);
                     tagWriter.SaveReplayGain(gainValue, _args.UseCustomTag);
 
                     // Выводим результат
+                    string autoTagMessage = _args.AutoTagEnabled ? " + авто-теги" : "";
                     _progressManager.UpdateThreadLine(lineIndex,
-                        $"Поток {formattedThreadId}> Готово: {shortFileName} - {gainValue:F2} dB",
+                        $"Поток {formattedThreadId}> Готово: {shortFileName} - {gainValue:F2} dB{autoTagMessage}",
                         ConsoleColor.Green);
 
                     _statistics.IncrementSuccess();
-                    _statistics.AddSuccess($"{fileName} - {gainValue:F2} dB");
+                    _statistics.AddSuccess($"{fileName} - {gainValue:F2} dB{autoTagMessage}");
                     Thread.Sleep(1000);
                 }
             }
@@ -116,7 +115,7 @@ namespace gainer.Processing
                 _statistics.IncrementProcessed();
                 _progressManager.PrintProgress();
                 _progressManager.ClearThreadLine(lineIndex);
-                _lastPercentReported = -1; // Сброс для следующего файла
+                _lastPercentReported = -1;
             }
         }
 

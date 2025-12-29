@@ -2,6 +2,7 @@
 using Strimer.Core;
 using Strimer.Services;
 using System.Diagnostics;
+using Un4seen.Bass.AddOn.Tags;
 
 namespace Strimer.Audio
 {
@@ -179,7 +180,18 @@ namespace Strimer.Audio
                 Logger.Warning($"[Player] Поток {threadName} не завершился за {seconds} секунд");
             }
         }
-
+        public TAG_INFO? GetTrackTags(string filePath)
+        {
+            try
+            {
+                return _audioEngine.GetTrackTags(filePath);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"[Player] Ошибка при получении тегов: {ex.Message}");
+                return null;
+            }
+        }
         public void StopCurrentTrack()
         {
             if (_currentStream != 0)

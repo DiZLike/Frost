@@ -121,7 +121,7 @@ namespace Strimer.Broadcast
             {
                 try
                 {
-                    Thread.Sleep(15000);                    // Пауза между проверками - 15 секунд
+                    Thread.Sleep(10000);                    // Пауза между проверками - 10 секунд
                     if (_disposed || !_shouldMonitor)       // Проверка флагов остановки
                         break;
 
@@ -146,6 +146,9 @@ namespace Strimer.Broadcast
                             _reconnectAttempts = 1;         // Начинаем первую попытку
                             IsConnected = false;            // Сбрасываем флаг соединения
                             Logger.Warning("[IceCastClient] Соединение потеряно. Начинаем переподключение...");
+                            var error_code = BassAudioEngine.GetBassError();
+                            if (error_code != BASSError.BASS_OK)
+                                Logger.Error($"[IceCastClient] Ошибка BASS: {error_code}");
                         }
                         else if (_reconnectTime.IsRunning)  // Если уже пытаемся переподключиться
                             _reconnectAttempts++;           // Увеличиваем счётчик попыток
@@ -257,7 +260,7 @@ namespace Strimer.Broadcast
             try
             {
                 _encoder.SetMetadata(artist, title);      // Отправка метаданных
-                Logger.Info($"[IceCastClient] Метаданные: {artist} - {title}");
+                Logger.Debug($"[IceCastClient] Метаданные: {artist} - {title}");
             }
             catch (Exception ex)
             {
