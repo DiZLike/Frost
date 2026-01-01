@@ -101,7 +101,7 @@ namespace OpusConverter.Core
                 tag.DiscCount.ToString("D2") :
                 "");
 
-            // Жанры
+            // Жанр (добавлено)
             pattern = pattern.Replace("{genre}",
                 tag.Genres?.FirstOrDefault() ??
                 "");

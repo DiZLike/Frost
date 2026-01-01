@@ -1,3 +1,3 @@
 d:
-python .\Scripts\CheckList.py O:\!Radio\pls\all.pls
+python .\Scripts\CheckList.py D:\DiZ\Yandex.Disk\radio\playlists\all.pls
 pause

@@ -79,6 +79,18 @@ namespace OpusConverter
             ConsoleUI.PrintSectionHeader("Справка", 40);
             Console.WriteLine("Использование: AudioOpusConverter [параметры]");
             Console.WriteLine();
+            Console.WriteLine("Плейсхолдеры для имен файлов:");
+            ConsoleUI.PrintInfo("{artist}", "Исполнитель");
+            ConsoleUI.PrintInfo("{title}", "Название трека");
+            ConsoleUI.PrintInfo("{album}", "Альбом");
+            ConsoleUI.PrintInfo("{year}", "Год");
+            ConsoleUI.PrintInfo("{track}", "Номер трека (с ведущим нулём)");
+            ConsoleUI.PrintInfo("{genre}", "Жанр"); // Добавлено
+            ConsoleUI.PrintInfo("{performer}", "Исполнитель (первый)");
+            ConsoleUI.PrintInfo("{composer}", "Композитор");
+            ConsoleUI.PrintInfo("{directory}", "Относительный путь");
+            ConsoleUI.PrintInfo("{filename}", "Имя файла без расширения");
+            Console.WriteLine();
             ConsoleUI.PrintInfo("--config <путь>", "Путь к файлу конфигурации");
             ConsoleUI.PrintInfo("--input <путь>", "Входная директория");
             ConsoleUI.PrintInfo("--output <путь>", "Выходная директория");
