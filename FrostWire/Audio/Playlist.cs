@@ -82,8 +82,8 @@ namespace FrostWire.Audio
                 if (currentWriteTime != _lastFileWriteTime) // Если файл изменился
                 {
                     int oldCount = _tracks.Count;
-                    LoadPlaylist(); // Перезагружаем плейлист
                     Logger.Info($"[Playlist] Плейлист обновлен: {oldCount} -> {_tracks.Count} треков");
+                    LoadPlaylist(); // Перезагружаем плейлист
                 }
             }
             catch (Exception ex)

@@ -1,3 +1,3 @@
 d:
-python .\Scripts\CopyAudio.py C:\Users\Evgeny\Desktop\MUSIC O:\!Radio\music
+python .\Scripts\CopyAudio.py O:\!Evgeny\MUSIC D:\DiZ\Yandex.Disk\radio\music
 pause

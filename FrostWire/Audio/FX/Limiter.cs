@@ -79,8 +79,8 @@ namespace FrostWire.Audio.FX
             bool success = Bass.BASS_FXSetParameters(_fxHandle, _limiterParams);
             if (success)
             {
-                Logger.Debug($"[Limiter] Параметры обновлены:");
-                Logger.Debug($"[Limiter] T={_limiterParams.fThreshold}dB, R={_limiterParams.fRatio}:1 REL={_limiterParams.fRelease}, G={_limiterParams.fGain}db");
+                Logger.Info($"[Limiter] Параметры обновлены:");
+                Logger.Info($"[Limiter] T={_limiterParams.fThreshold}dB, R={_limiterParams.fRatio}:1 REL={_limiterParams.fRelease}, G={_limiterParams.fGain}db");
             }
             else
             {

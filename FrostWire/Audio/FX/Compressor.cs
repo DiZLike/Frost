@@ -122,8 +122,8 @@ namespace FrostWire.Audio.FX
             bool success = Bass.BASS_FXSetParameters(_fxHandle, _compressorParams);
             if (success)
             {
-                Logger.Debug($"[Compressor] Параметры обновлены:");
-                Logger.Debug($"[Compressor]   T={_compressorParams.fThreshold:F1}dB, " +
+                Logger.Info($"[Compressor] Параметры обновлены:");
+                Logger.Info($"[Compressor]   T={_compressorParams.fThreshold:F1}dB, " +
                             $"R={_compressorParams.fRatio:F1}:1, " +
                             $"G={_compressorParams.fGain:F1}dB [{gain}db]");
             }

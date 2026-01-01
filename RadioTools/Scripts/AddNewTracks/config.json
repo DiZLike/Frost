@@ -1,12 +1,12 @@
 {
-  "songs_path": "O:\\!Radio\\music",
+  "songs_path": "D:\\DiZ\\Yandex.Disk\\radio\\music",
   "key": "up6jlo4bj6e8yy96w6w3iq84",
   "page": "http://r.dlike.ru/add-newtrack",
   "server_tracks_url": "http://r.dlike.ru/get-alltracks",
-  "server_path": "/home/admin/cloud/mailru/!Radio/music/",
+  "server_path": "/home/admin/cloud/yandex/radio/music/",
   "max_retries": 3,
   "supported_formats": [".mp3", ".flac", ".wav", ".ogg", ".m4a", ".opus"],
-  "remove_prefix": "!Radio/music",
+  "remove_prefix": "radio/music",
   "base_url": "http://r.dlike.ru/music/",
-  "playlist_file": "O:\\!Radio\\music\\playlist.pls"
+  "playlist_file": "D:\\DiZ\\Yandex.Disk\\radio\\playlists\\all1.pls"
 }

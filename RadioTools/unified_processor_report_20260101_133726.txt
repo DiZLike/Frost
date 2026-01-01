@@ -1,0 +1,371 @@
+============================================================
+ОТЧЕТ UNIFIED PROCESSOR
+Режим работы: default
+Время выполнения: 2026-01-01 13:37:26
+============================================================
+
+Общая статистика:
+  Добавлено в плейлист: 20
+  Пропущено дубликатов в плейлисте: 193
+  Отправлено на сервер: 20
+  Уже было в БД сервера: 0
+  Успешно отправлено: 20
+  Ошибок отправки: 0
+
+Добавленные в плейлист:
+  ✓ ДЛЯ СЕРВЕРА 2026-01-01_13-32_Pixel Showdown 2.opus
+     Полный путь: D:\DiZ\Yandex.Disk\radio\music\Chiptune\DiZlike Rec\2026-01-01_13-32_Pixel Showdown 2.opus
+
+  ✓ ДЛЯ СЕРВЕРА 2026-01-01_13-32_Blood Moon Rises 2.opus
+     Полный путь: D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\DiZlike Rec\2026-01-01_13-32_Blood Moon Rises 2.opus
+
+  ✓ ДЛЯ СЕРВЕРА 2026-01-01_13-32_Cosmic Carnage.opus
+     Полный путь: D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\DiZlike Rec\2026-01-01_13-32_Cosmic Carnage.opus
+
+  ✓ ДЛЯ СЕРВЕРА 2026-01-01_13-32_Dark Spiral 1.opus
+     Полный путь: D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\DiZlike Rec\2026-01-01_13-32_Dark Spiral 1.opus
+
+  ✓ ДЛЯ СЕРВЕРА 2026-01-01_13-32_Dark Spiral 2.opus
+     Полный путь: D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\DiZlike Rec\2026-01-01_13-32_Dark Spiral 2.opus
+
+  ✓ ДЛЯ СЕРВЕРА 2026-01-01_13-32_Level 01.opus
+     Полный путь: D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\DiZlike Rec\2026-01-01_13-32_Level 01.opus
+
+  ✓ ДЛЯ СЕРВЕРА 2026-01-01_13-32_Nightmare Arcade.opus
+     Полный путь: D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\DiZlike Rec\2026-01-01_13-32_Nightmare Arcade.opus
+
+  ✓ ДЛЯ СЕРВЕРА 2026-01-01_13-32_Nightmare March 1.opus
+     Полный путь: D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\DiZlike Rec\2026-01-01_13-32_Nightmare March 1.opus
+
+  ✓ ДЛЯ СЕРВЕРА 2026-01-01_13-32_Nightmare March 2.opus
+     Полный путь: D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\DiZlike Rec\2026-01-01_13-32_Nightmare March 2.opus
+
+  ✓ ДЛЯ СЕРВЕРА 2026-01-01_13-32_Pixel Showdown 1.opus
+     Полный путь: D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\DiZlike Rec\2026-01-01_13-32_Pixel Showdown 1.opus
+
+  ✓ ДЛЯ СЕРВЕРА 2026-01-01_13-32_Pixelated Showdown.opus
+     Полный путь: D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\DiZlike Rec\2026-01-01_13-32_Pixelated Showdown.opus
+
+  ✓ ДЛЯ СЕРВЕРА 2026-01-01_13-32_Shadow Circuit.opus
+     Полный путь: D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\DiZlike Rec\2026-01-01_13-32_Shadow Circuit.opus
+
+  ✓ ДЛЯ СЕРВЕРА 2026-01-01_13-32_Shadows Ignite.opus
+     Полный путь: D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\DiZlike Rec\2026-01-01_13-32_Shadows Ignite.opus
+
+  ✓ ДЛЯ СЕРВЕРА 2026-01-01_13-32_Shadows in Pixels.opus
+     Полный путь: D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\DiZlike Rec\2026-01-01_13-32_Shadows in Pixels.opus
+
+  ✓ ДЛЯ СЕРВЕРА 2026-01-01_13-32_Восьмибитный свет.opus
+     Полный путь: D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Lender\2026-01-01_13-32_Восьмибитный свет.opus
+
+  ✓ ДЛЯ СЕРВЕРА 2026-01-01_13-32_Pixel Punch.opus
+     Полный путь: D:\DiZ\Yandex.Disk\radio\music\Dance\DiZlike Rec\2026-01-01_13-32_Pixel Punch.opus
+
+  ✓ ДЛЯ СЕРВЕРА 2026-01-01_13-32_Blood Moon Rises 1.opus
+     Полный путь: D:\DiZ\Yandex.Disk\radio\music\Electronic\DiZlike Rec\2026-01-01_13-32_Blood Moon Rises 1.opus
+
+  ✓ ДЛЯ СЕРВЕРА 2026-01-01_13-32_Dancing with the Devil.opus
+     Полный путь: D:\DiZ\Yandex.Disk\radio\music\Electronic\DiZlike Rec\2026-01-01_13-32_Dancing with the Devil.opus
+
+  ✓ ДЛЯ СЕРВЕРА 2026-01-01_13-32_Shadows of the Abyss 1.opus
+     Полный путь: D:\DiZ\Yandex.Disk\radio\music\Electronic Metal\DiZlike Rec\2026-01-01_13-32_Shadows of the Abyss 1.opus
+
+  ✓ ДЛЯ СЕРВЕРА 2026-01-01_13-32_Shadows of the Abyss 2.opus
+     Полный путь: D:\DiZ\Yandex.Disk\radio\music\Electronic Metal\DiZlike Rec\2026-01-01_13-32_Shadows of the Abyss 2.opus
+
+Отправленные на сервер треки:
+  ✓ DiZlike Rec. - Pixel Showdown 2
+     Файл: 2026-01-01_13-32_Pixel Showdown 2.opus
+     Относительный путь: None
+     Результат: Ok
+
+  ✓ DiZlike Rec. - Blood Moon Rises 2
+     Файл: 2026-01-01_13-32_Blood Moon Rises 2.opus
+     Относительный путь: None
+     Результат: Ok
+
+  ✓ DiZlike Rec. - Cosmic Carnage
+     Файл: 2026-01-01_13-32_Cosmic Carnage.opus
+     Относительный путь: None
+     Результат: Ok
+
+  ✓ DiZlike Rec. - Dark Spiral 1
+     Файл: 2026-01-01_13-32_Dark Spiral 1.opus
+     Относительный путь: None
+     Результат: Ok
+
+  ✓ DiZlike Rec. - Dark Spiral 2
+     Файл: 2026-01-01_13-32_Dark Spiral 2.opus
+     Относительный путь: None
+     Результат: Ok
+
+  ✓ DiZlike Rec. - Level 01
+     Файл: 2026-01-01_13-32_Level 01.opus
+     Относительный путь: None
+     Результат: Ok
+
+  ✓ DiZlike Rec. - Nightmare Arcade
+     Файл: 2026-01-01_13-32_Nightmare Arcade.opus
+     Относительный путь: None
+     Результат: Ok
+
+  ✓ DiZlike Rec. - Nightmare March 1
+     Файл: 2026-01-01_13-32_Nightmare March 1.opus
+     Относительный путь: None
+     Результат: Ok
+
+  ✓ DiZlike Rec. - Nightmare March 2
+     Файл: 2026-01-01_13-32_Nightmare March 2.opus
+     Относительный путь: None
+     Результат: Ok
+
+  ✓ DiZlike Rec. - Pixel Showdown 1
+     Файл: 2026-01-01_13-32_Pixel Showdown 1.opus
+     Относительный путь: None
+     Результат: Ok
+
+  ✓ DiZlike Rec. - Pixelated Showdown
+     Файл: 2026-01-01_13-32_Pixelated Showdown.opus
+     Относительный путь: None
+     Результат: Ok
+
+  ✓ DiZlike Rec. - Shadow Circuit
+     Файл: 2026-01-01_13-32_Shadow Circuit.opus
+     Относительный путь: None
+     Результат: Ok
+
+  ✓ DiZlike Rec. - Shadows Ignite
+     Файл: 2026-01-01_13-32_Shadows Ignite.opus
+     Относительный путь: None
+     Результат: Ok
+
+  ✓ DiZlike Rec. - Shadows in Pixels
+     Файл: 2026-01-01_13-32_Shadows in Pixels.opus
+     Относительный путь: None
+     Результат: Ok
+
+  ✓ Lender - Восьмибитный свет
+     Файл: 2026-01-01_13-32_Восьмибитный свет.opus
+     Относительный путь: None
+     Результат: Ok
+
+  ✓ DiZlike Rec. - Pixel Punch
+     Файл: 2026-01-01_13-32_Pixel Punch.opus
+     Относительный путь: None
+     Результат: Ok
+
+  ✓ DiZlike Rec. - Blood Moon Rises 1
+     Файл: 2026-01-01_13-32_Blood Moon Rises 1.opus
+     Относительный путь: None
+     Результат: Ok
+
+  ✓ DiZlike Rec. - Dancing with the Devil
+     Файл: 2026-01-01_13-32_Dancing with the Devil.opus
+     Относительный путь: None
+     Результат: Ok
+
+  ✓ DiZlike Rec. - Shadows of the Abyss 1
+     Файл: 2026-01-01_13-32_Shadows of the Abyss 1.opus
+     Относительный путь: None
+     Результат: Ok
+
+  ✓ DiZlike Rec. - Shadows of the Abyss 2
+     Файл: 2026-01-01_13-32_Shadows of the Abyss 2.opus
+     Относительный путь: None
+     Результат: Ok
+
+
+Пропущенные дубликаты в плейлисте:
+  - D:\DiZ\Yandex.Disk\radio\music\Acoustic\Other\2025-12-26_15-22_8-Bit Baby - Ninja Gaiden - Devilish Influence.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune\DiZlike\2025-12-26_15-22_DiZlike - Game music 1.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune\DiZlike\2025-12-26_15-22_DiZlike - Заруинил битву (Гимн RTR).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune\DiZlike\2025-12-26_15-22_DiZlike - Кончится лето [Кино cover].opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune\Other\2025-12-26_15-22_Bloodstained - Curse of the Moon - Stage 4 [Blasphemy unto Heaven].opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune\Other\2025-12-26_15-22_Bloodstained - Stage 2 [Frigid Hell].opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune\Other\2025-12-26_15-22_Bloodstained - Stage 7 [Defiler of Taboos].opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune\Other\2025-12-26_15-22_Chiptune - 8-bit.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune\Other\2025-12-26_15-22_Dendy - OST - Jurassic Park - Jurassic Park - remix.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune\Other\2025-12-26_15-22_James Bond Jr - Stage 2.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune\Other\2025-12-26_15-22_Jurassic Park - Intro 2.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune\Other\2025-12-26_15-22_N1k-o - Delta's shadow - level 2-3(TS).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune\Other\2025-12-26_15-22_Over Horizon, NES Soundtrack - Title Theme.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune\Other\2025-12-26_15-22_Shovel Knight - An Underlying Problem.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune\[pandemic]\2025-12-26_15-22_[PandemiC] - Introduction.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\DiZlike\2025-12-26_15-20_DiZlike - Autumn Hills (Rainbowdragoneyes _ The Messenger) cover.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\DiZlike\2025-12-26_15-20_DiZlike - Elemental Skylands [Rainbowdragoneyes _ The Messenger] cover.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\DiZlike\2025-12-26_15-20_DiZlike - Manfred, The Sky Serpent [Rainbowdragoneyes _ The Messenger] cover.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\DiZlike\2025-12-26_15-20_DiZlike - Sunken Shrine [Rainbowdragoneyes _ The Messenger] cover.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\DiZlike\2025-12-26_15-20_DiZlike - The Arcane Shoppe [Rainbowdragoneyes _ The Messenger] cover.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-20_99.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-20_Action Girl.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-20_All Of My Angels.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-20_Anthem Apocalyptica.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-20_Arcade.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-20_Attack Music.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-20_Bouff.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-20_Conveyer.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Death from above.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_FanVaCoolt (men om nånting).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Flames of fire.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Flight of The Toyota.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Follower.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Force Feedback.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Futuremachinae.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Gimme More (sid).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Indiscriminate Murder is Counter-Productive.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Judgement fray.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Killer Instinct.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Knee-deep in the Xoxx.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Koala in the Spider's Web.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Lord Krutor's dominion.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Machinae Pride.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Masquerade.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Megascorcher.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Missiles of Metal.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Mostly Dark Universe.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Ninja.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Nova Prospekt.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Oki Kumas Adventure.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Overworld.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Paparazzi.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Persona.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Player One.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Reanimator (March of the Undead III).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Remnant (March Of The Undead IV).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Republic Of Gamers.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Retrospection.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Rise Of A Digital Nation.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Rocket Dragon.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Rogue World Asylum.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Seventeen.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Sid Icarus.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Sidstyler.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Spacepunx.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Super Steve.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_The Great Gianna Sisters.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_The Greatest Show On Earth.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_The Wired.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Throttle and Mask.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-21_Transgenic.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-22_Truth of Tomorrow.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Machinae Supremacy\2025-12-26_15-22_Winterstorm.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Chiptune Metal\Other\2025-12-26_15-22_Nekketsu - cover.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Dance\DiZlike\2025-12-26_15-20_DiZlike - Assholevania [AVGN Adventures cover].opus
+  - D:\DiZ\Yandex.Disk\radio\music\Dance\DiZlike\2025-12-26_15-20_DiZlike - Hi no Tori.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Dance\DiZlike\2025-12-26_15-20_DiZLike - Unbreakable Determination [4-2] (Ninja Gaiden cover).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Dance\Fond3ll\2025-12-26_15-20_Fond3ll - Unbreakable Determination (Ninja Gaiden (NES) Stage 4-2 Remix).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Dance\Other\2025-12-26_15-20_bLiNd - jade catacombs, brinstar one (super metroid, snes).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Dance\Reboot Me\2025-12-26_15-20_Reboot Me - All You Want.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic\Alexander Brandon\2025-12-26_15-19_Alexander Brandon - Enemy Within.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic\Alexander Brandon\2025-12-26_15-19_Alexander Brandon - Majestic 12 Labs.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic\Alexander Brandon\2025-12-26_15-19_Alexander Brandon - NYC Streets.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic\Alexander Brandon\2025-12-26_15-19_Alexander Brandon - Oceanlab Complex.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic\Alexander Brandon\2025-12-26_15-19_Alexander Brandon - Return to NYC.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic\Alexander Brandon\2025-12-26_15-19_Alexander Brandon - The Synapse (Hong Kong Streets).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic\Chipzel\2025-12-26_15-19_Chipzel - The Art of War.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic\Logan-47\2025-12-26_15-19_Logan-47 - Dance With Me.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic\Omnitica\2025-12-26_15-19_Omnitica - I'm Being Reelestic.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic\Other\2025-12-26_15-19_Aleksey777 (Саутин) - Подарок Бену.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic\Other\2025-12-26_15-19_Axiom Verge Cover.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic\Other\2025-12-26_15-19_Electronic Super Joy _ Groove City - Ginseng.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic\Other\2025-12-26_15-19_Geek Music - Call Of Silence (From Attack On Titan).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic\Other\2025-12-26_15-19_Jaroslav Beck ft. Summer Haze - Escape.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic\Other\2025-12-26_15-19_Michiel van den Bos - UNATCO.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic\Other\2025-12-26_15-19_Shallow hal - Edge Of The Ocean.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic\Other\2025-12-26_15-19_[NES] Alien 3 - Level 1 (Cover Version).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic\The Glitch Mob\2025-12-26_15-19_The Glitch Mob - Fortune Days.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic\TheFatRat\2025-12-26_15-20_TheFatRat - Fly Away feat. Anjulie.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic\Welan Edvee\2025-12-26_15-20_Welan Edvee - Dyclan Song's.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic Metal\Darkman007\2025-12-26_15-19_Darkman007 - Mission Impossible (Nes).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic Metal\DiZlike\2025-12-26_15-19_DiZlike - Blaster Master [Music cover by DiZlike].opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic Metal\DiZlike\2025-12-26_15-19_DiZlike - Final Fantasy IX - Battle.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic Metal\DiZlike\2025-12-26_15-19_DiZlike - Final Fantasy VIII - Compression of time [cover].opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic Metal\DiZlike\2025-12-26_15-19_DiZlike - Life Force [stage 3] (nes cover).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic Metal\DiZlike\2025-12-26_15-19_DiZlike - Mad Forest [Castlevania III cover].opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic Metal\DiZlike\2025-12-26_15-19_DiZlike - MegaMan 7 [ShadeMan].opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic Metal\DiZlike\2025-12-26_15-19_DiZlike - MegaMan 7 [SlashMan].opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic Metal\Machinae Supremacy\2025-12-26_15-19_2004 - Theme from Jets'n'Guns.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic Metal\[pandemic]\2025-12-26_15-19_[Pandemic] - Aladdin - Escape [sega mega drive].opus
+  - D:\DiZ\Yandex.Disk\radio\music\Electronic Metal\[pandemic]\2025-12-26_15-19_[pandemic] - Alien 3_ Title Screen [cover NES].opus
+  - D:\DiZ\Yandex.Disk\radio\music\Euro Dance\Alphaville\2025-12-26_15-19_Alphaville - Big in Japan.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Euro Dance\Fun Factory\2025-12-26_15-19_Fun Factory - Don't Fight.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Euro Dance\Heart Hunter\2025-12-26_15-19_Heart Hunter - Walking On Clouds.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-18_Beer Beer.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-18_Before The Morning Sun.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-18_Bring Us Pints Of Beer.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-18_Fields In Flames.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-18_Happy Little Boozer.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-18_Hunting Song.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-18_Isku Pitkasta Ilosta.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-18_Juodaan Viinaa.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-18_Konnin Kuokkamies (Bonus Track).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-18_Korpiklaani.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-18_Let's Drink.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-18_Mettanpeiton Valtiaalle.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-18_Midsummer Night.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-18_Mother Earth.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-18_Native Land.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-18_Pine Woods.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-18_Pixies Dance.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-18_Ryyppajaiset.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-18_Shaman Drum.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-18_Tuli Kokko.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-19_Under The Sun.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-19_Vesaisen Sota.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-19_Vesilahden Verajilla.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-19_Vodka.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Folk\Korpiklaani\2025-12-26_15-19_Wooden Pints.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\Creepue\2025-12-26_15-17_Creepue - Bucky O' Hare - Ending.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\DiZlike\2025-12-26_15-17_DiZlike - Castlevania - In Search of the Secret Spell [demo cover].opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\DiZlike\2025-12-26_15-17_DiZlike - final fantasy 7 [Cosmo Canyon] cover.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\DiZlike\2025-12-26_15-17_DiZlike - Hail from the Past [Castlevania_ Portrait of Ruin cover].opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\Other\2025-12-26_15-17_Crisis Force (Cover) - Stages 1 & 6 - Advanced City.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\Other\2025-12-26_15-17_Famicom Guitar - Ninja Gaiden (4-2).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\Other\2025-12-26_15-17_Golden Axe 2 - Ravaged Village (Metal Cover).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\Other\2025-12-26_15-17_Golden Axe 3 - Ancient Mound (RA Cover).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\Other\2025-12-26_15-18_KA4KA.RU - SEGA MD - Comix Zone (Cover).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\Other\2025-12-26_15-18_Mega Man X3 - Openning Stage (Cover).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\Other\2025-12-26_15-18_Minus - Начинаем стрим.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\Other\2025-12-26_15-18_Music forom Dendy in ROCK - Zen Ninja - Oil Rig Stage.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\Other\2025-12-26_15-18_Nes Covers - Jurassic park.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\Other\2025-12-26_15-18_NES Covers - Monster in my Рocket.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\Other\2025-12-26_15-18_Ninja Gaiden 2 - metal cover.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\Other\2025-12-26_15-18_RΞMΛSTΞRΞD (V mike) - Batman - Laboratory Ruins.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\Other\2025-12-26_15-18_RΞMΛSTΞRΞD - Contra Force - Full Force (Stage 2).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\Other\2025-12-26_15-18_RΞMΛSTΞRΞD - Contra Force - The Dewerdrye Warehouse.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\Other\2025-12-26_15-18_The Messenger - Rock cover.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\Other\2025-12-26_15-18_Екатерина - БЕН.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\Other\2025-12-26_15-18_Иван - Call_of_XPhantom.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\[pandemic]\2025-12-26_15-18_[PandemiC] - Silent Hill [cover] (2014).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Metal\[pandemic]\2025-12-26_15-18_[pandemic] - Streets of hate.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Power Metal\Machinae Supremacy\2025-12-26_15-17_Dark City.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Power Metal\Machinae Supremacy\2025-12-26_15-17_Deus Ex Machinae.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Power Metal\Machinae Supremacy\2025-12-26_15-17_Dreadnaught.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Power Metal\Machinae Supremacy\2025-12-26_15-17_Edge and Pearl.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Power Metal\Machinae Supremacy\2025-12-26_15-17_Flagcarrier.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Power Metal\Machinae Supremacy\2025-12-26_15-17_Fury.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Power Metal\Machinae Supremacy\2025-12-26_15-17_Hero.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Power Metal\Machinae Supremacy\2025-12-26_15-17_I Know the Reaper.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Power Metal\Machinae Supremacy\2025-12-26_15-17_Insidious.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Power Metal\Machinae Supremacy\2025-12-26_15-17_Laser Speed Force.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Power Metal\Machinae Supremacy\2025-12-26_15-17_Legion of Stoopid (Remaster).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Power Metal\Machinae Supremacy\2025-12-26_15-17_Loot Burn Rape Kill Repeat.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Power Metal\Machinae Supremacy\2025-12-26_15-17_Return to Snake Mountain.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Power Metal\Machinae Supremacy\2025-12-26_15-17_Rise.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Power Metal\Machinae Supremacy\2025-12-26_15-17_Soundtrack to the Rebellion.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Power Metal\Machinae Supremacy\2025-12-26_15-17_Through The Looking Glass.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Power Metal\Machinae Supremacy\2025-12-26_15-17_World Of Light.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Retrowave\Jeremiah Kane\2025-12-26_15-17_JEREMIAH KANE - VAMPIREVANIA.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Retrowave\Mauro Rawn\2025-12-26_15-17_Mauro Rawn - Scent of Love.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Retrowave\Other\2025-12-26_15-17_Katana - You Will Never Know.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Retrowave\Other\2025-12-26_15-17_Super Metroid - Lower Brinstar Theme (Mach Rider Edit).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Retrowave\Paul Hertzog\2025-12-26_15-17_Paul Hertzog - Advanced Training (mOBSCURE cover).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Retrowave\Violet Vibe\2025-12-26_15-17_Violet Vibe - Toyz Party.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Symphony\Other\2025-12-26_15-17_Ori and The Blind Forest OST - Light of Nibel.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Synthwave\Atmolifter\2025-12-26_15-16_Atmolifter - FAR FROM HOME 2019.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Synthwave\CXNTRAST\2025-12-26_15-16_CXNTRAST - Iceberg.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Synthwave\Don Dellpiero\2025-12-26_15-16_Don Dellpiero - Meet You at the 80s Arcades.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Synthwave\Galactic Beatz\2025-12-26_15-17_Galactic Beatz - Bloodsport (Triumph Synthwave Remix).opus
+  - D:\DiZ\Yandex.Disk\radio\music\Synthwave\Machinae Supremacy\2025-12-26_15-17_2004 - Shopmusic.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Synthwave\Other\2025-12-26_15-17_DANCE WITH THE DEAD - DANCE WITH THE DEAD - Hex.opus
+  - D:\DiZ\Yandex.Disk\radio\music\Synthwave\Other\2025-12-26_15-17_Kickboxer - Advanced Training Synthwave Remix by Nightdriver.opus
