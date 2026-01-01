@@ -18,56 +18,76 @@ namespace OpusConverter.Core
 
         public void Convert(string inputFile)
         {
-            string outputFileName;
+            string outputFile;
             TagLib.Tag fileTag = null;
 
-            // Получаем метаданные для формирования имени файла
-            if (!string.IsNullOrWhiteSpace(_config.OutputFilenamePattern))
+            try
             {
+                // Читаем метаданные файла
+                using (var sourceFile = TagLib.File.Create(inputFile))
+                {
+                    fileTag = sourceFile.Tag;
+
+                    // Определяем, есть ли в паттерне разделители папок
+                    if (!string.IsNullOrWhiteSpace(_config.OutputFilenamePattern) &&
+                        (_config.OutputFilenamePattern.Contains('/') || _config.OutputFilenamePattern.Contains('\\')))
+                    {
+                        // Используем метод, который создает структуру папок
+                        outputFile = _fileProcessor.GenerateOutputFilePath(inputFile, fileTag);
+                    }
+                    else
+                    {
+                        // Используем старый метод для плоской структуры
+                        string outputFileName = _fileProcessor.GenerateOutputFileName(inputFile, fileTag);
+                        outputFile = Path.Combine(_config.OutputDirectory, outputFileName);
+                    }
+                }
+
+                if (File.Exists(outputFile) && !_config.OverwriteExisting)
+                {
+                    lock (_fileProcessor)
+                    {
+                        _fileProcessor.IncrementProcessed();
+                        UpdateProgress();
+                    }
+                    Console.WriteLine($"\n        Пропуск: {Path.GetFileName(inputFile)} (уже существует)");
+                    return;
+                }
+
+                ConvertFile(inputFile, outputFile, fileTag);
+            }
+            catch (Exception ex)
+            {
+                // Если не удалось прочитать метаданные, используем базовый подход
                 try
                 {
-                    using (var sourceFile = TagLib.File.Create(inputFile))
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputFile) + ".opus";
+                    outputFile = Path.Combine(_config.OutputDirectory, outputFileName);
+
+                    if (File.Exists(outputFile) && !_config.OverwriteExisting)
                     {
-                        fileTag = sourceFile.Tag;
-                        outputFileName = _fileProcessor.GenerateOutputFileName(inputFile, fileTag);
+                        lock (_fileProcessor)
+                        {
+                            _fileProcessor.IncrementProcessed();
+                            UpdateProgress();
+                        }
+                        Console.WriteLine($"\n        Пропуск: {Path.GetFileName(inputFile)} (уже существует)");
+                        return;
                     }
+
+                    ConvertFile(inputFile, outputFile, null);
                 }
                 catch
                 {
-                    // Если не удалось прочитать метаданные, используем оригинальное имя
-                    outputFileName = Path.GetFileNameWithoutExtension(inputFile) + ".opus";
+                    lock (_fileProcessor)
+                    {
+                        _fileProcessor.IncrementProcessed();
+                        _fileProcessor.IncrementFailed();
+                        UpdateProgress();
+                    }
+                    Console.WriteLine($"\n        Ошибка: {Path.GetFileName(inputFile)} - {ex.Message}");
                 }
             }
-            else
-            {
-                outputFileName = Path.GetFileNameWithoutExtension(inputFile) + ".opus";
-            }
-
-            string outputFile;
-            if (!string.IsNullOrWhiteSpace(_config.OutputFilenamePattern) &&
-                (_config.OutputFilenamePattern.Contains('/') || _config.OutputFilenamePattern.Contains('\\')))
-            {
-                // Используем новый метод для создания структуры папок
-                outputFile = _fileProcessor.GenerateOutputFilePath(inputFile, fileTag);
-            }
-            else
-            {
-                // Старый метод для простых имен
-                outputFile = Path.Combine(_config.OutputDirectory, outputFileName);
-            }
-
-            if (File.Exists(outputFile) && !_config.OverwriteExisting)
-            {
-                lock (_fileProcessor)
-                {
-                    _fileProcessor.IncrementProcessed();
-                    UpdateProgress();
-                }
-                Console.WriteLine($"\n        Пропуск: {Path.GetFileName(inputFile)} (уже существует)");
-                return;
-            }
-
-            ConvertFile(inputFile, outputFile, fileTag);
         }
 
         private void ConvertFile(string inputFile, string outputFile, TagLib.Tag tag = null)
@@ -152,7 +172,7 @@ namespace OpusConverter.Core
                     UpdateProgress();
                 }
 
-                Console.WriteLine($"\n        {Path.GetFileName(inputFile)} -> {Path.GetFileName(outputFile)}");
+                Console.WriteLine($"\n        {Path.GetFileName(inputFile)} -> {Path.GetRelativePath(_config.OutputDirectory, outputFile)}");
             }
             catch (Exception ex)
             {

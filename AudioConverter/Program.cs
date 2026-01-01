@@ -85,11 +85,16 @@ namespace OpusConverter
             ConsoleUI.PrintInfo("{album}", "Альбом");
             ConsoleUI.PrintInfo("{year}", "Год");
             ConsoleUI.PrintInfo("{track}", "Номер трека (с ведущим нулём)");
-            ConsoleUI.PrintInfo("{genre}", "Жанр"); // Добавлено
+            ConsoleUI.PrintInfo("{genre}", "Жанр");
             ConsoleUI.PrintInfo("{performer}", "Исполнитель (первый)");
             ConsoleUI.PrintInfo("{composer}", "Композитор");
             ConsoleUI.PrintInfo("{directory}", "Относительный путь");
             ConsoleUI.PrintInfo("{filename}", "Имя файла без расширения");
+            ConsoleUI.PrintInfo("{extension}", "Расширение исходного файла");
+            Console.WriteLine();
+            Console.WriteLine("Создание структуры папок:");
+            ConsoleUI.PrintInfo("genre/artist/album/track - title", "Используйте / для создания папок");
+            ConsoleUI.PrintInfo("artist/album/track. title", "Используйте \\ для создания папок");
             Console.WriteLine();
             ConsoleUI.PrintInfo("--config <путь>", "Путь к файлу конфигурации");
             ConsoleUI.PrintInfo("--input <путь>", "Входная директория");

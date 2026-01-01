@@ -59,6 +59,98 @@ namespace OpusConverter.Core
 
             string pattern = _config.OutputFilenamePattern;
 
+            // Определяем часть паттерна для имени файла (после последнего слеша)
+            int lastSlash = Math.Max(
+                pattern.LastIndexOf('/'),
+                pattern.LastIndexOf('\\')
+            );
+
+            string filePattern;
+            if (lastSlash >= 0)
+            {
+                // Берем только часть для имени файла (после последнего слеша)
+                filePattern = pattern.Substring(lastSlash + 1);
+            }
+            else
+            {
+                // Если нет слешей - весь паттерн для имени файла
+                filePattern = pattern;
+            }
+
+            // Обрабатываем ТОЛЬКО имя файла
+            return ProcessFileNamePattern(inputFile, tag, filePattern) + ".opus";
+        }
+
+        public string GenerateOutputFilePath(string inputFile, TagLib.Tag tag)
+        {
+            if (string.IsNullOrWhiteSpace(_config.OutputFilenamePattern))
+                return Path.Combine(_config.OutputDirectory, Path.GetFileNameWithoutExtension(inputFile) + ".opus");
+
+            string pattern = _config.OutputFilenamePattern;
+
+            // Определяем часть паттерна для пути (до последнего слеша)
+            int lastSlash = Math.Max(
+                pattern.LastIndexOf('/'),
+                pattern.LastIndexOf('\\')
+            );
+
+            string folderPattern;
+            if (lastSlash >= 0)
+            {
+                // Берем часть для пути (до последнего слеша)
+                folderPattern = pattern.Substring(0, lastSlash);
+            }
+            else
+            {
+                // Если нет слешей - только корневая папка
+                return Path.Combine(_config.OutputDirectory, GenerateOutputFileName(inputFile, tag));
+            }
+
+            // Обрабатываем путь
+            string processedPath = ProcessPathPattern(inputFile, tag, folderPattern);
+
+            // Создаем папки
+            string fullPath = Path.Combine(_config.OutputDirectory, processedPath);
+            Directory.CreateDirectory(fullPath);
+
+            // Возвращаем полный путь с именем файла
+            return Path.Combine(fullPath, GenerateOutputFileName(inputFile, tag));
+        }
+
+        private string ProcessFileNamePattern(string inputFile, TagLib.Tag tag, string pattern)
+        {
+            if (string.IsNullOrWhiteSpace(pattern))
+                return Path.GetFileNameWithoutExtension(inputFile);
+
+            // Обрабатываем теги для имени файла
+            pattern = ReplaceTagsInPattern(inputFile, tag, pattern);
+
+            // Очищаем от недопустимых символов в именах файлов
+            pattern = CleanFileName(pattern);
+
+            return pattern.Trim();
+        }
+
+        private string ProcessPathPattern(string inputFile, TagLib.Tag tag, string pattern)
+        {
+            if (string.IsNullOrWhiteSpace(pattern))
+                return "";
+
+            // Обрабатываем теги для пути
+            pattern = ReplaceTagsInPattern(inputFile, tag, pattern);
+
+            // Заменяем все слеши на правильные разделители
+            pattern = pattern.Replace('/', Path.DirectorySeparatorChar)
+                            .Replace('\\', Path.DirectorySeparatorChar);
+
+            // Очищаем от недопустимых символов для путей
+            pattern = CleanPath(pattern);
+
+            return pattern.Trim();
+        }
+
+        private string ReplaceTagsInPattern(string inputFile, TagLib.Tag tag, string pattern)
+        {
             // Основные теги
             pattern = pattern.Replace("{artist}",
                 tag.AlbumArtists?.FirstOrDefault() ??
@@ -101,12 +193,12 @@ namespace OpusConverter.Core
                 tag.DiscCount.ToString("D2") :
                 "");
 
-            // Жанр (добавлено)
+            // Жанр
             pattern = pattern.Replace("{genre}",
                 tag.Genres?.FirstOrDefault() ??
                 "");
 
-            // Получаем первый исполнителя из массива
+            // Исполнитель
             pattern = pattern.Replace("{performer}",
                 tag.Performers?.FirstOrDefault() ??
                 "");
@@ -137,108 +229,35 @@ namespace OpusConverter.Core
             pattern = Regex.Replace(pattern, @"^-+|-+$", "");
             pattern = pattern.Trim(' ', '-', '_', '.');
 
-            // Очищаем от недопустимых символов в именах файлов
+            return pattern;
+        }
+
+        private string CleanFileName(string fileName)
+        {
             string invalidChars = new string(Path.GetInvalidFileNameChars());
             foreach (char c in invalidChars)
             {
-                pattern = pattern.Replace(c.ToString(), "_");
+                fileName = fileName.Replace(c.ToString(), "_");
             }
 
             // Убираем множественные подчеркивания
-            pattern = Regex.Replace(pattern, @"_{2,}", "_");
+            fileName = Regex.Replace(fileName, @"_{2,}", "_");
 
-            // Убираем пробелы в начале и конце
-            pattern = pattern.Trim();
-
-            // Если после всех замен получилась пустая строка, используем оригинальное имя
-            if (string.IsNullOrWhiteSpace(pattern))
-                pattern = Path.GetFileNameWithoutExtension(inputFile);
-
-            return pattern + ".opus";
+            return fileName;
         }
-        public string GenerateOutputFilePath(string inputFile, TagLib.Tag tag)
+
+        private string CleanPath(string path)
         {
-            // Получаем имя файла из шаблона
-            string fileName = GenerateOutputFileName(inputFile, tag);
-
-            // Если в шаблоне есть разделители папок (например: "{genre}/{artist}/{album}")
-            // их нужно обработать отдельно
-            string pattern = _config.OutputFilenamePattern;
-
-            // Извлекаем путь к папкам из шаблона ДО обработки тегов
-            // Находим последний слеш или обратный слеш
-            int lastSlash = Math.Max(
-                pattern.LastIndexOf('/'),
-                pattern.LastIndexOf('\\')
-            );
-
-            // Если нет разделителей папок, возвращаем простое имя файла
-            if (lastSlash == -1)
+            string invalidChars = new string(Path.GetInvalidPathChars());
+            foreach (char c in invalidChars)
             {
-                return Path.Combine(_config.OutputDirectory, fileName);
+                path = path.Replace(c.ToString(), "_");
             }
 
-            // Извлекаем часть шаблона для пути (до последнего слеша)
-            string folderPattern = pattern.Substring(0, lastSlash);
+            // Убираем множетельные подчеркивания
+            path = Regex.Replace(path, @"_{2,}", "_");
 
-            // Обрабатываем эту часть как путь с подстановкой тегов
-            folderPattern = folderPattern.Replace("{artist}",
-                tag.AlbumArtists?.FirstOrDefault() ??
-                tag.Performers?.FirstOrDefault() ??
-                tag.Composers?.FirstOrDefault() ??
-                "Unknown Artist");
-
-            folderPattern = folderPattern.Replace("{title}",
-                !string.IsNullOrWhiteSpace(tag.Title) ?
-                tag.Title :
-                Path.GetFileNameWithoutExtension(inputFile));
-
-            folderPattern = folderPattern.Replace("{album}",
-                !string.IsNullOrWhiteSpace(tag.Album) ?
-                tag.Album :
-                "Unknown Album");
-
-            folderPattern = folderPattern.Replace("{year}",
-                tag.Year > 0 ?
-                tag.Year.ToString() :
-                "");
-
-            folderPattern = folderPattern.Replace("{track}",
-                tag.Track > 0 ?
-                tag.Track.ToString("D2") :
-                "");
-
-            folderPattern = folderPattern.Replace("{genre}",
-                tag.Genres?.FirstOrDefault() ??
-                "");
-
-            folderPattern = folderPattern.Replace("{performer}",
-                tag.Performers?.FirstOrDefault() ??
-                "");
-
-            folderPattern = folderPattern.Replace("{composer}",
-                tag.Composers?.FirstOrDefault() ??
-                "");
-
-            // Очищаем путь от недопустимых символов
-            string invalidPathChars = new string(Path.GetInvalidPathChars());
-            foreach (char c in invalidPathChars)
-            {
-                folderPattern = folderPattern.Replace(c.ToString(), "_");
-            }
-
-            // Заменяем все слеши на правильные разделители
-            folderPattern = folderPattern.Replace('/', Path.DirectorySeparatorChar)
-                                         .Replace('\\', Path.DirectorySeparatorChar);
-
-            // Собираем полный путь
-            string fullPath = Path.Combine(_config.OutputDirectory, folderPattern);
-
-            // Создаем папки (если их нет)
-            Directory.CreateDirectory(fullPath);
-
-            // Возвращаем полный путь к файлу
-            return Path.Combine(fullPath, fileName);
+            return path;
         }
 
         public void IncrementProcessed()
@@ -258,25 +277,36 @@ namespace OpusConverter.Core
 
         public string GetProgressText()
         {
+            if (_totalFiles == 0) return "Нет файлов для обработки";
+
             double percentage = (_processedFiles / (double)_totalFiles) * 100;
             TimeSpan elapsed = DateTime.Now - _startTime;
-            TimeSpan estimatedTotal = TimeSpan.FromSeconds(elapsed.TotalSeconds / (_processedFiles / (double)_totalFiles));
-            TimeSpan remaining = estimatedTotal - elapsed;
 
-            return $"Прогресс: [{GetProgressBar(percentage)}] {percentage:F1}% " +
-                   $"({_processedFiles}/{_totalFiles}) " +
-                   $"Прошло: {FormatTimeSpan(elapsed)} " +
-                   $"Осталось: {FormatTimeSpan(remaining)}";
+            if (_processedFiles > 0)
+            {
+                TimeSpan estimatedTotal = TimeSpan.FromSeconds(elapsed.TotalSeconds / (_processedFiles / (double)_totalFiles));
+                TimeSpan remaining = estimatedTotal - elapsed;
+                return $"Прогресс: [{GetProgressBar(percentage)}] {percentage:F1}% " +
+                    $"({_processedFiles}/{_totalFiles}) " +
+                    $"Прошло: {FormatTimeSpan(elapsed)} " +
+                    $"Осталось: {FormatTimeSpan(remaining)}";
+            }
+            else
+            {
+                return $"Прогресс: [{GetProgressBar(percentage)}] {percentage:F1}% " +
+                    $"({_processedFiles}/{_totalFiles}) " +
+                    $"Прошло: {FormatTimeSpan(elapsed)}";
+            }
         }
 
         public string GetSummary()
         {
             TimeSpan totalTime = DateTime.Now - _startTime;
             return $"Успешно: {_successfulFiles} файлов\n" +
-                   $"Пропущено: {_totalFiles - _processedFiles} файлов\n" +
-                   $"Ошибок: {_failedFiles} файлов\n" +
-                   $"Общее время: {FormatTimeSpan(totalTime)}\n" +
-                   $"Среднее время на файл: {FormatTimeSpan(TimeSpan.FromSeconds(totalTime.TotalSeconds / _processedFiles))}";
+                $"Пропущено: {_totalFiles - _processedFiles} файлов\n" +
+                $"Ошибок: {_failedFiles} файлов\n" +
+                $"Общее время: {FormatTimeSpan(totalTime)}\n" +
+                $"Среднее время на файл: {FormatTimeSpan(TimeSpan.FromSeconds(totalTime.TotalSeconds / Math.Max(1, _processedFiles)))}";
         }
 
         private string GetProgressBar(double percentage)
