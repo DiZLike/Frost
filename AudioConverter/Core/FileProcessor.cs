@@ -138,7 +138,7 @@ namespace OpusConverter.Core
             pattern = pattern.Trim(' ', '-', '_', '.');
 
             // Очищаем от недопустимых символов в именах файлов
-            string invalidChars = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
+            string invalidChars = new string(Path.GetInvalidFileNameChars());
             foreach (char c in invalidChars)
             {
                 pattern = pattern.Replace(c.ToString(), "_");
@@ -155,6 +155,90 @@ namespace OpusConverter.Core
                 pattern = Path.GetFileNameWithoutExtension(inputFile);
 
             return pattern + ".opus";
+        }
+        public string GenerateOutputFilePath(string inputFile, TagLib.Tag tag)
+        {
+            // Получаем имя файла из шаблона
+            string fileName = GenerateOutputFileName(inputFile, tag);
+
+            // Если в шаблоне есть разделители папок (например: "{genre}/{artist}/{album}")
+            // их нужно обработать отдельно
+            string pattern = _config.OutputFilenamePattern;
+
+            // Извлекаем путь к папкам из шаблона ДО обработки тегов
+            // Находим последний слеш или обратный слеш
+            int lastSlash = Math.Max(
+                pattern.LastIndexOf('/'),
+                pattern.LastIndexOf('\\')
+            );
+
+            // Если нет разделителей папок, возвращаем простое имя файла
+            if (lastSlash == -1)
+            {
+                return Path.Combine(_config.OutputDirectory, fileName);
+            }
+
+            // Извлекаем часть шаблона для пути (до последнего слеша)
+            string folderPattern = pattern.Substring(0, lastSlash);
+
+            // Обрабатываем эту часть как путь с подстановкой тегов
+            folderPattern = folderPattern.Replace("{artist}",
+                tag.AlbumArtists?.FirstOrDefault() ??
+                tag.Performers?.FirstOrDefault() ??
+                tag.Composers?.FirstOrDefault() ??
+                "Unknown Artist");
+
+            folderPattern = folderPattern.Replace("{title}",
+                !string.IsNullOrWhiteSpace(tag.Title) ?
+                tag.Title :
+                Path.GetFileNameWithoutExtension(inputFile));
+
+            folderPattern = folderPattern.Replace("{album}",
+                !string.IsNullOrWhiteSpace(tag.Album) ?
+                tag.Album :
+                "Unknown Album");
+
+            folderPattern = folderPattern.Replace("{year}",
+                tag.Year > 0 ?
+                tag.Year.ToString() :
+                "");
+
+            folderPattern = folderPattern.Replace("{track}",
+                tag.Track > 0 ?
+                tag.Track.ToString("D2") :
+                "");
+
+            folderPattern = folderPattern.Replace("{genre}",
+                tag.Genres?.FirstOrDefault() ??
+                "");
+
+            folderPattern = folderPattern.Replace("{performer}",
+                tag.Performers?.FirstOrDefault() ??
+                "");
+
+            folderPattern = folderPattern.Replace("{composer}",
+                tag.Composers?.FirstOrDefault() ??
+                "");
+
+            // Очищаем путь от недопустимых символов
+            string invalidPathChars = new string(Path.GetInvalidPathChars());
+            foreach (char c in invalidPathChars)
+            {
+                folderPattern = folderPattern.Replace(c.ToString(), "_");
+            }
+
+            // Заменяем все слеши на правильные разделители
+            folderPattern = folderPattern.Replace('/', Path.DirectorySeparatorChar)
+                                         .Replace('\\', Path.DirectorySeparatorChar);
+
+            // Собираем полный путь
+            string fullPath = Path.Combine(_config.OutputDirectory, folderPattern);
+
+            // Создаем папки (если их нет)
+            Directory.CreateDirectory(fullPath);
+
+            // Возвращаем полный путь к файлу
+            return Path.Combine(fullPath, fileName);
         }
 
         public void IncrementProcessed()

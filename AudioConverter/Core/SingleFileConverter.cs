@@ -43,7 +43,18 @@ namespace OpusConverter.Core
                 outputFileName = Path.GetFileNameWithoutExtension(inputFile) + ".opus";
             }
 
-            string outputFile = Path.Combine(_config.OutputDirectory, outputFileName);
+            string outputFile;
+            if (!string.IsNullOrWhiteSpace(_config.OutputFilenamePattern) &&
+                (_config.OutputFilenamePattern.Contains('/') || _config.OutputFilenamePattern.Contains('\\')))
+            {
+                // Используем новый метод для создания структуры папок
+                outputFile = _fileProcessor.GenerateOutputFilePath(inputFile, fileTag);
+            }
+            else
+            {
+                // Старый метод для простых имен
+                outputFile = Path.Combine(_config.OutputDirectory, outputFileName);
+            }
 
             if (File.Exists(outputFile) && !_config.OverwriteExisting)
             {
