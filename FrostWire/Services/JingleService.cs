@@ -1,11 +1,10 @@
-﻿using strimer.Core;
-using Strimer.App;
-using Strimer.Audio;
-using Strimer.Broadcast;
-using Strimer.Core;
+﻿using FrostWire.Core;
+using FrostWire.App;
+using FrostWire.Broadcast;
 using System.Text.Json;
+using FrostWire.Audio;
 
-namespace Strimer.Services
+namespace FrostWire.Services
 {
     // Сервис управления джинглами
     public class JingleService
@@ -22,7 +21,7 @@ namespace Strimer.Services
         public JingleService(AppConfig config)
         {
             _config = config;                            // Сохраняем конфигурацию
-            if (!_config.JinglesEnable)
+            if (!_config.Jingles.JinglesEnable)
             {
                 Logger.Info($"[JingleService] Система джинглов отключена");
                 return;
@@ -42,15 +41,15 @@ namespace Strimer.Services
             try
             {
                 // Проверяем наличие файла конфигурации
-                if (string.IsNullOrEmpty(_config.JingleConfigFile) ||
-                    !File.Exists(_config.JingleConfigFile))
+                if (string.IsNullOrEmpty(_config.Jingles.JingleConfigFile) ||
+                    !File.Exists(_config.Jingles.JingleConfigFile))
                 {
-                    Logger.Warning($"[JingleService] Файл конфигурации джинглов не найден: {_config.JingleConfigFile}");
+                    Logger.Warning($"[JingleService] Файл конфигурации джинглов не найден: {_config.Jingles.JingleConfigFile}");
                     return;                               // Выходим если файл не найден
                 }
 
                 // Читаем JSON-файл
-                var json = File.ReadAllText(_config.JingleConfigFile);
+                var json = File.ReadAllText(_config.Jingles.JingleConfigFile);
 
                 // Десериализуем JSON в объект
                 var jingleConfig = JsonSerializer.Deserialize<JingleConfig>(json);
@@ -84,9 +83,9 @@ namespace Strimer.Services
         public bool ShouldPlayJingle()
         {
             // Проверяем все условия для воспроизведения джингла
-            return _config.JinglesEnable &&               // Если джинглы включены
+            return _config.Jingles.JinglesEnable &&               // Если джинглы включены
                    HasJingles &&                         // И есть доступные джинглы
-                   _trackCounter % _config.JingleFrequency == 0 && // И достигнута нужная частота
+                   _trackCounter % _config.Jingles.JingleFrequency == 0 && // И достигнута нужная частота
                    _trackCounter > 0;                    // И это не первый трек
         }
 
@@ -110,7 +109,7 @@ namespace Strimer.Services
                 }
 
                 // Выбираем джингл в зависимости от настроек
-                string? jingleFile = _config.JinglesRandom
+                string? jingleFile = _config.Jingles.JinglesRandom
                     ? GetRandomJingle()    // Случайный джингл
                     : GetNextJingle();     // Следующий джингл по порядку
 

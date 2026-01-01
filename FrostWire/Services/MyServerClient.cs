@@ -1,10 +1,10 @@
-﻿using Strimer.App;
-using Strimer.Core;
+﻿using FrostWire.App;
+using FrostWire.Core;
 using System;
 using System.Net.Http;
 using System.Web; // Для HttpUtility
 
-namespace Strimer.Services
+namespace FrostWire.Services
 {
     public class MyServerClient : IDisposable // 1. Добавляем IDisposable для корректного освобождения ресурсов
     {
@@ -16,7 +16,7 @@ namespace Strimer.Services
         {
             _config = config; // Сохраняем конфигурацию
             // Проверяем, включен ли клиент и задан ли URL
-            _enabled = config.MyServerEnabled && !string.IsNullOrWhiteSpace(config.MyServerUrl);
+            _enabled = config.MyServer.MyServerEnabled && !string.IsNullOrWhiteSpace(config.MyServer.MyServerUrl);
 
             if (_enabled)
             {
@@ -47,29 +47,29 @@ namespace Strimer.Services
             {
                 // 2. Используем HttpUtility для безопасного построения query-строки
                 var queryParams = HttpUtility.ParseQueryString(string.Empty);
-                queryParams["key"] = _config.MyServerKey; // Ключ доступа
-                queryParams[_config.MyAddSongInfoNumberVar] = trackNumber.ToString(); // Номер трека
-                queryParams[_config.MyAddSongInfoArtistVar] = artist; // Исполнитель
-                queryParams[_config.MyAddSongInfoTitleVar] = title;   // Название трека
+                queryParams["key"] = _config.MyServer.MyServerKey; // Ключ доступа
+                queryParams[_config.MyServer.MyAddSongInfoNumberVar] = trackNumber.ToString(); // Номер трека
+                queryParams[_config.MyServer.MyAddSongInfoArtistVar] = artist; // Исполнитель
+                queryParams[_config.MyServer.MyAddSongInfoTitleVar] = title;   // Название трека
 
                 // 3. Формируем полный путь к файлу на сервере
                 filename = filename.Replace('\\', '/');
-                string normalizedPrefix = _config.MyRemoveFilePrefix.Replace('\\', '/');
+                string normalizedPrefix = _config.MyServer.MyRemoveFilePrefix.Replace('\\', '/');
                 int prefixPos = filename.IndexOf(normalizedPrefix);
                 string relativePath;
                 if (prefixPos >= 0)
                     relativePath = filename.Substring(prefixPos + normalizedPrefix.Length).TrimStart('/');
                 else
                     relativePath = filename.TrimStart('/');
-                string baseUrl = _config.MyAddSongInfoLinkFolderOnServer.TrimEnd('/') + "/";
+                string baseUrl = _config.MyServer.MyAddSongInfoLinkFolderOnServer.TrimEnd('/') + "/";
                 var correct_path = (baseUrl + relativePath).Replace('\\', '/');
                 correct_path = correct_path.Replace("//", "/").Replace("http:/", "http://").Replace("https:/", "https://");
 
-                queryParams[_config.MyAddSongInfoLinkVar] = correct_path; // Путь к файлу
+                queryParams[_config.MyServer.MyAddSongInfoLinkVar] = correct_path; // Путь к файлу
 
                 // 4. Собираем полный URL с помощью UriBuilder
-                var uriBuilder = new UriBuilder(_config.MyServerUrl);
-                uriBuilder.Path = _config.MyAddSongInfoPage; // Путь к странице
+                var uriBuilder = new UriBuilder(_config.MyServer.MyServerUrl);
+                uriBuilder.Path = _config.MyServer.MyAddSongInfoPage; // Путь к странице
                 uriBuilder.Query = queryParams.ToString();    // Query-параметры
 
                 string url = uriBuilder.ToString(); // Полный URL для запроса

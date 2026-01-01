@@ -1,9 +1,10 @@
-﻿using Strimer.App;
-using Strimer.Core;
-using Strimer.Services;
+﻿using FrostWire.App;
+using FrostWire.Audio.FX;
+using FrostWire.Core;
+using FrostWire.Services;
 using System.Diagnostics;
 
-namespace Strimer.Audio
+namespace FrostWire.Audio
 {
     public class JinglePlayerSlowLoad
     {
@@ -11,19 +12,19 @@ namespace Strimer.Audio
         private readonly JingleService _jingleService;
         private readonly BassAudioEngine _audioEngine;
         private readonly Mixer _mixer;
-        private readonly ReplayGain _replayGain;
+        private readonly FXManager _fx;
 
         private int _currentJingleStream = 0;
         private readonly object _jingleLock = new();
 
         public JinglePlayerSlowLoad(AppConfig config, JingleService jingleService,
-                           BassAudioEngine audioEngine, Mixer mixer, ReplayGain replayGain)
+                           BassAudioEngine audioEngine, Mixer mixer, FXManager fx)
         {
             _config = config;
             _jingleService = jingleService;
             _audioEngine = audioEngine;
             _mixer = mixer;
-            _replayGain = replayGain;
+            _fx = fx;
         }
 
         public bool PlayJingleCycleWhileLoading(ManualResetEvent trackLoadedEvent,
@@ -34,7 +35,7 @@ namespace Strimer.Audio
             Logger.Info($"[JinglePlayer] Трек '{Path.GetFileName(filePath)}' грузится дольше 2 секунд, запускаю джинглы...");
             playedJingles = new List<string>();
 
-            if (!_config.JinglesEnable || !_jingleService.HasJingles)
+            if (!_config.Jingles.JinglesEnable || !_jingleService.HasJingles)
             {
                 Logger.Debug("[JinglePlayer] Джинглы отключены или недоступны");
                 return false;
@@ -46,7 +47,7 @@ namespace Strimer.Audio
                 while (!jingleCts.Token.IsCancellationRequested)
                 {
                     // Получаем следующий джингл
-                    string jingleFile = _config.JinglesRandom ? _jingleService.GetRandomJingle() : _jingleService.GetNextJingle();
+                    string jingleFile = _config.Jingles.JinglesRandom ? _jingleService.GetRandomJingle() : _jingleService.GetNextJingle();
 
                     if (string.IsNullOrEmpty(jingleFile))
                     {
@@ -105,7 +106,7 @@ namespace Strimer.Audio
                 var jingleTagInfo = _audioEngine.GetTrackTags(jingleFile);
                 if (jingleTagInfo != null)
                 {
-                    _replayGain.SetGain(jingleTagInfo);
+                    _fx.SetGain(jingleTagInfo);
                 }
 
                 // Добавляем в микшер и воспроизводим

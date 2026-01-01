@@ -1,18 +1,19 @@
-﻿using Strimer.Core;
+﻿using FrostWire.Audio.FX;
+using FrostWire.Core;
 using System.Diagnostics;
 using Un4seen.Bass.AddOn.Tags;
 
-namespace Strimer.Audio
+namespace FrostWire.Audio
 {
     public class TrackLoader
     {
         private readonly BassAudioEngine _audioEngine;
-        private readonly ReplayGain _replayGain;
+        private readonly FXManager _fx;
 
-        public TrackLoader(BassAudioEngine audioEngine, ReplayGain replayGain)
+        public TrackLoader(BassAudioEngine audioEngine, FXManager fx)
         {
             _audioEngine = audioEngine;
-            _replayGain = replayGain;
+            _fx = fx;
         }
 
         public LoadedTrackInfo LoadTrack(string filePath)
@@ -22,7 +23,6 @@ namespace Strimer.Audio
             try
             {
                 Logger.Debug($"[TrackLoader] Загрузка трека: {Path.GetFileName(filePath)}");
-                //Thread.Sleep(10000);
 
                 // Создаем аудиопоток
                 int streamHandle = _audioEngine.CreateStreamFromFile(filePath);
@@ -42,7 +42,7 @@ namespace Strimer.Audio
                 }
 
                 // Применяем ReplayGain
-                _replayGain.SetGain(tagInfo);
+                _fx.SetGain(tagInfo);
 
                 // Создаем информацию о треке
                 var trackInfo = CreateTrackInfo(tagInfo, filePath);

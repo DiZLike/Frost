@@ -1,10 +1,10 @@
-﻿using Strimer.App;
-using Strimer.Audio;
-using Strimer.Broadcast;
-using Strimer.Core;
+﻿using FrostWire.App;
+using FrostWire.Audio;
+using FrostWire.Broadcast;
+using FrostWire.Core;
 using System.Collections.Concurrent;
 
-namespace Strimer.Services
+namespace FrostWire.Services
 {
     public class RadioService
     {
@@ -51,17 +51,17 @@ namespace Strimer.Services
             _scheduleManager = new ScheduleManager(config);// Создаем менеджер расписания
 
             // Резервный плейлист (если расписание отключено или не настроено)
-            if (!config.ScheduleEnable || _scheduleManager.CurrentPlaylist == null)
+            if (!config.Playlist.ScheduleEnable || _scheduleManager.CurrentPlaylist == null)
             {
                 _fallbackPlaylist = new Playlist(         // Создаем резервный плейлист
-                    config.PlaylistFile,
-                    config.SavePlaylistHistory,
-                    config.DynamicPlaylist
+                    config.Playlist.PlaylistFile,
+                    config.Playlist.SavePlaylistHistory,
+                    config.Playlist.DynamicPlaylist
                 );
                 Logger.Info($"[RadioService] Резервный плейлист: {_fallbackPlaylist.TotalTracks} треков"); // Лог: информация о плейлисте
             }
 
-            Logger.Info($"[RadioService] Расписание включено: {config.ScheduleEnable}"); // Лог: статус расписания
+            Logger.Info($"[RadioService] Расписание включено: {config.Playlist.ScheduleEnable}"); // Лог: статус расписания
         }
 
         private void _iceCast_ConnectionRestored()
@@ -72,14 +72,14 @@ namespace Strimer.Services
         // Получение текущего активного плейлиста
         private Playlist? GetCurrentPlaylist()
         {
-            return _config.ScheduleEnable                // Если расписание включено
+            return _config.Playlist.ScheduleEnable                // Если расписание включено
                 ? _scheduleManager.CurrentPlaylist       // Берем плейлист из расписания
                 : _fallbackPlaylist;                     // Иначе берем резервный
         }
         // Получение следующего трека для воспроизведения
         private string? GetNextTrackFromPlaylist()
         {
-            return _config.ScheduleEnable                // Если расписание включено
+            return _config.Playlist.ScheduleEnable                // Если расписание включено
                 ? _scheduleManager.GetNextTrack()        // Берем трек из расписания
                 : _fallbackPlaylist?.GetRandomTrack();   // Иначе случайный из резервного
         }
@@ -232,7 +232,7 @@ namespace Strimer.Services
                     _scheduleManager.CheckAndUpdatePlaylist(); // Обновление плейлиста по расписанию
 
                     // Проверяем, нужно ли играть джингл перед треком
-                    if (_config.JinglesEnable && _jingleService.ShouldPlayJingle())
+                    if (_config.Jingles.JinglesEnable && _jingleService.ShouldPlayJingle())
                     {
                         // ВЫЗОВ ПЕРЕМЕЩЕННОГО МЕТОДА ИЗ JingleService
                         bool jinglePlayed = _jingleService.PlayJingle(_player, _iceCast);
@@ -290,7 +290,7 @@ namespace Strimer.Services
                     }
 
                     // 5. Отправляем информацию на внешний сервер
-                    if (_config.MyServerEnabled && _currentTrack != null) // Если внешний сервер включен и есть трек
+                    if (_config.MyServer.MyServerEnabled && _currentTrack != null) // Если внешний сервер включен и есть трек
                     {
                         var currentPlaylist = GetCurrentPlaylist(); // Получаем текущий плейлист
                         _myServer.SendTrackInfo(           // Отправка информации о треке

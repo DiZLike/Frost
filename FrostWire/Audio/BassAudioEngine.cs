@@ -1,10 +1,10 @@
-﻿using Strimer.App;
-using Strimer.Core;
+﻿using FrostWire.App;
+using FrostWire.Core;
 using System.Diagnostics;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Tags;
 
-namespace Strimer.Audio
+namespace FrostWire.Audio
 {
     public class BassAudioEngine : IDisposable
     {
@@ -17,7 +17,7 @@ namespace Strimer.Audio
         public BassAudioEngine(AppConfig config)
         {
             _config = config;
-            Logger.Debug($"[BassAudioEngine] Создан с конфигурацией: Устройство={_config.AudioDevice}, Частота={_config.SampleRate}");
+            Logger.Debug($"[BassAudioEngine] Создан с конфигурацией: Устройство={_config.Audio.AudioDevice}, Частота={_config.Audio.SampleRate}");
             Initialize();
         }
 
@@ -28,11 +28,13 @@ namespace Strimer.Audio
             Logger.Info("[BassAudioEngine] Инициализация BASS...");
 
             bool initSuccess = Bass.BASS_Init(
-                _config.AudioDevice,
-                _config.SampleRate,
+                _config.Audio.AudioDevice,
+                _config.Audio.SampleRate,
                 BASSInit.BASS_DEVICE_DEFAULT,
                 IntPtr.Zero
             );
+            Bass.BASS_SetConfig(BASSConfig.BASS_CONFIG_BUFFER, 2000);
+            int bufLen = Bass.BASS_GetConfig(BASSConfig.BASS_CONFIG_BUFFER);
 
             if (!initSuccess)
             {

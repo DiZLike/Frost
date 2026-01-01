@@ -1,4 +1,4 @@
-﻿using Strimer.App;
+﻿using FrostWire.App;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace Strimer.Core
+namespace FrostWire.Core
 {
     public static class Logger
     {
@@ -48,7 +48,7 @@ namespace Strimer.Core
 
         private static string GetCallerChain(int skipFrames = 2, int maxDepth = 5)
         {
-            if (AppConfig == null || (!AppConfig.DebugEnable && !AppConfig.DebugStackView))
+            if (AppConfig == null || (!AppConfig.Debug.DebugEnable && !AppConfig.Debug.DebugStackView))
                 return "";
 
             try
@@ -118,7 +118,7 @@ namespace Strimer.Core
         {
             string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-            if (AppConfig != null && AppConfig.DebugStackView && includeCaller)
+            if (AppConfig != null && AppConfig.Debug.DebugStackView && includeCaller)
             {
                 string callerChain = GetCallerChain(3);
                 if (!string.IsNullOrEmpty(callerChain))
@@ -176,7 +176,7 @@ namespace Strimer.Core
 
         public static void Debug(string message)
         {
-            if (AppConfig != null && AppConfig.DebugEnable)
+            if (AppConfig != null && AppConfig.Debug.DebugEnable)
             {
                 string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 string consoleMessage = $"[DEBUG]\t{message}";

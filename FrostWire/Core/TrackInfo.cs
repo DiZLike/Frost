@@ -1,4 +1,4 @@
-﻿namespace Strimer.Core
+﻿namespace FrostWire.Core
 {
     public class TrackInfo
     {

@@ -1,14 +1,14 @@
-﻿using Strimer.App;
-using Strimer.Audio;
-using Strimer.Broadcast.Encoders;
-using Strimer.Core;
+﻿using FrostWire.App;
+using FrostWire.Audio;
+using FrostWire.Broadcast.Encoders;
+using FrostWire.Core;
 using System.Diagnostics;
 using System.Net;
 using System.Text;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Enc;
 
-namespace Strimer.Broadcast
+namespace FrostWire.Broadcast
 {
     public class IceCastClient : IDisposable
     {
@@ -51,15 +51,15 @@ namespace Strimer.Broadcast
                 try
                 {
                     // Логируем параметры подключения
-                    Logger.Info($"[IceCastClient] Подключение к IceCast: {_config.IceCastServer}:{_config.IceCastPort}/{_config.IceCastMount}");
+                    Logger.Info($"[IceCastClient] Подключение к IceCast: {_config.Icecast.Server}:{_config.Icecast.Port}/{_config.Icecast.Mount}");
 
                     _encoder?.Dispose();                  // Освобождаем старый энкодер
                     _encoder = new OpusEncoder(_config, _mixer); // Создаем новый энкодер
                     Thread.Sleep(100);                    // Даем время на инициализацию
 
                     // Формируем URL и авторизацию
-                    string url = $"http://{_config.IceCastServer}:{_config.IceCastPort}/{_config.IceCastMount}";
-                    string auth = $"{_config.IceCastUser}:{_config.IceCastPassword}";
+                    string url = $"http://{_config.Icecast.Server}:{_config.Icecast.Port}/{_config.Icecast.Mount}";
+                    string auth = $"{_config.Icecast.User}:{_config.Icecast.Password}";
 
                     // Инициализируем трансляцию через BASS
                     bool success = BassEnc.BASS_Encode_CastInit(
@@ -67,10 +67,10 @@ namespace Strimer.Broadcast
                         url,                              // URL сервера
                         auth,                             // Логин:пароль
                         "audio/ogg",                      // Тип контента
-                        _config.IceCastName,              // Название потока
-                        _config.IceCastGenre,             // Жанр
+                        _config.Icecast.Name,              // Название потока
+                        _config.Icecast.Genre,             // Жанр
                         null, null, null,                 // Дополнительные параметры
-                        _config.OpusBitrate,              // Битрейт
+                        _config.Opus.OpusBitrate,              // Битрейт
                         BASSEncodeCast.BASS_ENCODE_CAST_PUT // Метод отправки
                     );
 
@@ -193,12 +193,12 @@ namespace Strimer.Broadcast
         {
             try
             {
-                string statsUrl = $"http://{_config.IceCastServer}:{_config.IceCastPort}/status-json.xsl";
+                string statsUrl = $"http://{_config.Icecast.Server}:{_config.Icecast.Port}/status-json.xsl";
                 using (var client = new HttpClient())
                 {
                     client.Timeout = new TimeSpan(0, 0, 5);                 // Таймаут 5 секунд
                     string json = client.GetStringAsync(statsUrl).Result;   // Загружаем статистику
-                    return json.Contains($"/{_config.IceCastMount}");       // Ищем наш mount point
+                    return json.Contains($"/{_config.Icecast.Mount}");       // Ищем наш mount point
                 }
 
                 //using (var client = new WebClient())      // Создаем WebClient
@@ -219,12 +219,12 @@ namespace Strimer.Broadcast
         {
             try
             {
-                string statsUrl = $"http://{_config.IceCastServer}:{_config.IceCastPort}/status-json.xsl";
+                string statsUrl = $"http://{_config.Icecast.Server}:{_config.Icecast.Port}/status-json.xsl";
 
                 using (var client = new WebClient())
                 {
                     string json = client.DownloadString(statsUrl);
-                    string mountPoint = $"/{_config.IceCastMount}";
+                    string mountPoint = $"/{_config.Icecast.Mount}";
 
                     if (json.Contains(mountPoint))        // Если наш mount point существует
                     {
@@ -259,7 +259,8 @@ namespace Strimer.Broadcast
 
             try
             {
-                _encoder.SetMetadata(artist, title);      // Отправка метаданных
+                bool ok = _encoder.SetMetadata(artist, title);      // Отправка метаданных
+                var err = Bass.BASS_ErrorGetCode();
                 Logger.Debug($"[IceCastClient] Метаданные: {artist} - {title}");
             }
             catch (Exception ex)

@@ -1,7 +1,7 @@
-﻿using Strimer.App;
+﻿using FrostWire.App;
 using System.Reflection;
 
-namespace Strimer
+namespace FrostWire
 {
     internal class Program
     {

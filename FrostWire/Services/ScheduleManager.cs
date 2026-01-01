@@ -1,8 +1,8 @@
-﻿using Strimer.App;
-using Strimer.Audio;
-using Strimer.Core;
+﻿using FrostWire.App;
+using FrostWire.Audio;
+using FrostWire.Core;
 
-namespace Strimer.Services
+namespace FrostWire.Services
 {
     public class ScheduleManager
     {
@@ -24,7 +24,7 @@ namespace Strimer.Services
 
         private void LoadSchedule()
         {
-            string scheduleFile = _config.ScheduleFile;
+            string scheduleFile = _config.Playlist.ScheduleFile;
 
             // Если путь относительный - добавляем базовую директорию
             if (!Path.IsPathRooted(scheduleFile))
@@ -123,7 +123,7 @@ namespace Strimer.Services
 
         public void CheckAndUpdatePlaylist()
         {
-            if (!_config.ScheduleEnable)
+            if (!_config.Playlist.ScheduleEnable)
             {
                 Logger.Info("[ScheduleManager] Расписание отключено в конфигурации");
                 return;
@@ -186,8 +186,8 @@ namespace Strimer.Services
                 // Создаем или обновляем плейлист
                 _currentPlaylist = new Playlist(
                     activeSchedule.PlaylistPath,
-                    _config.SavePlaylistHistory,
-                    _config.DynamicPlaylist
+                    _config.Playlist.SavePlaylistHistory,
+                    _config.Playlist.DynamicPlaylist
                 );
 
                 _currentSchedule = activeSchedule;

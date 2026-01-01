@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace strimer.Core
+namespace FrostWire.Core
 {
     // Конфигурация джинглов из JSON-файла
     public class JingleConfig

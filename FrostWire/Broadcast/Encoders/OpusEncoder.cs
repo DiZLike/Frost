@@ -1,13 +1,11 @@
-﻿using Strimer.App;
-using Strimer.Audio;
-using Strimer.Core;
-using System.IO;
-using System.Text;
+﻿using FrostWire.App;
+using FrostWire.Audio;
+using FrostWire.Core;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Enc;
 using Un4seen.Bass.AddOn.EncOpus;
 
-namespace Strimer.Broadcast.Encoders
+namespace FrostWire.Broadcast.Encoders
 {
     public class OpusEncoder : IDisposable
     {
@@ -60,7 +58,7 @@ namespace Strimer.Broadcast.Encoders
             if (_encoderHandle == 0)  // Проверка успешности создания
                 throw new Exception($"Не удалось создать Opus энкодер: {Bass.BASS_ErrorGetCode()}");
 
-            Logger.Info($"[OpusEncoder] Opus энкодер: {_config.OpusBitrate}кбит/с {_config.OpusMode}");  // Лог успеха
+            Logger.Info($"[OpusEncoder] Opus энкодер: {_config.Opus.OpusBitrate}кбит/с {_config.Opus.OpusMode}");  // Лог успеха
         }
 
         // Проверка валидности энкодера (потокобезопасная)
@@ -138,11 +136,11 @@ namespace Strimer.Broadcast.Encoders
         {
             // Собираем все параметры в одну строку
             return $"{_encoderExe} " +                      // Исполняемый файл
-                   $"--bitrate {_config.OpusBitrate} " +    // Битрейт
-                   $"--{_config.OpusMode} " +               // Режим (VBR/CBR)
-                   $"--{_config.OpusContentType} " +        // Тип контента (audio/voip)
-                   $"--comp {_config.OpusComplexity} " +    // Сложность кодирования
-                   $"--framesize {_config.OpusFrameSize} " + // Размер фрейма
+                   $"--bitrate {_config.Opus.OpusBitrate} " +    // Битрейт
+                   $"--{_config.Opus.OpusMode} " +               // Режим (VBR/CBR)
+                   $"--{_config.Opus.OpusContentType} " +        // Тип контента (audio/voip)
+                   $"--comp {_config.Opus.OpusComplexity} " +    // Сложность кодирования
+                   $"--framesize {_config.Opus.OpusFrameSize} " + // Размер фрейма
                    "- -";                                   // stdin -> stdout
         }
     }

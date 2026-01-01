@@ -1,8 +1,8 @@
-﻿using Strimer.Core;
+﻿using FrostWire.Core;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Mix;
 
-namespace Strimer.Audio
+namespace FrostWire.Audio
 {
     public class Mixer
     {
@@ -19,6 +19,8 @@ namespace Strimer.Audio
                 2,                                      // Стерео (2 канала)
                 BASSFlag.BASS_MIXER_NONSTOP | BASSFlag.BASS_SAMPLE_FLOAT
             );
+            Bass.BASS_SetConfig(BASSConfig.BASS_CONFIG_MIXER_BUFFER, 2000);
+            int bufLenAsync = Bass.BASS_GetConfig(BASSConfig.BASS_CONFIG_MIXER_BUFFER);
 
             if (!IsValid)                               // Если микшер не создался
             {

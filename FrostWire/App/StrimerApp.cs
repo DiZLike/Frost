@@ -1,7 +1,7 @@
-﻿using Strimer.Services;
+﻿using FrostWire.Services;
 using System.Runtime.InteropServices;
 
-namespace Strimer.App
+namespace FrostWire.App
 {
     public class StrimerApp
     {
@@ -17,47 +17,37 @@ namespace Strimer.App
 
             // 1. Загрузка конфигурации
             _config = new AppConfig();
-
-            // 2. Если не настроено - автоматически копируем библиотеки и устанавливаем базовые настройки
+            // 2. Если не настроено - автоматически копируем библиотеки
             if (!_config.IsConfigured)
             {
-                Core.Logger.Info("[App] Приложение не настроено. Выполняется автоматическая настройка...");
+                Core.Logger.Info("[App] Приложение не настроено...");
 
                 // Копируем нативные библиотеки
                 CopyNativeLibraries();
 
-                // Устанавливаем базовые параметры
-                SetDefaultConfiguration();
-
-                // Перезагружаем конфигурацию
-                _config = new AppConfig();
-
-                Core.Logger.Info("[App] Автоматическая настройка завершена");
-
                 // 3. Выводим сообщение о необходимости настройки и завершаем работу
                 Console.WriteLine("\n" + new string('═', 50));
-                Console.WriteLine("  НАСТРОЙКА ЗАВЕРШЕНА");
-                Console.WriteLine(new string('═', 50));
-                Console.WriteLine("\nАвтоматическая настройка завершена.");
                 Console.WriteLine("Пожалуйста, настройте приложение перед запуском:");
                 Console.WriteLine();
                 Console.WriteLine("1. Отредактируйте файл конфигурации:");
                 Console.WriteLine($"   {Path.Combine(_config.ConfigDirectory, "strimer.conf")}");
                 Console.WriteLine();
                 Console.WriteLine("2. Добавьте музыкальные файлы в плейлист:");
-                Console.WriteLine($"   {_config.PlaylistFile}");
-                Console.WriteLine("\n   Формат: track=C:\\путь\\к\\файлу.mp3?;");
+                Console.WriteLine("   Формат: track=C:\\путь\\к\\файлу.mp3?;");
                 Console.WriteLine();
                 Console.WriteLine("3. Настройте параметры IceCast сервера при необходимости.");
+                _config.SetConfigOk();
 
                 Environment.Exit(0);
                 return; // Дополнительная гарантия выхода
             }
+            if (!_config.LoadConfig())
+                throw new Exception("Ошибка загрузки конфигурации!");
 
             // 4. Запускаем радио сервис (только если уже настроено)
             Console.WriteLine("\n" + new string('═', 50));
             Console.WriteLine("  ЗАПУСК РАДИО-СТРИМА");
-            if (_config.DebugEnable)
+            if (_config.Debug.DebugEnable)
                 Console.WriteLine($"Приложение запущено в режиме отладки!");
             Console.WriteLine(new string('═', 50) + "\n");
 
@@ -130,81 +120,6 @@ namespace Strimer.App
             {
                 Core.Logger.Error($"[App] Не удалось скопировать библиотеки: {ex.Message}");
                 Console.WriteLine($"\nОШИБКА: Не удалось скопировать библиотеки: {ex.Message}");
-                Environment.Exit(1);
-            }
-        }
-
-        private void SetDefaultConfiguration()
-        {
-            try
-            {
-                Core.Logger.Info("[App] Установка конфигурации по умолчанию...");
-
-                // Создаем директорию для конфигурации
-                Directory.CreateDirectory(_config.ConfigDirectory);
-
-                // Устанавливаем базовые параметры
-                _config.IceCastServer = "localhost";
-                _config.IceCastPort = "8000";
-                _config.IceCastMount = "live";
-                _config.IceCastName = "Strimer Radio";
-                _config.IceCastGenre = "Various";
-                _config.IceCastUser = "source";
-                _config.IceCastPassword = "hackme";
-
-                _config.AudioDevice = -1;
-                _config.SampleRate = 44100;
-
-                _config.PlaylistFile = "playlist.txt";
-                _config.SavePlaylistHistory = true;
-                _config.DynamicPlaylist = false;
-
-                _config.ScheduleEnable = false;
-                _config.ScheduleFile = "schedule.json";
-
-                _config.OpusBitrate = 128;
-                _config.OpusMode = "vbr";
-                _config.OpusContentType = "music";
-                _config.OpusComplexity = 10;
-                _config.OpusFrameSize = "20";
-
-                _config.UseReplayGain = true;
-                _config.UseCustomGain = false;
-
-                _config.MyServerEnabled = false;
-                _config.MyServerUrl = "";
-                _config.MyServerKey = "";
-
-                // Устанавливаем флаг конфигурации
-                _config.IsConfigured = true;
-
-                // Сохраняем конфигурацию
-                _config.Save();
-
-                Core.Logger.Info("[App] Конфигурация по умолчанию сохранена");
-
-                // Создаем пустой файл плейлиста если его нет
-                if (!File.Exists(_config.PlaylistFile))
-                {
-                    try
-                    {
-                        File.WriteAllText(_config.PlaylistFile,
-                            "# Плейлист Strimer\n" +
-                            "# Добавляйте треки в формате: track=C:\\путь\\к\\файлу.mp3?;\n" +
-                            "# Пример:\n" +
-                            "# track=C:\\Music\\song1.mp3?;\n" +
-                            "# track=C:\\Music\\song2.mp3?;\n");
-                        Core.Logger.Info($"Создан пустой плейлист: {_config.PlaylistFile}");
-                    }
-                    catch (Exception ex)
-                    {
-                        Core.Logger.Error($"[App] Не удалось создать файл плейлиста: {ex.Message}");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Core.Logger.Error($"[App] Не удалось установить конфигурацию по умолчанию: {ex.Message}");
                 Environment.Exit(1);
             }
         }

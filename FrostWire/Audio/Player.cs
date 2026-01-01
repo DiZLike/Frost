@@ -1,10 +1,11 @@
-﻿using Strimer.App;
-using Strimer.Core;
-using Strimer.Services;
+﻿using FrostWire.App;
+using FrostWire.Audio.FX;
+using FrostWire.Core;
+using FrostWire.Services;
 using System.Diagnostics;
 using Un4seen.Bass.AddOn.Tags;
 
-namespace Strimer.Audio
+namespace FrostWire.Audio
 {
     public class Player : IDisposable
     {
@@ -12,7 +13,7 @@ namespace Strimer.Audio
         private readonly JingleService _jingleService;
         private readonly BassAudioEngine _audioEngine;
         private readonly Mixer _mixer;
-        private readonly ReplayGain _replayGain;
+        private readonly FXManager _fx;
         private readonly TrackLoader _trackLoader;
         private readonly JinglePlayerSlowLoad _jinglePlayer;
 
@@ -29,10 +30,10 @@ namespace Strimer.Audio
             _jingleService = jingleService;
 
             _audioEngine = new BassAudioEngine(config);
-            _mixer = new Mixer(_config.SampleRate);
-            _replayGain = new ReplayGain(_config.UseReplayGain, _config.UseCustomGain, _mixer.Handle);
-            _trackLoader = new TrackLoader(_audioEngine, _replayGain);
-            _jinglePlayer = new JinglePlayerSlowLoad(config, jingleService, _audioEngine, _mixer, _replayGain);
+            _mixer = new Mixer(_config.Audio.SampleRate);
+            _fx = new FXManager(_mixer.Handle, _config);
+            _trackLoader = new TrackLoader(_audioEngine, _fx);
+            _jinglePlayer = new JinglePlayerSlowLoad(config, jingleService, _audioEngine, _mixer, _fx);
 
             Logger.Debug("[Player] Инициализирован с модульной архитектурой");
         }
@@ -87,7 +88,7 @@ namespace Strimer.Audio
                     bool loadedInTime = trackLoadedEvent.WaitOne(TimeSpan.FromSeconds(2));
 
                     // 3. Если медленно и есть джинглы - запускаем цикл джинглов
-                    if (!loadedInTime && _config.JinglesEnable && _jingleService.HasJingles)
+                    if (!loadedInTime && _config.Jingles.JinglesEnable && _jingleService.HasJingles)
                     {
                         jinglePlayed = true;
 

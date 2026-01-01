@@ -1,6 +1,6 @@
-﻿using Strimer.Core;
+﻿using FrostWire.Core;
 
-namespace Strimer.Audio
+namespace FrostWire.Audio
 {
     public class Playlist
     {

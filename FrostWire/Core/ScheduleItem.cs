@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Strimer.Core
+namespace FrostWire.Core
 {
     public class ScheduleItem
     {

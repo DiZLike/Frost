@@ -1,77 +1,52 @@
-﻿using Strimer.Core;
+﻿using FrostWire.App.Config;
+using FrostWire.App.Config.Encoders;
+using FrostWire.Audio;
+using FrostWire.Audio.FX;
+using FrostWire.Core;
+using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
+using TagLib.Ogg.Codecs;
+using static Un4seen.Bass.Misc.BaseEncoder;
 
-namespace Strimer.App
+namespace FrostWire.App
 {
     public class AppConfig
     {
         public string OS { get; private set; }
         public string Architecture { get; private set; }
-        public bool IsConfigured { get; set; } = false;
-
-        // Пути
         public string BaseDirectory { get; } = AppDomain.CurrentDomain.BaseDirectory;
         public string ConfigDirectory => Path.Combine(BaseDirectory, "config");
+        public bool IsConfigured { get; set; } = false;
 
-        // IceCast настройки
-        public string IceCastServer { get; set; } = "localhost";
-        public string IceCastPort { get; set; } = "8000";
-        public string IceCastMount { get; set; } = "live";
-        public string IceCastUser { get; set; } = "source";
-        public string IceCastPassword { get; set; } = "hackme";
-        public string IceCastName { get; set; } = "Strimer Radio";
-        public string IceCastGenre { get; set; } = "Various";
-
-        // Аудио настройки
-        public int AudioDevice { get; set; } = -1;
-        public int SampleRate { get; set; } = 44100;
-
-        // Плейлист
-        public string PlaylistFile { get; set; } = "playlist.txt";
-        public bool DynamicPlaylist { get; set; } = false;
-        public bool SavePlaylistHistory { get; set; } = true;
-
-        // Расписание (НОВОЕ)
-        public bool ScheduleEnable { get; set; } = false;
-        public string ScheduleFile { get; set; } = "schedule.json";
-
-        // Opus настройки
-        public int OpusBitrate { get; set; } = 128;
-        public string OpusMode { get; set; } = "vbr";
-        public string OpusContentType { get; set; } = "music";
-        public int OpusComplexity { get; set; } = 10;
-        public string OpusFrameSize { get; set; } = "20";
-
-        // Replay Gain
-        public bool UseReplayGain { get; set; } = true;
-        public bool UseCustomGain { get; set; } = false;
-
-        // MyServer
-        public bool MyServerEnabled { get; set; } = false;
-        public string MyServerUrl { get; set; } = "";
-        public string MyServerKey { get; set; } = "";
-        public string MyAddSongInfoPage { get; set; } = "";
-        public string MyAddSongInfoNumberVar { get; set; } = "";
-        public string MyAddSongInfoTitleVar { get; set; } = "";
-        public string MyAddSongInfoArtistVar { get; set; } = "";
-        public string MyAddSongInfoLinkVar { get; set; } = "";
-        public string MyAddSongInfoLinkFolderOnServer { get; set; } = "";
-        public string MyRemoveFilePrefix { get; set; } = "";
-
-        // Джинглы
-        public bool JinglesEnable { get; set; } = false;                    // Включены ли джинглы
-        public string JingleConfigFile { get; set; } = "jingles.json";     // Путь к файлу конфигурации джинглов
-        public int JingleFrequency { get; set; } = 3;                      // Частота джинглов (каждый N-й трек)
-        public bool JinglesRandom { get; set; } = true;                    // Случайный порядок джинглов
-
-        // Debug
-        public bool DebugEnable { get; set; } = false;
-        public bool DebugStackView { get; set; } = false;
+        public CAudio Audio { get; set; }
+        public CIcecast Icecast { get; set; }
+        public CPlaylist Playlist { get; set; }
+        public COpus Opus { get; set; }
+        public CReplayGain ReplayGain { get; set; }
+        public CFirstCompressor FirstCompressor { get; set; }
+        public CSecondCompressor SecondCompressor { get; set; }
+        public CLimiter Limiter { get; set; }
+        public CMyServer MyServer { get; set; }
+        public CJingles Jingles { get; set; }
+        public CDebug Debug { get; set; }
 
         public AppConfig()
         {
+            Audio = new CAudio();
+            Playlist = new CPlaylist();
+            Icecast = new CIcecast();
+            Opus = new COpus();
+            ReplayGain = new CReplayGain();
+            FirstCompressor = new CFirstCompressor();
+            SecondCompressor = new CSecondCompressor();
+            Limiter = new CLimiter();
+            MyServer = new CMyServer();
+            Jingles = new CJingles();
+            Debug = new CDebug();
+
             DetectOS();
-            LoadConfig();
+            CheckConfigOk();
         }
 
         private void DetectOS()
@@ -88,15 +63,15 @@ namespace Strimer.App
             Core.Logger.Info($"[AppConfig] Обнаружена ОС: {OS} ({Architecture})");
         }
 
-        private void LoadConfig()
+        public bool LoadConfig()
         {
             string configFile = Path.Combine(ConfigDirectory, "strimer.conf");
 
             if (!File.Exists(configFile))
             {
-                Core.Logger.Warning("[AppConfig] Файл конфигурации не найден. Используются значения по умолчанию.");
+                Core.Logger.Warning("[AppConfig] Файл конфигурации не найден!");
                 IsConfigured = false;
-                return;
+                return false;
             }
 
             try
@@ -136,14 +111,16 @@ namespace Strimer.App
                 }
                 Logger.AppConfig = this;
 
-                Logger.Debug($"[AppConfig] Загружено: IceCast={IceCastServer}:{IceCastPort}, Плейлист={PlaylistFile}");
-                Logger.Debug($"[AppConfig] Аудио: Устройство={AudioDevice}, Частота={SampleRate}Гц");
-                Logger.Debug($"[AppConfig] Кодировщик: Opus {OpusBitrate}кбит/с {OpusMode}, RG={(UseReplayGain ? "Вкл" : "Выкл")}");
+                Logger.Debug($"[AppConfig] Загружено: IceCast={Icecast.Server}:{Icecast.Port}, Плейлист={Playlist.PlaylistFile}");
+                Logger.Debug($"[AppConfig] Аудио: Устройство={Audio.AudioDevice}, Частота={Audio.SampleRate}Гц");
+                Logger.Debug($"[AppConfig] Кодировщик: Opus {Opus.OpusBitrate}кбит/с {Opus.OpusMode}, RG={(ReplayGain.UseReplayGain ? "Вкл" : "Выкл")}");
+                return true;
             }
             catch (Exception ex)
             {
                 Core.Logger.Error($"[AppConfig] Не удалось загрузить конфигурацию: {ex.Message}");
                 IsConfigured = false;
+                return false;
             }
         }
 
@@ -152,12 +129,16 @@ namespace Strimer.App
             // Упрощенная обработка: учитываем только секцию, без префиксов в ключах
             switch (section)
             {
-                case "app":
+                case "audio":
                     switch (key)
                     {
-                        case "configured":
-                            string cleanValue = value.ToLower().Trim();
-                            IsConfigured = (cleanValue == "yes" || cleanValue == "true" || cleanValue == "1");
+                        case "device":
+                            if (int.TryParse(value, out int deviceId))
+                                Audio.AudioDevice = deviceId;
+                            break;
+                        case "frequency":
+                            if (int.TryParse(value, out int freq))
+                                Audio.SampleRate = freq;
                             break;
                     }
                     break;
@@ -166,39 +147,25 @@ namespace Strimer.App
                     switch (key)
                     {
                         case "server":
-                            IceCastServer = value;
+                            Icecast.Server = value;
                             break;
                         case "port":
-                            IceCastPort = value;
+                            Icecast.Port = value;
                             break;
                         case "mount":
-                            IceCastMount = value;
+                            Icecast.Mount = value;
                             break;
                         case "name":
-                            IceCastName = value;
+                            Icecast.Name = value;
                             break;
                         case "genre":
-                            IceCastGenre = value;
+                            Icecast.Genre = value;
                             break;
                         case "username":
-                            IceCastUser = value;
+                            Icecast.User = value;
                             break;
                         case "password":
-                            IceCastPassword = value;
-                            break;
-                    }
-                    break;
-
-                case "audio":
-                    switch (key)
-                    {
-                        case "device":
-                            if (int.TryParse(value, out int deviceId))
-                                AudioDevice = deviceId;
-                            break;
-                        case "frequency":
-                            if (int.TryParse(value, out int freq))
-                                SampleRate = freq;
+                            Icecast.Password = value;
                             break;
                     }
                     break;
@@ -207,19 +174,19 @@ namespace Strimer.App
                     switch (key)
                     {
                         case "list":
-                            PlaylistFile = value;
+                            Playlist.PlaylistFile = value;
                             break;
                         case "dynamic_playlist":
-                            DynamicPlaylist = value.ToLower() == "yes";
+                            Playlist.DynamicPlaylist = value.ToLower() == "yes";
                             break;
                         case "save_playlist_history":
-                            SavePlaylistHistory = value.ToLower() == "yes";
+                            Playlist.SavePlaylistHistory = value.ToLower() == "yes";
                             break;
                         case "schedule_enable":
-                            ScheduleEnable = value.ToLower() == "yes";
+                            Playlist.ScheduleEnable = value.ToLower() == "yes";
                             break;
                         case "schedule":
-                            ScheduleFile = value;
+                            Playlist.ScheduleFile = value;
                             break;
                     }
                     break;
@@ -229,68 +196,137 @@ namespace Strimer.App
                     {
                         case "bitrate":
                             if (int.TryParse(value, out int bitrate))
-                                OpusBitrate = bitrate;
+                                Opus.OpusBitrate = bitrate;
                             break;
                         case "bitrate_mode":
-                            OpusMode = value;
+                            Opus.OpusMode = value;
                             break;
                         case "content_type":
-                            OpusContentType = value;
+                            Opus.OpusContentType = value;
                             break;
                         case "complexity":
                             if (int.TryParse(value, out int complexity))
-                                OpusComplexity = complexity;
+                                Opus.OpusComplexity = complexity;
                             break;
                         case "framesize":
-                            OpusFrameSize = value;
+                            Opus.OpusFrameSize = value;
                             break;
                     }
                     break;
 
-                case "audioprocessing":
+                case "replaygain":
                     switch (key)
                     {
                         case "use_replay_gain":
-                            UseReplayGain = value.ToLower() == "yes";
+                            ReplayGain.UseReplayGain = value.ToLower() == "yes";
                             break;
                         case "use_custom_gain":
-                            UseCustomGain = value.ToLower() == "yes";
+                            ReplayGain.UseCustomGain = value.ToLower() == "yes";
                             break;
                     }
                     break;
 
-                case "mysrv":  // Более краткое название, как в старом формате
+                case "firstcompressor":
                     switch (key)
                     {
                         case "enable":
-                            MyServerEnabled = value.ToLower() == "yes";
+                            FirstCompressor.Enable = value.ToLower() == "yes";
+                            break;
+                        case "adaptive":
+                            FirstCompressor.Adaptive = value.ToLower() == "yes";
+                            break;
+                        case "threshold":
+                            FirstCompressor.Threshold = float.Parse(value.Replace(".", ","));
+                            break;
+                        case "ratio":
+                            FirstCompressor.Ratio = float.Parse(value.Replace(".", ","));
+                            break;
+                        case "attack":
+                            FirstCompressor.Attack = float.Parse(value.Replace(".", ","));
+                            break;
+                        case "release":
+                            FirstCompressor.Release = float.Parse(value.Replace(".", ","));
+                            break;
+                        case "gain":
+                            FirstCompressor.Gain = float.Parse(value.Replace(".", ","));
+                            break;
+                    }
+                    break;
+
+                case "secondcompressor":
+                    switch (key)
+                    {
+                        case "enable":
+                            SecondCompressor.Enable = value.ToLower() == "yes";
+                            break;
+                        case "threshold":
+                            SecondCompressor.Threshold = float.Parse(value.Replace(".", ","));
+                            break;
+                        case "ratio":
+                            SecondCompressor.Ratio = float.Parse(value.Replace(".", ","));
+                            break;
+                        case "attack":
+                            SecondCompressor.Attack = float.Parse(value.Replace(".", ","));
+                            break;
+                        case "release":
+                            SecondCompressor.Release = float.Parse(value.Replace(".", ","));
+                            break;
+                        case "gain":
+                            SecondCompressor.Gain = float.Parse(value.Replace(".", ","));
+                            break;
+                    }
+                    break;
+
+                case "limiter":
+                    switch (key)
+                    {
+                        case "enable":
+                            Limiter.Enable = value.ToLower() == "yes";
+                            break;
+                        case "threshold":
+                            Limiter.Threshold = float.Parse(value.Replace(".", ","));
+                            break;
+                        case "release":
+                            Limiter.Release = float.Parse(value.Replace(".", ","));
+                            break;
+                        case "gain":
+                            Limiter.Gain = float.Parse(value.Replace(".", ","));
+                            break;
+                    }
+                    break;
+
+                case "myserver":  // Более краткое название, как в старом формате
+                    switch (key)
+                    {
+                        case "enable":
+                            MyServer.MyServerEnabled = value.ToLower() == "yes";
                             break;
                         case "server":
-                            MyServerUrl = value;
+                            MyServer.MyServerUrl = value;
                             break;
                         case "key":
-                            MyServerKey = value;
+                            MyServer.MyServerKey = value;
                             break;
                         case "add_song_info_page":
-                            MyAddSongInfoPage = value;
+                            MyServer.MyAddSongInfoPage = value;
                             break;
                         case "add_song_info_number_var":
-                            MyAddSongInfoNumberVar = value;
+                            MyServer.MyAddSongInfoNumberVar = value;
                             break;
                         case "add_song_info_title_var":
-                            MyAddSongInfoTitleVar = value;
+                            MyServer.MyAddSongInfoTitleVar = value;
                             break;
                         case "add_song_info_artist_var":
-                            MyAddSongInfoArtistVar = value;
+                            MyServer.MyAddSongInfoArtistVar = value;
                             break;
                         case "add_song_info_link_var":
-                            MyAddSongInfoLinkVar = value;
+                            MyServer.MyAddSongInfoLinkVar = value;
                             break;
                         case "add_song_info_link_folder_on_server":
-                            MyAddSongInfoLinkFolderOnServer = value;
+                            MyServer.MyAddSongInfoLinkFolderOnServer = value;
                             break;
                         case "remove_file_prefix":
-                            MyRemoveFilePrefix = value;
+                            MyServer.MyRemoveFilePrefix = value;
                             break;
                     }
                     break;
@@ -299,17 +335,17 @@ namespace Strimer.App
                     switch (key)
                     {
                         case "enable":
-                            JinglesEnable = value.ToLower() == "yes";
+                            Jingles.JinglesEnable = value.ToLower() == "yes";
                             break;
                         case "file":
-                            JingleConfigFile = value;
+                            Jingles.JingleConfigFile = value;
                             break;
                         case "frequency":
                             if (int.TryParse(value, out int frequency))
-                                JingleFrequency = frequency;
+                                Jingles.JingleFrequency = frequency;
                             break;
                         case "random":
-                            JinglesRandom = value.ToLower() == "yes";
+                            Jingles.JinglesRandom = value.ToLower() == "yes";
                             break;
                     }
                     break;
@@ -319,10 +355,10 @@ namespace Strimer.App
                     switch (key)
                     {
                         case "enable":
-                            DebugEnable = value.ToLower() == "yes";
+                            Debug.DebugEnable = value.ToLower() == "yes";
                             break;
                         case "stack_view":
-                            DebugStackView = value.ToLower() == "yes";
+                            Debug.DebugStackView = value.ToLower() == "yes";
                             break;
                     }
                     break;
@@ -332,82 +368,24 @@ namespace Strimer.App
                     break;
             }
         }
-
-        public void Save()
+        public bool SetConfigOk()
         {
             try
             {
                 Directory.CreateDirectory(ConfigDirectory);
-
-                var lines = new List<string>
-                {
-                    "# Конфигурация Strimer Radio",
-                    "# Сгенерировано " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                    "",
-                    "[App]",
-                    $"configured={(IsConfigured ? "yes" : "no")};",
-                    "",
-                    "[IceCast]",
-                    $"server={IceCastServer};",
-                    $"port={IceCastPort};",
-                    $"mount={IceCastMount};",
-                    $"name={IceCastName};",
-                    $"genre={IceCastGenre};",
-                    $"username={IceCastUser};",
-                    $"password={IceCastPassword};",
-                    "",
-                    "[Audio]",
-                    $"device={AudioDevice};",
-                    $"frequency={SampleRate};",
-                    "",
-                    "[Playlist]",
-                    $"list={PlaylistFile};",
-                    $"save_playlist_history={(SavePlaylistHistory ? "yes" : "no")};",
-                    $"dynamic_playlist={(DynamicPlaylist ? "yes" : "no")};",
-                    $"schedule_enable={(ScheduleEnable ? "yes" : "no")};",
-                    $"schedule={ScheduleFile};",
-                    "",
-                    "[Encoder]",
-                    $"bitrate={OpusBitrate};",
-                    $"bitrate_mode={OpusMode};",
-                    $"content_type={OpusContentType};",
-                    $"complexity={OpusComplexity};",
-                    $"framesize={OpusFrameSize};",
-                    "",
-                    "[AudioProcessing]",
-                    $"use_replay_gain={(UseReplayGain ? "yes" : "no")};",
-                    $"use_custom_gain={(UseCustomGain ? "yes" : "no")};",
-                    "",
-                    "[MySrv]",
-                    $"enable={(MyServerEnabled ? "yes" : "no")};",
-                    $"server={MyServerUrl};",
-                    $"key={MyServerKey};",
-                    $"add_song_info_page={MyAddSongInfoPage};",
-                    $"add_song_info_number_var={MyAddSongInfoNumberVar};",
-                    $"add_song_info_title_var={MyAddSongInfoTitleVar};",
-                    $"add_song_info_artist_var={MyAddSongInfoArtistVar};",
-                    $"add_song_info_link_var={MyAddSongInfoLinkVar};",
-                    $"add_song_info_link_folder_on_server={MyAddSongInfoLinkFolderOnServer};",
-                    $"remove_file_prefix={MyRemoveFilePrefix};",
-                    "",
-                    $"[Jingles]",
-                    $"enable={(JinglesEnable ? "yes" : "no")};",
-                    $"file={JingleConfigFile}",
-                    $"frequency={JingleFrequency}",
-                    $"random={(JinglesRandom ? "yes" : "no")};",
-                    "",
-                    $"[Debug]",
-                    $"enable={(DebugEnable ? "yes" : "no")};",
-                    $"stack_view={(DebugStackView ? "yes" : "no")};"
-                };
-
-                File.WriteAllLines(Path.Combine(ConfigDirectory, "strimer.conf"), lines);
-                Core.Logger.Info("[AppConfig] Конфигурация сохранена");
+                File.WriteAllText(Path.Combine(ConfigDirectory, "ok"), DateTime.Now.ToString("o"));
+                return IsConfigured = true;
             }
-            catch (Exception ex)
+            catch
             {
-                Core.Logger.Error($"[AppConfig] Не удалось сохранить конфигурацию: {ex.Message}");
+                return IsConfigured = false;
             }
+        }
+        private bool CheckConfigOk()
+        {
+            if (string.IsNullOrEmpty(ConfigDirectory) || !Directory.Exists(ConfigDirectory))
+                return false;
+            return IsConfigured = File.Exists(Path.Combine(ConfigDirectory, "ok"));
         }
     }
 }
