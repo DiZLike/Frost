@@ -32,83 +32,81 @@ namespace gainer.Processing
 
             try
             {
-                _progressManager.UpdateThreadLine(lineIndex, $"Поток {formattedThreadId}> Начало: {shortFileName}", ConsoleColor.Cyan);
+                _progressManager.UpdateThreadLine(lineIndex,
+                    $"Поток {formattedThreadId}> Начало: {shortFileName}",
+                    ConsoleColor.Cyan);
 
                 // 1. Чтение аудио
                 using (var audioReader = new AudioReader(filePath))
                 {
-                    // Подписываемся на прогресс чтения
                     audioReader.ProgressChanged += (progress) =>
                     {
                         int percent = (int)(progress * 100);
-                        if (Math.Abs(percent - _lastPercentReported) >= 2 || percent == 50 || percent == 0)
+                        if (Math.Abs(percent - _lastPercentReported) >= 2)
                         {
                             _lastPercentReported = percent;
                             _progressManager.UpdateThreadLine(lineIndex,
-                                $"Поток {formattedThreadId}> [{percent}%] {shortFileName}",
+                                $"Поток {formattedThreadId}> [{percent}%] Чтение: {shortFileName}",
                                 ConsoleColor.Cyan);
                         }
                     };
+
                     float[] pcmData = audioReader.GetPCMData32();
 
                     if (pcmData.Length == 0)
                     {
                         string error = "Нет аудиоданных";
-                        _progressManager.UpdateThreadLine(lineIndex, $"Поток {formattedThreadId}> {shortFileName} - {error}", ConsoleColor.Yellow);
+                        _progressManager.UpdateThreadLine(lineIndex,
+                            $"Поток {formattedThreadId}> {shortFileName} - {error}",
+                            ConsoleColor.Yellow);
                         _statistics.AddFailed($"{fileName} - {error}");
                         Thread.Sleep(2000);
                         return;
                     }
 
-                    // 2. Расчет Replay Gain
-                    var replayGain = new ReplayGainCalculator(44100, _args.TargetLufs);
-                    replayGain.ProgressChanged += (progress, message) =>
+                    // 2. Анализ (ReplayGain + RMS)
+                    var analyzer = new AudioAnalyzer(44100, _args.TargetLufs, _args.UseKFilter);
+                    analyzer.ProgressChanged += (progress, message) =>
                     {
                         int percent = (int)(progress * 100);
-                        if (Math.Abs(percent - _lastPercentReported) >= 2 || percent >= 90 || percent <= 50)
+                        if (Math.Abs(percent - _lastPercentReported) >= 2)
                         {
                             _lastPercentReported = percent;
-                            string shortMessage = message.Length > 20 ?
-                                message.Substring(0, 17) + "..." : message;
-
                             _progressManager.UpdateThreadLine(lineIndex,
                                 $"Поток {formattedThreadId}> [{percent}%] {shortFileName} {message}",
                                 ConsoleColor.Yellow);
                         }
                     };
 
-                    double gainValue = _args.UseKFilter ?
-                        replayGain.CalculateWithKFilter(pcmData) :
-                        replayGain.Calculate(pcmData);
+                    var results = analyzer.Analyze(pcmData);
 
                     // 3. Сохранение в теги
                     _progressManager.UpdateThreadLine(lineIndex,
-                        $"Поток {formattedThreadId}> 💾 {shortFileName} - сохранение тегов...",
+                        $"Поток {formattedThreadId}> 💾 {shortFileName} - сохранение...",
                         ConsoleColor.Blue);
 
                     var tagWriter = new TagWriter(filePath, _args.AutoTagEnabled);
-                    tagWriter.SaveReplayGain(gainValue, _args.UseCustomTag);
+                    tagWriter.SaveAnalysisResults(results, _args.UseCustomTag);
 
-                    // Выводим результат
+                    // 4. Вывод результата
                     string autoTagMessage = _args.AutoTagEnabled ? " + авто-теги" : "";
                     _progressManager.UpdateThreadLine(lineIndex,
-                        $"Поток {formattedThreadId}> Готово: {shortFileName} - {gainValue:F2} dB{autoTagMessage}",
+                        $"Поток {formattedThreadId}> Готово: {shortFileName} - {results.ReplayGain:F2} dB, RMS: {results.RmsDb:F2} dB{autoTagMessage}",
                         ConsoleColor.Green);
 
                     _statistics.IncrementSuccess();
-                    _statistics.AddSuccess($"{fileName} - {gainValue:F2} dB{autoTagMessage}");
+                    _statistics.AddSuccess($"{fileName} - {results.ReplayGain:F2} dB, RMS: {results.RmsDb:F2} dB{autoTagMessage}");
                     Thread.Sleep(1000);
                 }
             }
             catch (Exception ex)
             {
                 _progressManager.UpdateThreadLine(lineIndex,
-                    $"Поток {formattedThreadId}> {shortFileName} - Ошибка",
+                    $"Поток {formattedThreadId}> {shortFileName} - Ошибка: {ex.Message}",
                     ConsoleColor.Red);
 
                 _statistics.AddFailed($"{fileName} - {ex.Message}");
                 Thread.Sleep(2000);
-                throw;
             }
             finally
             {
@@ -127,7 +125,6 @@ namespace gainer.Processing
                 ".aac", ".ogg", ".wma", ".mp4", ".m4b",
                 ".ape", ".wv"
             };
-
             return supportedExtensions.Contains(ext);
         }
 

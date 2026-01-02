@@ -50,6 +50,10 @@ namespace gainer
             Console.WriteLine("  -target -23   : целевое значение LUFS (по умолчанию -23)");
             Console.WriteLine("  -autotag on/off: автоматическое заполнение тегов из пути");
             Console.WriteLine("  \"путь\"        : путь к папке с аудиофайлами");
+            Console.WriteLine();
+            Console.WriteLine("Результаты сохраняются в формате:");
+            Console.WriteLine("  replay-gain=-3.5");
+            Console.WriteLine("  rms=-25.12");
         }
 
         private static void PrintSummary(CommandLineArgs args)
@@ -61,6 +65,7 @@ namespace gainer
             Console.WriteLine($"Тип тегов: {(args.UseCustomTag ? "Кастомный" : "Стандартный")}");
             Console.WriteLine($"Целевое LUFS: {args.TargetLufs}");
             Console.WriteLine($"Авто-теги: {(args.AutoTagEnabled ? "ВКЛ" : "ВЫКЛ")}");
+            Console.WriteLine($"Расчет: ReplayGain + RMS (в децибелах)");
         }
     }
 }

@@ -45,13 +45,11 @@ namespace FrostLive.Services
                     }
                 }
 
-                if (StatusChanged != null)
-                    StatusChanged("READY");
+                StatusChanged?.Invoke("READY");
             }
             catch (Exception ex)
             {
-                if (StatusChanged != null)
-                    StatusChanged($"ERROR: {ex.Message}");
+                StatusChanged?.Invoke($"ERROR: {ex.Message}");
             }
         }
 
@@ -66,8 +64,7 @@ namespace FrostLive.Services
 
                 if (_streamHandle == 0)
                 {
-                    if (StatusChanged != null)
-                        StatusChanged($"Failed to create stream: {Bass.BASS_ErrorGetCode()}");
+                    StatusChanged?.Invoke($"Failed to create stream: {Bass.BASS_ErrorGetCode()}");
                     return false;
                 }
 
@@ -80,23 +77,19 @@ namespace FrostLive.Services
                 if (playSuccess)
                 {
                     IsPlaying = true;
-                    if (PlaybackStateChanged != null)
-                        PlaybackStateChanged(true);
-                    if (StatusChanged != null)
-                        StatusChanged("PLAYING");
+                    PlaybackStateChanged?.Invoke(true);
+                    StatusChanged?.Invoke("PLAYING");
                     return true;
                 }
                 else
                 {
-                    if (StatusChanged != null)
-                        StatusChanged($"Play failed: {Bass.BASS_ErrorGetCode()}");
+                    StatusChanged?.Invoke($"Play failed: {Bass.BASS_ErrorGetCode()}");
                     return false;
                 }
             }
             catch (Exception ex)
             {
-                if (StatusChanged != null)
-                    StatusChanged($"Play error: {ex.Message}");
+                StatusChanged?.Invoke($"Play error: {ex.Message}");
                 return false;
             }
         }
@@ -107,10 +100,8 @@ namespace FrostLive.Services
             {
                 Bass.BASS_ChannelPause(_streamHandle);
                 IsPlaying = false;
-                if (PlaybackStateChanged != null)
-                    PlaybackStateChanged(false);
-                if (StatusChanged != null)
-                    StatusChanged("PAUSED");
+                PlaybackStateChanged?.Invoke(false);
+                StatusChanged?.Invoke("PAUSED");
             }
         }
 
@@ -120,10 +111,8 @@ namespace FrostLive.Services
             {
                 Bass.BASS_ChannelPlay(_streamHandle, false);
                 IsPlaying = true;
-                if (PlaybackStateChanged != null)
-                    PlaybackStateChanged(true);
-                if (StatusChanged != null)
-                    StatusChanged("PLAYING");
+                PlaybackStateChanged?.Invoke(true);
+                StatusChanged?.Invoke("PLAYING");
             }
         }
 
@@ -135,10 +124,8 @@ namespace FrostLive.Services
                 Bass.BASS_StreamFree(_streamHandle);
                 _streamHandle = 0;
                 IsPlaying = false;
-                if (PlaybackStateChanged != null)
-                    PlaybackStateChanged(false);
-                if (StatusChanged != null)
-                    StatusChanged("STOPPED");
+                PlaybackStateChanged?.Invoke(false);
+                StatusChanged?.Invoke("STOPPED");
             }
         }
 
@@ -151,8 +138,7 @@ namespace FrostLive.Services
                 Bass.BASS_ChannelSetAttribute(_streamHandle, BASSAttribute.BASS_ATTRIB_VOL, Volume / 100f);
             }
 
-            if (VolumeChanged != null)
-                VolumeChanged(Volume);
+            VolumeChanged?.Invoke(Volume);
         }
 
         public string GetPlaybackTime()
@@ -168,9 +154,9 @@ namespace FrostLive.Services
         public void UpdateCurrentSong(string song)
         {
             CurrentSong = song;
-            if (CurrentSongChanged != null)
-                CurrentSongChanged(song);
+            CurrentSongChanged?.Invoke(song);
         }
+
         public (float left, float right) GetLevels()
         {
             float offset = 0.2f;
@@ -214,7 +200,7 @@ namespace FrostLive.Services
         private float LinearToDecibels(float linearValue)
         {
             if (linearValue <= 0)
-                return -96f; // тишина (практически -бесконечность)
+                return -96f;
 
             // Формула: dB = 20 * log10(linearValue)
             return 20f * (float)Math.Log10(linearValue);

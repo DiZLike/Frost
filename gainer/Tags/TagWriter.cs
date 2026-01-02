@@ -1,4 +1,5 @@
-﻿using System;
+﻿using gainer.Audio;
+using System;
 using System.Threading;
 using TagLib;
 
@@ -15,7 +16,7 @@ namespace gainer.Tags
             _autoTagEnabled = autoTagEnabled;
         }
 
-        public void SaveReplayGain(double gain, bool useCustomTag)
+        public void SaveAnalysisResults(AudioAnalysisResult results, bool useCustomTag)
         {
             int retryCount = 0;
             const int maxRetries = 5;
@@ -34,36 +35,38 @@ namespace gainer.Tags
                             autoTagger.ApplyTags(file, tags);
                         }
 
+                        // Формируем строку комментария в новом формате
+                        string comment = $"replay-gain={results.ReplayGain:F2}\r\nrms={results.RmsDb:F2}";
+
                         if (useCustomTag)
                         {
-                            // Кастомный тег в комментарии
-                            file.Tag.Comment = $"replay-gain={gain}";
+                            // Кастомный тег - вся информация в комментарии
+                            file.Tag.Comment = comment;
                         }
                         else
                         {
                             try
                             {
-                                // Стандартный тег Replay Gain
-                                file.Tag.ReplayGainTrackGain = gain;
+                                // Стандартный тег ReplayGain
+                                file.Tag.ReplayGainTrackGain = results.ReplayGain;
+                                // RMS сохраняем в комментарий
+                                file.Tag.Comment = results.RmsDb.ToString("F2");
                             }
                             catch (NotImplementedException)
                             {
-                                // Если формат не поддерживает стандартный тег, используем кастомный
-                                file.Tag.Comment = $"replay-gain={gain}";
+                                // Если формат не поддерживает стандартный тег
+                                file.Tag.Comment = comment;
                             }
                         }
 
                         file.Save();
                     }
-                    return; // Успешно, выходим из цикла
+                    return;
                 }
-                catch (System.IO.IOException ex)
+                catch (System.IO.IOException)
                 {
                     retryCount++;
-                    if (retryCount >= maxRetries)
-                    {
-                        return;
-                    }
+                    if (retryCount >= maxRetries) return;
                     Thread.Sleep(100);
                 }
                 catch (Exception)

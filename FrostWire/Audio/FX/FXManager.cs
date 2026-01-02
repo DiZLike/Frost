@@ -74,10 +74,11 @@ namespace FrostWire.Audio.FX
             if (_firstCompressor != null)
             {
                 float replayGainValue = _replayGain.GainValue;
-                _firstCompressor.SetCompressor(replayGainValue);
+                float rms = _replayGain.RMSValue;
+                _firstCompressor.SetCompressor(replayGainValue, rms);
             }
             if (_secondCompressor != null)
-                _secondCompressor.SetCompressor(0);
+                _secondCompressor.SetCompressor(0, 0);
             if (_limiter != null)
                 _limiter.SetLimiter();
             

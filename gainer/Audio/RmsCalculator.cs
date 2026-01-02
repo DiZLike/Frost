@@ -3,22 +3,20 @@ using System.Linq;
 
 namespace gainer.Audio
 {
-    public class ReplayGainCalculator
+    public class RmsCalculator
     {
         public event Action<double, string>? ProgressChanged;
 
         private readonly int _sampleRate;
-        private readonly double _targetLufs;
         private int _progressUpdateCounter = 0;
         private const int PROGRESS_UPDATE_INTERVAL = 50;
 
-        public ReplayGainCalculator(int sampleRate, double targetLufs)
+        public RmsCalculator(int sampleRate)
         {
             _sampleRate = sampleRate;
-            _targetLufs = targetLufs;
         }
 
-        public (double replayGain, double integratedLoudness) Calculate(float[] pcmData)
+        public (double rmsLinear, double rmsDb) Calculate(float[] pcmData)
         {
             int blockSize = _sampleRate * 400 / 1000;
             int numBlocks = pcmData.Length / (blockSize * 2);
@@ -26,8 +24,7 @@ namespace gainer.Audio
             if (numBlocks == 0)
                 return (0, -120);
 
-            double sumLoudness = 0;
-            int validBlocks = 0;
+            double sumRMS = 0;
 
             for (int i = 0; i < numBlocks; i++)
             {
@@ -38,30 +35,21 @@ namespace gainer.Audio
                 double rmsRight = CalculateRMS(rightBlock);
                 double rms = Math.Sqrt((rmsLeft * rmsLeft + rmsRight * rmsRight) / 2);
 
-                double momentaryLoudness = -0.691 + 20 * Math.Log10(rms);
-
-                if (momentaryLoudness > -70)
-                {
-                    sumLoudness += Math.Pow(10, momentaryLoudness / 10);
-                    validBlocks++;
-                }
+                sumRMS += rms;
 
                 if (_progressUpdateCounter % PROGRESS_UPDATE_INTERVAL == 0 || i == numBlocks - 1)
                 {
                     double blockProgress = i / (double)numBlocks;
-                    double totalProgress = 0.5 + (blockProgress * 0.4);
-                    ProgressChanged?.Invoke(totalProgress, $"LUFS: {i + 1}/{numBlocks} блоков");
+                    double totalProgress = 0.5 + (blockProgress * 0.2);
+                    ProgressChanged?.Invoke(totalProgress, $"RMS: {i + 1}/{numBlocks} блоков");
                 }
                 _progressUpdateCounter++;
             }
 
-            double integratedLoudness = validBlocks > 0
-                ? Math.Round(-0.691 + 10 * Math.Log10(sumLoudness / validBlocks), 2)
-                : -120;
+            double averageRMS = sumRMS / numBlocks;
+            double rmsDb = 20 * Math.Log10(averageRMS);
 
-            double replayGain = Math.Round(_targetLufs - integratedLoudness, 2);
-
-            return (replayGain, integratedLoudness);
+            return (Math.Round(averageRMS, 6), Math.Round(rmsDb, 2));
         }
 
         private float[] GetChannelBlock(float[] pcmData, int startIndex, int blockSize, int channel, int numChannels)

@@ -8,5 +8,5 @@
   "supported_formats": [".mp3", ".flac", ".wav", ".ogg", ".m4a", ".opus"],
   "remove_prefix": "radio/music",
   "base_url": "http://r.dlike.ru/music/",
-  "playlist_file": "D:\\DiZ\\Yandex.Disk\\radio\\playlists\\all1.pls"
+  "playlist_file": "D:\\DiZ\\Yandex.Disk\\radio\\playlists\\all.pls"
 }

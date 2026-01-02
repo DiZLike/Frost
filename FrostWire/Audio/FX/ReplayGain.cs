@@ -19,6 +19,7 @@ namespace FrostWire.Audio.FX
         private bool _initialized = false;
 
         public float GainValue { get; set; } = 0f;
+        public float RMSValue { get; set; } = 0f; // Добавлено свойство для RMS
 
         public ReplayGain(bool useReplayGain, bool useCustomGain, int mixerHandle)
         {
@@ -89,16 +90,26 @@ namespace FrostWire.Audio.FX
 
             _fileName = tagInfo.filename;
             GainValue = 0f;
+            RMSValue = 0f; // Сбрасываем RMS значение
             _gainSource = "отсутствует";
 
             // 1. Пробуем кастомное усиление из комментария (если включено)
             if (_useCustomGain)
             {
                 GainValue = ExtractCustomGain(tagInfo.comment);
+                RMSValue = ExtractRMSValue(tagInfo.comment); // Извлекаем RMS значение
+
                 if (Math.Abs(GainValue) > 0.001f)
                 {
                     _gainSource = "кастомный комментарий";
                     ApplyGainValue(GainValue);
+
+                    // Логируем RMS значение, если оно найдено
+                    if (Math.Abs(RMSValue) > 0.001f)
+                    {
+                        Logger.Debug($"[ReplayGain] Найдено RMS значение: {RMSValue:F2}");
+                    }
+
                     return;
                 }
                 else if (!string.IsNullOrEmpty(tagInfo.comment))
@@ -174,6 +185,45 @@ namespace FrostWire.Audio.FX
             return 0f;
         }
 
+        private float ExtractRMSValue(string comment)
+        {
+            if (string.IsNullOrEmpty(comment))
+                return 0f;
+
+            string lowerComment = comment.ToLowerInvariant();
+            int markerIndex = lowerComment.IndexOf("rms=");
+
+            if (markerIndex == -1)
+                return 0f;
+
+            int startIndex = markerIndex + "rms=".Length;
+
+            int endIndex = startIndex;
+            while (endIndex < comment.Length &&
+                   (char.IsDigit(comment[endIndex]) ||
+                    comment[endIndex] == '.' ||
+                    comment[endIndex] == ',' ||
+                    comment[endIndex] == '-' ||
+                    comment[endIndex] == '+'))
+            {
+                endIndex++;
+            }
+
+            if (endIndex <= startIndex)
+                return 0f;
+
+            string rmsStr = comment.Substring(startIndex, endIndex - startIndex)
+                .Replace(',', '.');
+
+            if (float.TryParse(rmsStr, NumberStyles.Float,
+                CultureInfo.InvariantCulture, out float result))
+            {
+                return result;
+            }
+
+            return 0f;
+        }
+
         private void ApplyGainValue(float gainValue)
         {
             gainValue = Math.Max(-24f, Math.Min(24f, gainValue));
@@ -193,6 +243,12 @@ namespace FrostWire.Audio.FX
             if (success)
             {
                 Logger.Info($"[ReplayGain] ReplayGain применен к {Path.GetFileName(_fileName)}: {_compressor.fGain:F2} дБ (источник: {_gainSource})");
+
+                // Дополнительно логируем RMS значение, если оно установлено
+                if (Math.Abs(RMSValue) > 0.001f)
+                {
+                    Logger.Info($"[ReplayGain] RMS: {RMSValue:F2}");
+                }
             }
             else
             {
@@ -204,6 +260,8 @@ namespace FrostWire.Audio.FX
         public void Reset()
         {
             _compressor.fGain = 0f;
+            GainValue = 0f;
+            RMSValue = 0f; // Сбрасываем RMS при сбросе
             _gainSource = "сброс (0 дБ)";
 
             if (_fxHandle != 0 && _enabled)
