@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Un4seen.Bass;
 
 namespace FrostLive.Services
@@ -53,148 +54,191 @@ namespace FrostLive.Services
             }
         }
 
-        public bool PlayStream(string url)
+        public async Task<bool> PlayStream(string url)
         {
-            try
+            return await Task.Run(async () =>
             {
-                Stop();
-
-                // Создание потока с URL
-                _streamHandle = Bass.BASS_StreamCreateURL(url, 0, BASSFlag.BASS_DEFAULT, null, IntPtr.Zero);
-
-                if (_streamHandle == 0)
+                try
                 {
-                    StatusChanged?.Invoke($"Failed to create stream: {Bass.BASS_ErrorGetCode()}");
+                    await Stop();
+
+                    // Создание потока с URL
+                    _streamHandle = Bass.BASS_StreamCreateURL(url, 0, BASSFlag.BASS_DEFAULT, null, IntPtr.Zero);
+
+                    if (_streamHandle == 0)
+                    {
+                        StatusChanged?.Invoke($"Failed to create stream: {Bass.BASS_ErrorGetCode()}");
+                        return false;
+                    }
+
+                    // Установка громкости
+                    SetVolume(Volume);
+
+                    // Воспроизведение
+                    bool playSuccess = Bass.BASS_ChannelPlay(_streamHandle, false);
+
+                    if (playSuccess)
+                    {
+                        IsPlaying = true;
+                        PlaybackStateChanged?.Invoke(true);
+                        StatusChanged?.Invoke("PLAYING");
+                        return true;
+                    }
+                    else
+                    {
+                        StatusChanged?.Invoke($"Play failed: {Bass.BASS_ErrorGetCode()}");
+                        return false;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    StatusChanged?.Invoke($"Play error: {ex.Message}");
                     return false;
                 }
+            });
+        }
 
-                // Установка громкости
-                Bass.BASS_ChannelSetAttribute(_streamHandle, BASSAttribute.BASS_ATTRIB_VOL, Volume / 100f);
-
-                // Воспроизведение
-                bool playSuccess = Bass.BASS_ChannelPlay(_streamHandle, false);
-
-                if (playSuccess)
+        public async Task Pause()
+        {
+            await Task.Run(() =>
+            {
+                if (_streamHandle != 0 && IsPlaying)
                 {
+                    Bass.BASS_ChannelPause(_streamHandle);
+                    IsPlaying = false;
+                    PlaybackStateChanged?.Invoke(false);
+                    StatusChanged?.Invoke("PAUSED");
+                }
+            });
+        }
+
+        public async Task Resume()
+        {
+            await Task.Run(() =>
+            {
+                if (_streamHandle != 0 && !IsPlaying)
+                {
+                    Bass.BASS_ChannelPlay(_streamHandle, false);
                     IsPlaying = true;
                     PlaybackStateChanged?.Invoke(true);
                     StatusChanged?.Invoke("PLAYING");
-                    return true;
                 }
-                else
+            });
+        }
+
+        public async Task Stop()
+        {
+            await Task.Run(() =>
+            {
+                if (_streamHandle != 0)
                 {
-                    StatusChanged?.Invoke($"Play failed: {Bass.BASS_ErrorGetCode()}");
-                    return false;
+                    Bass.BASS_ChannelStop(_streamHandle);
+                    Bass.BASS_StreamFree(_streamHandle);
+                    _streamHandle = 0;
+                    IsPlaying = false;
+                    PlaybackStateChanged?.Invoke(false);
+                    StatusChanged?.Invoke("STOPPED");
                 }
-            }
-            catch (Exception ex)
+            });
+        }
+
+        public async Task SetVolume(int volume)
+        {
+            await Task.Run(() =>
             {
-                StatusChanged?.Invoke($"Play error: {ex.Message}");
-                return false;
-            }
-        }
+                Volume = Math.Max(0, Math.Min(100, volume));
 
-        public void Pause()
-        {
-            if (_streamHandle != 0 && IsPlaying)
-            {
-                Bass.BASS_ChannelPause(_streamHandle);
-                IsPlaying = false;
-                PlaybackStateChanged?.Invoke(false);
-                StatusChanged?.Invoke("PAUSED");
-            }
-        }
-
-        public void Resume()
-        {
-            if (_streamHandle != 0 && !IsPlaying)
-            {
-                Bass.BASS_ChannelPlay(_streamHandle, false);
-                IsPlaying = true;
-                PlaybackStateChanged?.Invoke(true);
-                StatusChanged?.Invoke("PLAYING");
-            }
-        }
-
-        public void Stop()
-        {
-            if (_streamHandle != 0)
-            {
-                Bass.BASS_ChannelStop(_streamHandle);
-                Bass.BASS_StreamFree(_streamHandle);
-                _streamHandle = 0;
-                IsPlaying = false;
-                PlaybackStateChanged?.Invoke(false);
-                StatusChanged?.Invoke("STOPPED");
-            }
-        }
-
-        public void SetVolume(int volume)
-        {
-            Volume = Math.Max(0, Math.Min(100, volume));
-
-            if (_streamHandle != 0)
-            {
-                Bass.BASS_ChannelSetAttribute(_streamHandle, BASSAttribute.BASS_ATTRIB_VOL, Volume / 100f);
-            }
-
-            VolumeChanged?.Invoke(Volume);
-        }
-
-        public string GetPlaybackTime()
-        {
-            if (_streamHandle == 0) return "00:00";
-
-            double seconds = Bass.BASS_ChannelBytes2Seconds(_streamHandle,
-                Bass.BASS_ChannelGetPosition(_streamHandle));
-            TimeSpan time = TimeSpan.FromSeconds(seconds);
-            return string.Format("{0:D2}:{1:D2}", time.Minutes, time.Seconds);
-        }
-
-        public void UpdateCurrentSong(string song)
-        {
-            CurrentSong = song;
-            CurrentSongChanged?.Invoke(song);
-        }
-
-        public (float left, float right) GetLevels()
-        {
-            float offset = 0.2f;
-            if (_streamHandle == 0 || !IsPlaying)
-                return (0, 0);
-
-            float left = 0, right = 0;
-            try
-            {
-                // Получаем уровни с BASS
-                float[] levels = Bass.BASS_ChannelGetLevels(_streamHandle, 0.02f);
-                if (levels != null && levels.Length == 2)
+                if (_streamHandle != 0)
                 {
-                    left = levels[0];
-                    right = levels[1];
+                    // Логарифмическое преобразование: воспринимаемая громкость
+                    float logVolume;
+
+                    if (Volume > 0)
+                    {
+                        // Преобразуем линейное значение (0-100) в логарифмическое (0.01-1.0)
+                        // Минимальный порог 0.01 вместо 0 для избежания полной тишины при малых значениях
+                        float minVolume = 0.01f;
+                        float maxVolume = 1.0f;
+
+                        // Логарифмическая формула
+                        float linearNormalized = Volume / 100f;
+                        logVolume = (float)(minVolume * Math.Pow(maxVolume / minVolume, linearNormalized));
+                    }
+                    else
+                    {
+                        logVolume = 0f;
+                    }
+
+                    Bass.BASS_ChannelSetAttribute(_streamHandle, BASSAttribute.BASS_ATTRIB_VOL, logVolume);
                 }
-            }
-            catch
+
+                VolumeChanged?.Invoke(Volume);
+            });
+        }
+
+        public async Task<string> GetPlaybackTime()
+        {
+            return await Task.Run(() =>
             {
-                // Игнорируем ошибки
-            }
+                if (_streamHandle == 0) return "00:00";
 
-            // Конвертируем линейные уровни в децибелы
-            float leftDb = LinearToDecibels(left);
-            float rightDb = LinearToDecibels(right);
+                double seconds = Bass.BASS_ChannelBytes2Seconds(_streamHandle,
+                    Bass.BASS_ChannelGetPosition(_streamHandle));
+                TimeSpan time = TimeSpan.FromSeconds(seconds);
+                return string.Format("{0:D2}:{1:D2}", time.Minutes, time.Seconds);
+            });
+        }
 
-            // Нормализуем децибелы в диапазон 0-1 с экспоненциальным преобразованием
-            float leftNormalized = DecibelsToNormalizedExponential(leftDb);
-            float rightNormalized = DecibelsToNormalizedExponential(rightDb);
+        public async Task UpdateCurrentSong(string song)
+        {
+            await Task.Run(() =>
+            {
+                CurrentSong = song;
+                CurrentSongChanged?.Invoke(song);
+            });
+        }
 
-            if (left > 0) left += offset;
-            if (right > 0) right += offset;
+        public async Task<(float left, float right)> GetLevels()
+        {
+            return await Task.Run(() =>
+            {
+                float offset = 0.2f;
+                if (_streamHandle == 0 || !IsPlaying)
+                    return (0, 0);
 
-            // Ограничиваем и нормализуем значения
-            left = Math.Min(1, Math.Max(0, left));
-            right = Math.Min(1, Math.Max(0, right));
+                float left = 0, right = 0;
+                try
+                {
+                    // Получаем уровни с BASS
+                    float[] levels = Bass.BASS_ChannelGetLevels(_streamHandle, 0.02f);
+                    if (levels != null && levels.Length == 2)
+                    {
+                        left = levels[0];
+                        right = levels[1];
+                    }
+                }
+                catch
+                {
+                    // Игнорируем ошибки
+                }
 
-            return (left, right);
+                // Конвертируем линейные уровни в децибелы
+                float leftDb = LinearToDecibels(left);
+                float rightDb = LinearToDecibels(right);
+
+                // Нормализуем децибелы в диапазон 0-1 с экспоненциальным преобразованием
+                float leftNormalized = DecibelsToNormalizedExponential(leftDb);
+                float rightNormalized = DecibelsToNormalizedExponential(rightDb);
+
+                if (left > 0) left += offset;
+                if (right > 0) right += offset;
+
+                // Ограничиваем и нормализуем значения
+                left = Math.Min(1, Math.Max(0, left));
+                right = Math.Min(1, Math.Max(0, right));
+
+                return (left, right);
+            });
         }
 
         private float LinearToDecibels(float linearValue)
@@ -222,7 +266,7 @@ namespace FrostLive.Services
 
         public void Dispose()
         {
-            Stop();
+            Stop().GetAwaiter().GetResult();
 
             if (_isInitialized)
             {

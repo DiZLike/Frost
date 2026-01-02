@@ -253,6 +253,7 @@ namespace FrostLive.Controls
             _playPauseButton.Click += PlayPauseButton_Click;
             _playPauseButton.Paint += PlayPauseButton_Paint;
             _currentTimeLabel.Paint += CurrentTimeLabel_Paint;
+            _statusPanel.Paint += StatusPanel_Paint;
 
             // Устанавливаем стили для двойной буферизации и корректной отрисовки
             SetStyle(ControlStyles.AllPaintingInWmPaint |
@@ -314,6 +315,17 @@ namespace FrostLive.Controls
             if (_playPauseButton != null)
             {
                 _playPauseButton.Text = _isPlaying ? "PAUSE" : "PLAY";
+
+                // Меняем цвет кнопки в зависимости от состояния воспроизведения
+                if (_isPlaying)
+                {
+                    PlayButtonColor = _neonGreen; // Зеленый для "PLAYING"
+                }
+                else
+                {
+                    PlayButtonColor = _neonBlue; // Голубой для "PAUSED/STOPPED"
+                }
+
                 _playPauseButton.Invalidate();
             }
         }
@@ -336,8 +348,17 @@ namespace FrostLive.Controls
             var panel = (Panel)sender;
             Color statusColor = GetStatusColor();
 
+            // Уменьшаем область рисования на 1 пиксель с каждой стороны
+            // чтобы рамка не обрезалась границами контрола
+            var rect = new Rectangle(
+                panel.ClientRectangle.X,
+                panel.ClientRectangle.Y,
+                panel.ClientRectangle.Width - 1,
+                panel.ClientRectangle.Height - 1
+            );
+
             using (var borderPen = new Pen(statusColor, 1))
-            using (var path = GetRoundedRectPath(panel.ClientRectangle, 4))
+            using (var path = GetRoundedRectPath(rect, 4))
             {
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 e.Graphics.DrawPath(borderPen, path);
@@ -375,7 +396,16 @@ namespace FrostLive.Controls
         {
             var button = (Button)sender;
 
-            using (var path = GetRoundedRectPath(button.ClientRectangle, 6))
+            // Уменьшаем область рисования на 1 пиксель с каждой стороны
+            // чтобы рамка не обрезалась границами контрола
+            var rect = new Rectangle(
+                button.ClientRectangle.X,
+                button.ClientRectangle.Y,
+                button.ClientRectangle.Width - 1,
+                button.ClientRectangle.Height - 1
+            );
+
+            using (var path = GetRoundedRectPath(rect, 6))
             {
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 e.Graphics.DrawPath(new Pen(button.ForeColor, 2), path);

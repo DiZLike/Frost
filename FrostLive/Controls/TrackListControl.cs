@@ -2,6 +2,7 @@
 using FrostLive.Models;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -25,7 +26,7 @@ namespace FrostLive.Controls
         private int _itemHeight = 70;
         private int _hoveredItemIndex = -1;
         private int _selectedItemIndex = -1;
-        private Rectangle _downloadButtonRect = Rectangle.Empty;
+        private Dictionary<int, Rectangle> _downloadButtonRects = new Dictionary<int, Rectangle>(); // Изменено на словарь
 
         // Цвета
         private Color _backgroundColor = Color.FromArgb(0x05, 0x05, 0x08);
@@ -105,6 +106,7 @@ namespace FrostLive.Controls
                 _artistFont?.Dispose();
                 _timeFont?.Dispose();
                 _centerFormat?.Dispose();
+                _downloadButtonRects.Clear();
             }
             base.Dispose(disposing);
         }
@@ -134,114 +136,14 @@ namespace FrostLive.Controls
             {
                 _tracks = value;
                 _scrollOffset = 0;
+                _hoveredItemIndex = -1;
+                _selectedItemIndex = -1;
+                _downloadButtonRects.Clear(); // Очищаем словарь при обновлении списка
                 Invalidate();
             }
         }
 
-        [Browsable(true)]
-        [Category("Behavior")]
-        [Description("Показывать кнопку обновления")]
-        [DefaultValue(false)]
-        public bool ShowRefreshButton
-        {
-            get => _showRefreshButton;
-            set
-            {
-                _showRefreshButton = value;
-                Invalidate();
-            }
-        }
-
-        [Browsable(true)]
-        [Category("Layout")]
-        [Description("Максимальная высота списка")]
-        [DefaultValue(double.PositiveInfinity)]
-        public double MaxListHeight
-        {
-            get => _maxListHeight;
-            set
-            {
-                _maxListHeight = value;
-                Invalidate();
-            }
-        }
-
-        [Browsable(true)]
-        [Category("Appearance")]
-        [Description("Высота элемента списка")]
-        [DefaultValue(70)]
-        public int ItemHeight
-        {
-            get => _itemHeight;
-            set
-            {
-                _itemHeight = Math.Max(50, Math.Min(150, value));
-                Invalidate();
-            }
-        }
-
-        [Browsable(true)]
-        [Category("Appearance")]
-        [Description("Цвет фона")]
-        public Color BackgroundColor
-        {
-            get => _backgroundColor;
-            set
-            {
-                _backgroundColor = value;
-                _bgBrush?.Dispose();
-                _bgBrush = new SolidBrush(value);
-                Invalidate();
-            }
-        }
-
-        [Browsable(true)]
-        [Category("Appearance")]
-        [Description("Цвет рамки")]
-        public Color BorderColor
-        {
-            get => _borderColor;
-            set
-            {
-                _borderColor = value;
-                _borderPen?.Dispose();
-                _borderPen = new Pen(value, 1);
-                Invalidate();
-            }
-        }
-
-        [Browsable(true)]
-        [Category("Appearance")]
-        [Description("Цвет выделенного элемента")]
-        public Color SelectedItemColor
-        {
-            get => _selectedItemColor;
-            set
-            {
-                _selectedItemColor = value;
-                Invalidate();
-            }
-        }
-
-        [Browsable(true)]
-        [Category("Appearance")]
-        [Description("Цвет элемента при наведении")]
-        public Color HoverItemColor
-        {
-            get => _hoverItemColor;
-            set
-            {
-                _hoverItemColor = value;
-                Invalidate();
-            }
-        }
-
-        [Browsable(false)]
-        public override string Text
-        {
-            get => base.Text;
-            set => base.Text = value;
-        }
+        // ... остальные свойства без изменений ...
 
         #endregion
 
@@ -273,6 +175,9 @@ namespace FrostLive.Controls
 
             // Header
             DrawHeader(g);
+
+            // Очищаем словарь перед отрисовкой
+            _downloadButtonRects.Clear();
 
             // Список треков
             DrawTrackList(g);
@@ -415,13 +320,16 @@ namespace FrostLive.Controls
             }
 
             // Кнопка скачать
-            _downloadButtonRect = new Rectangle(
+            var downloadButtonRect = new Rectangle(
                 rect.Right - 45,
                 rect.Top + 15,
                 35, 35
             );
 
-            DrawDownloadButton(g, _downloadButtonRect, isHovered);
+            // Сохраняем прямоугольник кнопки в словарь
+            _downloadButtonRects[index] = downloadButtonRect;
+
+            DrawDownloadButton(g, downloadButtonRect, isHovered);
         }
 
         private void DrawDownloadButton(Graphics g, Rectangle rect, bool isHot)
@@ -488,8 +396,18 @@ namespace FrostLive.Controls
                     Invalidate();
                 }
 
-                Cursor = _downloadButtonRect.Contains(e.Location) ?
-                         Cursors.Hand : Cursors.Default;
+                // Проверяем, находится ли курсор над любой кнопкой скачивания
+                bool isOverDownloadButton = false;
+                foreach (var kvp in _downloadButtonRects)
+                {
+                    if (kvp.Value.Contains(e.Location))
+                    {
+                        isOverDownloadButton = true;
+                        break;
+                    }
+                }
+
+                Cursor = isOverDownloadButton ? Cursors.Hand : Cursors.Default;
             }
             else
             {
@@ -498,6 +416,7 @@ namespace FrostLive.Controls
                     _hoveredItemIndex = -1;
                     Invalidate();
                 }
+                Cursor = Cursors.Default;
             }
         }
 
@@ -516,23 +435,33 @@ namespace FrostLive.Controls
                     }
                 }
 
-                // Кнопка скачать
-                if (_downloadButtonRect.Contains(e.Location) && _hoveredItemIndex >= 0)
+                // Проверяем клик по кнопкам скачивания
+                foreach (var kvp in _downloadButtonRects)
                 {
-                    var track = GetTrackAtIndex(_hoveredItemIndex);
-                    if (track != null && !string.IsNullOrEmpty(track.Link) && track.Link != "#")
+                    if (kvp.Value.Contains(e.Location))
                     {
-                        DownloadClicked?.Invoke(this, track.Link);
+                        var track = GetTrackAtIndex(kvp.Key);
+                        if (track != null && !string.IsNullOrEmpty(track.Link) && track.Link != "#")
+                        {
+                            DownloadClicked?.Invoke(this, track.Link);
+                            return; // Выходим после обработки
+                        }
                     }
                 }
 
-                // Выбор элемента
+                // Выбор элемента (клик по самому элементу, не по кнопке)
                 var listRect = new Rectangle(20, 70, Width - 40, Height - 90);
                 if (listRect.Contains(e.Location))
                 {
                     int relativeY = e.Y - listRect.Top + _scrollOffset;
-                    _selectedItemIndex = relativeY / _itemHeight;
-                    Invalidate();
+                    int clickedIndex = relativeY / _itemHeight;
+
+                    // Проверяем, что индекс в пределах
+                    if (clickedIndex >= 0 && clickedIndex < GetTotalItems())
+                    {
+                        _selectedItemIndex = clickedIndex;
+                        Invalidate();
+                    }
                 }
             }
         }
@@ -576,6 +505,7 @@ namespace FrostLive.Controls
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
+            _downloadButtonRects.Clear(); // Очищаем при изменении размера
             Invalidate();
         }
     }

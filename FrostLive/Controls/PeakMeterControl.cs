@@ -92,7 +92,7 @@ namespace FrostLive.Controls
             _channelBgBrush = new SolidBrush(_channelBackground);
             _dividerPen = new Pen(_dividerColor, 1);
             _peakTextBrush = new SolidBrush(_neonBlue);
-            _peakFont = new Font("Courier New", 8, FontStyle.Bold);
+            _peakFont = new Font("Courier New", 8, FontStyle.Regular);
         }
 
         private void SetupTimer()
@@ -367,8 +367,16 @@ namespace FrostLive.Controls
             // Пиковые значения
             if (_showPeakValues)
             {
-                DrawPeakValue(g, _leftHold, true);
-                DrawPeakValue(g, _rightHold, false);
+                // Располагаем пиковые значения по центру соответствующих каналов
+                int peakX = Width - 40;
+
+                // Левый канал: по центру его прямоугольника
+                int leftPeakY = leftChannelRect.Top + (leftChannelRect.Height / 2) - 8;
+                DrawPeakValue(g, _leftHold, peakX + 3, leftPeakY);
+
+                // Правый канал: по центру его прямоугольника
+                int rightPeakY = rightChannelRect.Top + (rightChannelRect.Height / 2) - 6;
+                DrawPeakValue(g, _rightHold, peakX + 3, rightPeakY);
             }
         }
 
@@ -415,13 +423,9 @@ namespace FrostLive.Controls
             }
         }
 
-        private void DrawPeakValue(Graphics g, double value, bool isTop)
+        private void DrawPeakValue(Graphics g, double value, int x, int y)
         {
             string text = value.ToString("0.00");
-            var textSize = g.MeasureString(text, _peakFont);
-
-            int x = Width - 40;
-            int y = isTop ? 5 : Height - 17;
 
             if (value > 0.01)
             {
