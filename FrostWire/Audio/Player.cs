@@ -41,6 +41,12 @@ namespace FrostWire.Audio
         public void Initialize()
         {
             _audioEngine.Initialize();
+            _audioEngine.TrackPositionChanged += _audioEngine_TrackPositionChanged;
+        }
+
+        private void _audioEngine_TrackPositionChanged(double arg1, double arg2)
+        {
+            _fx.FadeStart(arg1, arg2);
         }
 
         public TrackInfo PlayTrack(string filePath)

@@ -12,6 +12,7 @@ namespace FrostWire.Audio.FX
         private readonly Compressor _firstCompressor;
         private readonly Compressor _secondCompressor;
         private readonly Limiter _limiter;
+        private readonly Fader _fader;
         private bool _enabled = true;
         public Limiter Limiter => _limiter;
         public FXManager(int mixerHandle, AppConfig config)
@@ -60,9 +61,12 @@ namespace FrostWire.Audio.FX
                 Logger.Info("Лимитер включен");
             }
 
+            var fparams = new FaderModel() { Duration = 3 };
+            _fader = new Fader(mixerHandle, fparams);
+            Logger.Info("Фейдер включен");
+
             Logger.Debug($"[FXManager] Инициализирован с mixerHandle={mixerHandle}");
         }
-
         public void SetGain(TAG_INFO tagInfo)
         {
             if (!_enabled) return;
@@ -77,16 +81,23 @@ namespace FrostWire.Audio.FX
                 float rms = _replayGain.RMSValue;
                 _firstCompressor.SetCompressor(replayGainValue, rms);
             }
-            if (_secondCompressor != null)
-                _secondCompressor.SetCompressor(0, 0);
-            if (_limiter != null)
-                _limiter.SetLimiter();
+            _secondCompressor?.SetCompressor(0, 0);
+            _limiter?.SetLimiter();
             
+        }
+        public void FadeStart(double pos, double len)
+        {
+            _fader?.FadeStart(pos, len);
+        }
+        public void FadeStop()
+        {
+            _fader?.FadeStop();
         }
         public void Cleanup()
         {
             _replayGain?.Cleanup();
             _firstCompressor?.Cleanup();
+            _secondCompressor?.Cleanup();
             _limiter?.Cleanup();
             Logger.Debug("[FXManager] Все ресурсы эффектов освобождены");
         }

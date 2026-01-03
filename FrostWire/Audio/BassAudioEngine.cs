@@ -3,6 +3,7 @@ using FrostWire.Core;
 using System.Diagnostics;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Tags;
+using Timer = System.Timers.Timer;
 
 namespace FrostWire.Audio
 {
@@ -11,6 +12,12 @@ namespace FrostWire.Audio
         private readonly AppConfig _config;
         private bool _isInitialized = false;
         private bool _isDisposed = false;
+        private int _currentStream = 0;
+        private double _lastTrackPosition = 0f;
+
+        private Timer _positionTimer;
+
+        public event Action<double, double>? TrackPositionChanged;
 
         public bool IsInitialized => _isInitialized;
 
@@ -43,8 +50,22 @@ namespace FrostWire.Audio
             }
 
             LoadPlugins();
+
+            _positionTimer = new Timer(500);
+            _positionTimer.AutoReset = true;
+            _positionTimer.Elapsed += _positionTimer_Elapsed;
+
             _isInitialized = true;
             Logger.Info("[BassAudioEngine] BASS успешно инициализирован");
+        }
+
+        private void _positionTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            double len = GetStreamLenght();
+            double pos = GetStreamPosition();
+            if (pos != _lastTrackPosition)
+                TrackPositionChanged?.Invoke(pos, len);
+            _lastTrackPosition = pos;
         }
 
         private void LoadPlugins()
@@ -107,6 +128,7 @@ namespace FrostWire.Audio
                 Logger.Debug($"[Производительность] Поток создан за {stopwatch.ElapsedMilliseconds} мс, handle: {stream}");
             }
 
+            _currentStream = stream;
             return stream;
         }
 
@@ -114,6 +136,23 @@ namespace FrostWire.Audio
         {
             return BassTags.BASS_TAG_GetFromFile(filePath);
         }
+        public double GetStreamPosition()
+        {
+            if (_currentStream == 0)
+                return 0;
+            long bytes = Bass.BASS_ChannelGetPosition(_currentStream);
+            double sec = Bass.BASS_ChannelBytes2Seconds(_currentStream, bytes);
+            return sec;
+        }
+        public double GetStreamLenght()
+        {
+            if (_currentStream == 0)
+                return 0;
+            long byets = Bass.BASS_ChannelGetLength(_currentStream);
+            double sec = Bass.BASS_ChannelBytes2Seconds(_currentStream, byets);
+            return sec;
+        }
+        
         public static BASSError GetBassError()
         {
             return Bass.BASS_ErrorGetCode();
@@ -127,9 +166,14 @@ namespace FrostWire.Audio
 
         public void PlayStream(int streamHandle)
         {
+            StartPositionTimer();
             Bass.BASS_ChannelPlay(streamHandle, false);
         }
-
+        private void StartPositionTimer()
+        {
+            _positionTimer.Stop();
+            _positionTimer.Start();
+        }
         public void StopStream(int streamHandle)
         {
             if (streamHandle != 0)
