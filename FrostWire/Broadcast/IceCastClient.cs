@@ -4,7 +4,6 @@ using FrostWire.Broadcast.Encoders;
 using FrostWire.Core;
 using System.Diagnostics;
 using System.Net;
-using System.Text;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Enc;
 
