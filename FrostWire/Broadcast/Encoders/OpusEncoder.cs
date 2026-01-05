@@ -1,4 +1,5 @@
 ﻿using FrostWire.App;
+using FrostWire.App.Config.Encoders;
 using FrostWire.Audio;
 using FrostWire.Core;
 using Un4seen.Bass;
@@ -15,14 +16,16 @@ namespace FrostWire.Broadcast.Encoders
         private string _encoderExe;               // Путь к исполняемому файлу opusenc
         private bool _disposed = false;           // Флаг освобождения ресурсов
         private readonly object _disposeLock = new object();  // Блокировка для потокобезопасности
+        private readonly COpus _opusEncoder;
 
         public int Handle => _encoderHandle;      // Публичный доступ к хэндлу (только для чтения)
 
         // Конструктор
-        public OpusEncoder(AppConfig config, Mixer mixer)
+        public OpusEncoder(AppConfig config, Mixer mixer, BaseEncoder opus)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));  // Проверка аргументов
             _mixer = mixer ?? throw new ArgumentNullException(nameof(mixer));
+            _opusEncoder = opus as COpus;
 
             Initialize();  // Инициализация энкодера
         }
@@ -38,15 +41,6 @@ namespace FrostWire.Broadcast.Encoders
 
             string parameters = BuildParameters();  // Строим параметры командной строки
 
-            // Создаем энкодер через BASS
-            //_encoderHandle = BassEnc_Opus.BASS_Encode_OPUS_Start(
-            //    _mixer.Handle,          // Хэндл микшера
-            //    parameters,             // Параметры запуска
-            //    BASSEncode.BASS_ENCODE_FP_16BIT,  // 16-битное кодирование
-            //    null,                   // Callback не нужен
-            //    IntPtr.Zero             // User data не нужен
-            //);
-
             _encoderHandle = BassEnc.BASS_Encode_Start(
                     _mixer.Handle,
                     $"{parameters}",
@@ -58,7 +52,7 @@ namespace FrostWire.Broadcast.Encoders
             if (_encoderHandle == 0)  // Проверка успешности создания
                 throw new Exception($"Не удалось создать Opus энкодер: {Bass.BASS_ErrorGetCode()}");
 
-            Logger.Info($"[OpusEncoder] Opus энкодер: {_config.Opus.OpusBitrate}кбит/с {_config.Opus.OpusMode}");  // Лог успеха
+            Logger.Info($"[OpusEncoder] Opus энкодер: {_opusEncoder.Bitrate}кбит/с {_opusEncoder.Mode}");  // Лог успеха
         }
 
         // Проверка валидности энкодера (потокобезопасная)
@@ -136,11 +130,11 @@ namespace FrostWire.Broadcast.Encoders
         {
             // Собираем все параметры в одну строку
             return $"{_encoderExe} " +                      // Исполняемый файл
-                   $"--bitrate {_config.Opus.OpusBitrate} " +    // Битрейт
-                   $"--{_config.Opus.OpusMode} " +               // Режим (VBR/CBR)
-                   $"--{_config.Opus.OpusContentType} " +        // Тип контента (audio/voip)
-                   $"--comp {_config.Opus.OpusComplexity} " +    // Сложность кодирования
-                   $"--framesize {_config.Opus.OpusFrameSize} " + // Размер фрейма
+                   $"--bitrate {_opusEncoder.Bitrate} " +    // Битрейт
+                   $"--{_opusEncoder.Mode} " +               // Режим (VBR/CBR)
+                   $"--{_opusEncoder.ContentType} " +        // Тип контента (audio/voip)
+                   $"--comp {_opusEncoder.Complexity} " +    // Сложность кодирования
+                   $"--framesize {_opusEncoder.FrameSize} " + // Размер фрейма
                    "- -";                                   // stdin -> stdout
         }
     }

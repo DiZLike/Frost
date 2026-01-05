@@ -12,7 +12,7 @@ namespace FrostWire.Services
         private readonly Player _player;                  // Проигрыватель аудио
         private readonly ScheduleManager _scheduleManager;// Менеджер расписания
         private readonly Playlist? _fallbackPlaylist;     // Резервный плейлист (если расписание отключено)
-        private readonly IceCastClient _iceCast;          // Клиент для IceCast стриминга
+        private readonly MultiCastClient _multiCast;
         private readonly MyServerClient _myServer;        // Клиент для внешнего сервера
         private readonly JingleService _jingleService;    // Сервис джинглов
 
@@ -29,12 +29,7 @@ namespace FrostWire.Services
         // История последних исполнителей и жанров (для предотвращения повторений)
         private readonly ConcurrentQueue<string> _lastArtists = new();
         private readonly ConcurrentQueue<string> _lastGenres = new();
-        private const int MAX_ARTIST_HISTORY = 5;         // Храним последних 5 исполнителей
-
-        public bool IsRunning => _isRunning;              // Свойство: работает ли сервис
-        public bool IsPaused => _isPaused;                // Свойство: на паузе ли воспроизведение
-        public TrackInfo? CurrentTrack => _currentTrack;  // Свойство: текущий трек
-        public IceCastClient IceCast => _iceCast;         // Свойство: клиент IceCast
+        private const int MAX_ARTIST_HISTORY = 10;         // Храним последних 5 исполнителей
 
         public RadioService(AppConfig config)
         {
@@ -45,9 +40,9 @@ namespace FrostWire.Services
             // Инициализация компонентов
             _jingleService = new JingleService(config);   // Создаем сервис джинглов
             _player = new Player(config, _jingleService); // Создаем проигрыватель
-            _iceCast = new IceCastClient(config);         // Создаем клиент IceCast
+            _multiCast = new MultiCastClient(config);
             _myServer = new MyServerClient(config);       // Создаем клиент внешнего сервера
-            _iceCast.ConnectionRestored += _iceCast_ConnectionRestored;
+            _multiCast.ConnectionRestored += multiCast_ConnectionRestored;
 
             _scheduleManager = new ScheduleManager(config);// Создаем менеджер расписания
 
@@ -65,7 +60,7 @@ namespace FrostWire.Services
             Logger.Info($"[RadioService] Расписание включено: {config.Playlist.ScheduleEnable}"); // Лог: статус расписания
         }
 
-        private void _iceCast_ConnectionRestored()
+        private void multiCast_ConnectionRestored(string str)
         {
             _skipToNextTrack = true;
         }
@@ -254,7 +249,7 @@ namespace FrostWire.Services
             _player.Initialize();                        // Инициализация проигрывателя
 
             // Инициализируем IceCast
-            _iceCast.Initialize(_player.Mixer);          // Передаем микшер в IceCast
+            _multiCast.Initialize(_player.Mixer);
 
             // Запускаем поток воспроизведения
             _playbackThread = new Thread(PlaybackLoop);  // Создаем поток для цикла воспроизведения
@@ -273,7 +268,7 @@ namespace FrostWire.Services
             _playbackThread?.Join(3000);                 // Ждем завершения потока (3 секунды)
 
             _player.Stop();                              // Останавливаем проигрыватель
-            _iceCast.Dispose();                          // Освобождаем ресурсы IceCast
+            _multiCast.Dispose();                        // Освобождаем ресурсы IceCast
 
             Logger.Info("[RadioService] Радио сервис остановлен");      // Лог: сервис остановлен
         }
@@ -303,7 +298,7 @@ namespace FrostWire.Services
                     if (_config.Jingles.JinglesEnable && _jingleService.ShouldPlayJingle())
                     {
                         // ВЫЗОВ ПЕРЕМЕЩЕННОГО МЕТОДА ИЗ JingleService
-                        bool jinglePlayed = _jingleService.PlayJingle(_player, _iceCast);
+                        bool jinglePlayed = _jingleService.PlayJingle(_player, _multiCast);
 
                         if (jinglePlayed)
                         {
@@ -326,7 +321,7 @@ namespace FrostWire.Services
                     Logger.Info($"[RadioService] Выбран трек: {Path.GetFileName(trackFile)}"); // Лог: выбранный трек
 
                     // 2. Проверяем подключение к IceCast перед воспроизведением
-                    if (!_iceCast.IsConnected)           // Если IceCast не подключен
+                    if (!_multiCast.IsConnected)           // Если IceCast не подключен
                     {
                         Logger.Warning("[RadioService] IceCast не подключен"); // Лог: предупреждение
                     }
@@ -349,7 +344,7 @@ namespace FrostWire.Services
                     {
                         try
                         {
-                            _iceCast.SetMetadata(_currentTrack.Artist, _currentTrack.Title); // Отправка метаданных
+                            _multiCast.SetMetadata(_currentTrack.Artist, _currentTrack.Title); // Отправка метаданных
                         }
                         catch (Exception ex)              // Обработка ошибок
                         {

@@ -6,6 +6,7 @@ using FrostWire.Core;
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 using TagLib.Ogg.Codecs;
 using static Un4seen.Bass.Misc.BaseEncoder;
 
@@ -22,7 +23,7 @@ namespace FrostWire.App
         public CAudio Audio { get; set; }
         public CIcecast Icecast { get; set; }
         public CPlaylist Playlist { get; set; }
-        public COpus Opus { get; set; }
+        public List<BaseEncoder> Encoders { get; set; } = new List<BaseEncoder>();
         public CReplayGain ReplayGain { get; set; }
         public CFirstCompressor FirstCompressor { get; set; }
         public CSecondCompressor SecondCompressor { get; set; }
@@ -36,7 +37,6 @@ namespace FrostWire.App
             Audio = new CAudio();
             Playlist = new CPlaylist();
             Icecast = new CIcecast();
-            Opus = new COpus();
             ReplayGain = new CReplayGain();
             FirstCompressor = new CFirstCompressor();
             SecondCompressor = new CSecondCompressor();
@@ -113,7 +113,7 @@ namespace FrostWire.App
 
                 Logger.Debug($"[AppConfig] Загружено: IceCast={Icecast.Server}:{Icecast.Port}, Плейлист={Playlist.PlaylistFile}");
                 Logger.Debug($"[AppConfig] Аудио: Устройство={Audio.AudioDevice}, Частота={Audio.SampleRate}Гц");
-                Logger.Debug($"[AppConfig] Кодировщик: Opus {Opus.OpusBitrate}кбит/с {Opus.OpusMode}, RG={(ReplayGain.UseReplayGain ? "Вкл" : "Выкл")}");
+                //Logger.Debug($"[AppConfig] Кодировщик: Opus {Opus.OpusBitrate}кбит/с {Opus.OpusMode}, RG={(ReplayGain.UseReplayGain ? "Вкл" : "Выкл")}");
                 return true;
             }
             catch (Exception ex)
@@ -152,9 +152,6 @@ namespace FrostWire.App
                         case "port":
                             Icecast.Port = value;
                             break;
-                        case "mount":
-                            Icecast.Mount = value;
-                            break;
                         case "name":
                             Icecast.Name = value;
                             break;
@@ -191,26 +188,38 @@ namespace FrostWire.App
                     }
                     break;
 
-                case "encoder":
-                    switch (key)
+                case string s when s.StartsWith("encoder:"):
+                    string encoderMount = section["encoder:".Length..];
+                    BaseEncoder? encoder = GetOrCreateEncoder(encoderMount);
+
+                    if (encoder is COpus opus)
                     {
-                        case "bitrate":
-                            if (int.TryParse(value, out int bitrate))
-                                Opus.OpusBitrate = bitrate;
-                            break;
-                        case "bitrate_mode":
-                            Opus.OpusMode = value;
-                            break;
-                        case "content_type":
-                            Opus.OpusContentType = value;
-                            break;
-                        case "complexity":
-                            if (int.TryParse(value, out int complexity))
-                                Opus.OpusComplexity = complexity;
-                            break;
-                        case "framesize":
-                            Opus.OpusFrameSize = value;
-                            break;
+                        switch (key.ToLower())
+                        {
+                            case "type":
+                                encoder.Type = value.ToLower();
+                                break;
+                            case "enabled":
+                                encoder.Enabled = value.ToLower() == "yes";
+                                break;
+                            case "bitrate":
+                                if (int.TryParse(value, out int bitrate))
+                                    opus.Bitrate = bitrate;
+                                break;
+                            case "bitrate_mode":
+                                opus.Mode = value;
+                                break;
+                            case "content_type":
+                                opus.ContentType = value;
+                                break;
+                            case "complexity":
+                                if (int.TryParse(value, out int complexity))
+                                    opus.Complexity = complexity;
+                                break;
+                            case "framesize":
+                                opus.FrameSize = value;
+                                break;
+                        }
                     }
                     break;
 
@@ -349,7 +358,6 @@ namespace FrostWire.App
                             break;
                     }
                     break;
-           
 
                 case "debug":
                     switch (key)
@@ -386,6 +394,16 @@ namespace FrostWire.App
             if (string.IsNullOrEmpty(ConfigDirectory) || !Directory.Exists(ConfigDirectory))
                 return false;
             return IsConfigured = File.Exists(Path.Combine(ConfigDirectory, "ok"));
+        }
+        private BaseEncoder? GetOrCreateEncoder(string mount)
+        {
+            bool exist = Encoders.Any(e => e.Mount == mount);
+            if (exist)
+                return null;
+            // Создаем новый (можно определить тип позже)
+            var newEncoder = new COpus { Mount = mount };
+            Encoders.Add(newEncoder);
+            return newEncoder;
         }
     }
 }

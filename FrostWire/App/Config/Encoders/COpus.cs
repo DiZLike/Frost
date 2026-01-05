@@ -6,13 +6,17 @@ using System.Threading.Tasks;
 
 namespace FrostWire.App.Config.Encoders
 {
-    public class COpus
+    public class COpus : BaseEncoder
     {
         // Opus настройки
-        public int OpusBitrate { get; set; } = 128;
-        public string OpusMode { get; set; } = "vbr";
-        public string OpusContentType { get; set; } = "music";
-        public int OpusComplexity { get; set; } = 10;
-        public string OpusFrameSize { get; set; } = "20";
+        public COpus()
+        {
+            Type = "opus";
+        }
+        public int Bitrate { get; set; } = 128;
+        public string Mode { get; set; } = "vbr";
+        public string ContentType { get; set; } = "music";
+        public int Complexity { get; set; } = 10;
+        public string FrameSize { get; set; } = "20";
     }
 }

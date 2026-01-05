@@ -90,12 +90,12 @@ namespace FrostWire.Services
         }
 
         // Воспроизведение джингла
-        public bool PlayJingle(Player player, IceCastClient iceCast)
+        public bool PlayJingle(Player player, MultiCastClient multiCast)
         {
             try
             {
                 // Проверяем доступность джинглов и возможность воспроизведения
-                if (!HasJingles || player == null || iceCast == null)
+                if (!HasJingles || player == null || multiCast == null)
                 {
                     Logger.Warning("[JingleService] Невозможно воспроизвести джингл: недостаточно данных");
                     return false;
@@ -128,7 +128,7 @@ namespace FrostWire.Services
                 if (jingleTrack != null)                  // Если джингл успешно начал играть
                 {
                     // Отправляем метаданные джингла в поток через переданный iceCast
-                    iceCast.SetMetadata("Джингл", Path.GetFileNameWithoutExtension(jingleFile));
+                    multiCast.SetMetadata("Джингл", Path.GetFileNameWithoutExtension(jingleFile));
 
                     // Сбрасываем счетчик после воспроизведения джингла (ПЕРЕМЕЩЕНО ИЗ RadioService)
                     _trackCounter = 0;

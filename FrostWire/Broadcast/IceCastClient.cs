@@ -1,4 +1,5 @@
 ﻿using FrostWire.App;
+using FrostWire.App.Config.Encoders;
 using FrostWire.Audio;
 using FrostWire.Broadcast.Encoders;
 using FrostWire.Core;
@@ -12,7 +13,6 @@ namespace FrostWire.Broadcast
     public class IceCastClient : IDisposable
     {
         private readonly AppConfig _config;                 // Конфигурация приложения
-        private OpusEncoder _encoder;                       // Аудио энкодер
         private Mixer _mixer;                               // Микшер аудио
         private Thread _monitoringThread;                   // Поток мониторинга соединения
         private bool _disposed;                             // Флаг освобождения ресурсов
@@ -20,14 +20,14 @@ namespace FrostWire.Broadcast
         private readonly object _lock = new object();       // Объект для синхронизации
         private Stopwatch _reconnectTime = new Stopwatch(); // Таймер для измерения времени переподключения
         private int _reconnectAttempts = 0;                 // Счётчик попыток переподключения
-        public event Action? ConnectionRestored;
+        public event Action<string>? ConnectionRestored;
 
         public bool IsConnected { get; private set; }       // Состояние подключения
         public int Listeners { get; private set; }          // Текущее количество слушателей
         public int PeakListeners { get; private set; }      // Максимальное количество слушателей
 
         // Конструктор - принимает конфигурацию
-        public IceCastClient(AppConfig config)
+        public IceCastClient(AppConfig config, BaseEncoder encoder)
         {
             _config = config;
         }

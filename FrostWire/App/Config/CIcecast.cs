@@ -11,7 +11,6 @@ namespace FrostWire.App.Config
         // IceCast настройки
         public string Server { get; set; } = "localhost";
         public string Port { get; set; } = "8000";
-        public string Mount { get; set; } = "live";
         public string User { get; set; } = "source";
         public string Password { get; set; } = "hackme";
         public string Name { get; set; } = "Strimer Radio";
