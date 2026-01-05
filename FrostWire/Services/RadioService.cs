@@ -26,8 +26,9 @@ namespace FrostWire.Services
         private DateTime _trackStartTime;                 // Время начала текущего трека
         private bool _skipToNextTrack = false;
 
-        // История последних исполнителей (для предотвращения повторений)
+        // История последних исполнителей и жанров (для предотвращения повторений)
         private readonly ConcurrentQueue<string> _lastArtists = new();
+        private readonly ConcurrentQueue<string> _lastGenres = new();
         private const int MAX_ARTIST_HISTORY = 5;         // Храним последних 5 исполнителей
 
         public bool IsRunning => _isRunning;              // Свойство: работает ли сервис
@@ -83,16 +84,17 @@ namespace FrostWire.Services
                 ? _scheduleManager.GetNextTrack()        // Берем трек из расписания
                 : _fallbackPlaylist?.GetRandomTrack();   // Иначе случайный из резервного
         }
-        // Получение случайного трека с проверкой на повтор исполнителя
-        private string? GetRandomTrackWithArtistCheck()
+        // Получение случайного трека с проверкой на повтор исполнителя и жанра
+        private string? GetRandomTrackWithCheck()
         {
             if (_fallbackPlaylist == null)
                 return null;
 
             string? selectedTrack = null;
             string? selectedArtist = null;
+            string? selectedGenre = null;
             int attempts = 0;
-            const int MAX_ATTEMPTS = 3; // Максимальное количество попыток найти трек с другим исполнителем
+            const int MAX_ATTEMPTS = 5; // Максимальное количество попыток найти трек с другим исполнителем
 
             do
             {
@@ -113,21 +115,81 @@ namespace FrostWire.Services
                     {
                         selectedArtist = !string.IsNullOrWhiteSpace(tagInfo.artist)
                             ? tagInfo.artist
-                            : "Unknown Artist";
+                            : "Other";
+                        selectedGenre = !string.IsNullOrWhiteSpace(tagInfo.genre)
+                            ? tagInfo.genre
+                            : "Other";
 
-                        // Проверяем, был ли этот исполнитель недавно
-                        bool isArtistRepeated = _lastArtists.Contains(selectedArtist);
+                        if (selectedArtist == "Other" || selectedGenre == "Other")
+                        {
+                            // Определяем, что именно неизвестно
+                            bool isArtistUnknown = selectedArtist == "Other";
+                            bool isGenreUnknown = selectedGenre == "Other";
 
-                        if (isArtistRepeated && attempts < MAX_ATTEMPTS - 1)
+                            // Если неизвестно и то и другое, используем трек как есть
+                            if (isArtistUnknown && isGenreUnknown)
+                            {
+                                Logger.Info($"[RadioService] Используем трек с неизвестным исполнителем и жанром: {Path.GetFileName(selectedTrack)}");
+                                break;
+                            }
+
+                            // Если неизвестен только исполнитель - проверяем только жанр
+                            if (isArtistUnknown)
+                            {
+                                bool isGenreRepeated = _lastGenres.Contains(selectedGenre);
+
+                                if (attempts < MAX_ATTEMPTS - 1 && isGenreRepeated)
+                                {
+                                    Logger.Info($"[RadioService] Пропускаем трек {Path.GetFileName(selectedTrack)} - " +
+                                              $"жанр '{selectedGenre}' был недавно (исполнитель неизвестен, попытка {attempts + 1})");
+                                    attempts++;
+                                    continue;
+                                }
+                                else
+                                {
+                                    // Подходящий трек с неизвестным исполнителем, но уникальным жанром
+                                    AddGenreToHistory(selectedGenre);
+                                    break;
+                                }
+                            }
+
+                            // Если неизвестен только жанр - проверяем только исполнителя
+                            if (isGenreUnknown)
+                            {
+                                bool isArtistRepeated = _lastArtists.Contains(selectedArtist);
+
+                                if (attempts < MAX_ATTEMPTS - 1 && isArtistRepeated)
+                                {
+                                    Logger.Info($"[RadioService] Пропускаем трек {Path.GetFileName(selectedTrack)} - " +
+                                              $"исполнитель '{selectedArtist}' был недавно (жанр неизвестен, попытка {attempts + 1})");
+                                    attempts++;
+                                    continue;
+                                }
+                                else
+                                {
+                                    // Подходящий трек с неизвестным жанром, но уникальным исполнителем
+                                    AddArtistToHistory(selectedArtist);
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Если оба известны - проверяем и исполнителя, и жанр
+                        bool isArtistRepeatedFull = _lastArtists.Contains(selectedArtist);
+                        bool isGenreRepeatedFull = _lastGenres.Contains(selectedGenre);
+
+                        if (attempts < MAX_ATTEMPTS - 1 && (isArtistRepeatedFull || isGenreRepeatedFull))
                         {
                             Logger.Info($"[RadioService] Пропускаем трек {Path.GetFileName(selectedTrack)} - " +
-                                      $"исполнитель был недавно: {selectedArtist} (попытка {attempts + 1})");
+                                      $"исполнитель или жанр был недавно: {selectedArtist}, {selectedGenre} (попытка {attempts + 1})");
                             attempts++;
-                            continue; // Пробуем найти другой трек
+                            continue;
                         }
                         else
                         {
-                            // Нашли подходящий трек
+                            // Нашли подходящий трек с известными исполнителем и жанром
+                            AddArtistToHistory(selectedArtist);
+                            AddGenreToHistory(selectedGenre);
                             break;
                         }
                     }
@@ -135,8 +197,8 @@ namespace FrostWire.Services
                 catch (Exception ex)
                 {
                     Logger.Error($"[RadioService] Ошибка при проверке тегов трека {selectedTrack}: {ex.Message}");
-                    // Если не удалось проверить теги, используем трек как есть
-                    selectedArtist = "Unknown Artist";
+                    selectedArtist = "Other";
+                    selectedGenre = "Other";
                     break;
                 }
 
@@ -144,14 +206,8 @@ namespace FrostWire.Services
 
             if (attempts >= MAX_ATTEMPTS)
             {
-                Logger.Warning($"[RadioService] Не удалось найти трек с другим исполнителем после {MAX_ATTEMPTS} попыток. " +
+                Logger.Warning($"[RadioService] Не удалось найти трек с другим исполнителем или жанром после {MAX_ATTEMPTS} попыток. " +
                               $"Использую последний найденный: {Path.GetFileName(selectedTrack)}");
-            }
-
-            // Добавляем исполнителя в историю ДО воспроизведения
-            if (selectedArtist != null && selectedTrack != null)
-            {
-                AddArtistToHistory(selectedArtist);
             }
 
             return selectedTrack;
@@ -169,6 +225,18 @@ namespace FrostWire.Services
             }
 
             Logger.Debug($"[RadioService] Исполнитель добавлен в историю: {artist} (всего: {_lastArtists.Count})");
+        }
+        private void AddGenreToHistory(string genre)
+        {
+            _lastGenres.Enqueue(genre);
+
+            // Поддерживаем максимальный размер очереди
+            while (_lastGenres.Count > MAX_ARTIST_HISTORY)
+            {
+                _lastGenres.TryDequeue(out _);
+            }
+
+            Logger.Debug($"[RadioService] Жанр добавлен в историю: {genre} (всего: {_lastGenres.Count})");
         }
 
         // Запуск сервиса
@@ -246,7 +314,7 @@ namespace FrostWire.Services
                     }
 
                     // 1. Получаем следующий трек с проверкой исполнителя
-                    string? trackFile = GetRandomTrackWithArtistCheck();
+                    string? trackFile = GetRandomTrackWithCheck();
 
                     if (string.IsNullOrEmpty(trackFile)) // Если трек не найден
                     {
