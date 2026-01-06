@@ -397,10 +397,15 @@ namespace FrostWire.App
         }
         private BaseEncoder? GetOrCreateEncoder(string mount)
         {
-            bool exist = Encoders.Any(e => e.Mount == mount);
-            if (exist)
-                return null;
-            // Создаем новый (можно определить тип позже)
+            // Ищем существующий энкодер с указанным mount
+            var existingEncoder = Encoders.FirstOrDefault(e => e.Mount == mount);
+
+            if (existingEncoder != null)
+            {
+                return existingEncoder;
+            }
+
+            // Создаем новый энкодер
             var newEncoder = new COpus { Mount = mount };
             Encoders.Add(newEncoder);
             return newEncoder;

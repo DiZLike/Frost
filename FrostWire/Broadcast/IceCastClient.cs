@@ -14,6 +14,8 @@ namespace FrostWire.Broadcast
     {
         private readonly AppConfig _config;                 // Конфигурация приложения
         private Mixer _mixer;                               // Микшер аудио
+        private OpusEncoder _opus;
+        private readonly COpus _encoderConfig;
         private Thread _monitoringThread;                   // Поток мониторинга соединения
         private bool _disposed;                             // Флаг освобождения ресурсов
         private bool _shouldMonitor = true;                 // Флаг работы мониторинга
@@ -30,6 +32,7 @@ namespace FrostWire.Broadcast
         public IceCastClient(AppConfig config, BaseEncoder encoder)
         {
             _config = config;
+            _encoderConfig = encoder as COpus;
         }
 
         // Инициализация клиента
@@ -50,26 +53,26 @@ namespace FrostWire.Broadcast
                 try
                 {
                     // Логируем параметры подключения
-                    Logger.Info($"[IceCastClient] Подключение к IceCast: {_config.Icecast.Server}:{_config.Icecast.Port}/{_config.Icecast.Mount}");
+                    Logger.Info($"[IceCastClient] Подключение к IceCast: {_config.Icecast.Server}:{_config.Icecast.Port}/{_encoderConfig.Mount}");
 
-                    _encoder?.Dispose();                  // Освобождаем старый энкодер
-                    _encoder = new OpusEncoder(_config, _mixer); // Создаем новый энкодер
+                    _opus?.Dispose();                  // Освобождаем старый энкодер
+                    _opus = new OpusEncoder(_config, _mixer, _encoderConfig); // Создаем новый энкодер
                     Thread.Sleep(100);                    // Даем время на инициализацию
 
                     // Формируем URL и авторизацию
-                    string url = $"http://{_config.Icecast.Server}:{_config.Icecast.Port}/{_config.Icecast.Mount}";
+                    string url = $"http://{_config.Icecast.Server}:{_config.Icecast.Port}/{_encoderConfig.Mount}";
                     string auth = $"{_config.Icecast.User}:{_config.Icecast.Password}";
 
                     // Инициализируем трансляцию через BASS
                     bool success = BassEnc.BASS_Encode_CastInit(
-                        _encoder.Handle,                  // Хэндл энкодера
+                        _opus.Handle,                  // Хэндл энкодера
                         url,                              // URL сервера
                         auth,                             // Логин:пароль
                         "audio/ogg",                      // Тип контента
                         _config.Icecast.Name,              // Название потока
                         _config.Icecast.Genre,             // Жанр
                         null, null, null,                 // Дополнительные параметры
-                        _config.Opus.OpusBitrate,              // Битрейт
+                        _encoderConfig.Bitrate,              // Битрейт
                         BASSEncodeCast.BASS_ENCODE_CAST_PUT // Метод отправки
                     );
 
@@ -159,7 +162,7 @@ namespace FrostWire.Broadcast
                             IsConnected = true;             // Устанавливаем флаг при успехе
                             _reconnectAttempts = 0;         // Сбрасываем счётчик попыток
                             _reconnectTime.Stop();          // Останавливаем таймер
-                            ConnectionRestored?.Invoke();
+                            ConnectionRestored?.Invoke("!");
                             Logger.Info($"[Производительность] Соединение восстановлено за {_reconnectTime.Elapsed.TotalSeconds:F1} секунд");
                         }
                         else                                // Если переподключение не удалось
@@ -197,7 +200,7 @@ namespace FrostWire.Broadcast
                 {
                     client.Timeout = new TimeSpan(0, 0, 5);                 // Таймаут 5 секунд
                     string json = client.GetStringAsync(statsUrl).Result;   // Загружаем статистику
-                    return json.Contains($"/{_config.Icecast.Mount}");       // Ищем наш mount point
+                    return json.Contains($"/{_encoderConfig.Mount}");       // Ищем наш mount point
                 }
 
                 //using (var client = new WebClient())      // Создаем WebClient
@@ -223,7 +226,7 @@ namespace FrostWire.Broadcast
                 using (var client = new WebClient())
                 {
                     string json = client.DownloadString(statsUrl);
-                    string mountPoint = $"/{_config.Icecast.Mount}";
+                    string mountPoint = $"/{_encoderConfig.Mount}";
 
                     if (json.Contains(mountPoint))        // Если наш mount point существует
                     {
@@ -253,12 +256,12 @@ namespace FrostWire.Broadcast
         // Установка метаданных (название трека)
         public void SetMetadata(string artist, string title)
         {
-            if (!IsConnected || _encoder == null || _disposed) // Проверка доступности
+            if (!IsConnected || _opus == null || _disposed) // Проверка доступности
                 return;
 
             try
             {
-                bool ok = _encoder.SetMetadata(artist, title);      // Отправка метаданных
+                bool ok = _opus.SetMetadata(artist, title);      // Отправка метаданных
                 var err = Bass.BASS_ErrorGetCode();
                 Logger.Debug($"[IceCastClient] Метаданные: {artist} - {title}");
             }
@@ -283,7 +286,7 @@ namespace FrostWire.Broadcast
                     _monitoringThread.Join(1000);         // Даем 1 секунду на завершение
                 }
 
-                _encoder?.Dispose();                      // Освобождаем энкодер
+                _opus?.Dispose();                      // Освобождаем энкодер
                 Logger.Info("[IceCastClient] IceCast клиент остановлен"); // Логируем остановку
             }
         }
