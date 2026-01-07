@@ -167,7 +167,7 @@ namespace FrostWire.Audio
         public void PlayStream(int streamHandle)
         {
             StartPositionTimer();
-            Bass.BASS_ChannelPlay(streamHandle, false);
+            bool ok = Bass.BASS_ChannelPlay(streamHandle, false);
         }
         private void StartPositionTimer()
         {

@@ -42,7 +42,7 @@ namespace FrostWire.Broadcast.Encoders
             string parameters = BuildParameters();  // Строим параметры командной строки
 
             _encoderHandle = BassEnc.BASS_Encode_Start(
-                    _mixer.Handle,
+                    _mixer.OutputHandle,
                     $"{parameters}",
                     0,
                     null,

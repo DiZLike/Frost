@@ -36,68 +36,75 @@ namespace gainer.Processing
                     $"Поток {formattedThreadId}> Начало: {shortFileName}",
                     ConsoleColor.Cyan);
 
-                // 1. Чтение аудио
-                using (var audioReader = new AudioReader(filePath))
+                // 1.1 Чтение аудио
+                AudioReader audioReader = new AudioReader(filePath);
+                audioReader.ProgressChanged += (progress) =>
                 {
-                    audioReader.ProgressChanged += (progress) =>
+                    int percent = (int)(progress * 100);
+                    if (Math.Abs(percent - _lastPercentReported) >= 2)
                     {
-                        int percent = (int)(progress * 100);
-                        if (Math.Abs(percent - _lastPercentReported) >= 2)
-                        {
-                            _lastPercentReported = percent;
-                            _progressManager.UpdateThreadLine(lineIndex,
-                                $"Поток {formattedThreadId}> [{percent}%] Чтение: {shortFileName}",
-                                ConsoleColor.Cyan);
-                        }
-                    };
-
-                    float[] pcmData = audioReader.GetPCMData32();
-
-                    if (pcmData.Length == 0)
-                    {
-                        string error = "Нет аудиоданных";
+                        _lastPercentReported = percent;
                         _progressManager.UpdateThreadLine(lineIndex,
-                            $"Поток {formattedThreadId}> {shortFileName} - {error}",
-                            ConsoleColor.Yellow);
-                        _statistics.AddFailed($"{fileName} - {error}");
-                        Thread.Sleep(2000);
-                        return;
+                            $"Поток {formattedThreadId}> [{percent}%] Чтение: {shortFileName}",
+                            ConsoleColor.Cyan);
                     }
+                };
 
-                    // 2. Анализ (ReplayGain + RMS)
-                    var analyzer = new AudioAnalyzer(44100, _args.TargetLufs, _args.UseKFilter);
-                    analyzer.ProgressChanged += (progress, message) =>
-                    {
-                        int percent = (int)(progress * 100);
-                        if (Math.Abs(percent - _lastPercentReported) >= 2)
-                        {
-                            _lastPercentReported = percent;
-                            _progressManager.UpdateThreadLine(lineIndex,
-                                $"Поток {formattedThreadId}> [{percent}%] {shortFileName} {message}",
-                                ConsoleColor.Yellow);
-                        }
-                    };
+                // 1.2 Основной поток
+                float[] pcmDataMain = audioReader.GetPCMData32(audioReader.Stream);
+                // 1.3 Низ
+                float[] pcmDataSub = audioReader.GetPCMData32(audioReader.SubStream);
+                // 1.4 Бас
+                float[] pcmDataLow = audioReader.GetPCMData32(audioReader.LowStream);
+                // 1.5 Середина
+                float[] pcmDataMid = audioReader.GetPCMData32(audioReader.MidStream);
+                // 1.6 Высота
+                float[] pcmDataHigh = audioReader.GetPCMData32(audioReader.HighStream);
 
-                    var results = analyzer.Analyze(pcmData);
-
-                    // 3. Сохранение в теги
+                if (pcmDataMain.Length == 0)
+                {
+                    string error = "Нет аудиоданных";
                     _progressManager.UpdateThreadLine(lineIndex,
-                        $"Поток {formattedThreadId}> 💾 {shortFileName} - сохранение...",
-                        ConsoleColor.Blue);
-
-                    var tagWriter = new TagWriter(filePath, _args.AutoTagEnabled);
-                    tagWriter.SaveAnalysisResults(results, _args.UseCustomTag);
-
-                    // 4. Вывод результата
-                    string autoTagMessage = _args.AutoTagEnabled ? " + авто-теги" : "";
-                    _progressManager.UpdateThreadLine(lineIndex,
-                        $"Поток {formattedThreadId}> Готово: {shortFileName} - {results.ReplayGain:F2} dB, RMS: {results.RmsDb:F2} dB{autoTagMessage}",
-                        ConsoleColor.Green);
-
-                    _statistics.IncrementSuccess();
-                    _statistics.AddSuccess($"{fileName} - {results.ReplayGain:F2} dB, RMS: {results.RmsDb:F2} dB{autoTagMessage}");
-                    Thread.Sleep(1000);
+                        $"Поток {formattedThreadId}> {shortFileName} - {error}",
+                        ConsoleColor.Yellow);
+                    _statistics.AddFailed($"{fileName} - {error}");
+                    Thread.Sleep(2000);
+                    return;
                 }
+
+                // 2. Анализ (ReplayGain + RMS)
+                var analyzer = new AudioAnalyzer(44100, _args.TargetLufs, _args.UseKFilter);
+                analyzer.ProgressChanged += (progress, message) =>
+                {
+                    int percent = (int)(progress * 100);
+                    if (Math.Abs(percent - _lastPercentReported) >= 2)
+                    {
+                        _lastPercentReported = percent;
+                        _progressManager.UpdateThreadLine(lineIndex,
+                            $"Поток {formattedThreadId}> [{percent}%] {shortFileName} {message}",
+                            ConsoleColor.Yellow);
+                    }
+                };
+
+                var results = analyzer.Analyze(pcmDataMain);
+
+                // 3. Сохранение в теги
+                _progressManager.UpdateThreadLine(lineIndex,
+                    $"Поток {formattedThreadId}> 💾 {shortFileName} - сохранение...",
+                    ConsoleColor.Blue);
+
+                var tagWriter = new TagWriter(filePath, _args.AutoTagEnabled);
+                tagWriter.SaveAnalysisResults(results, _args.UseCustomTag);
+
+                // 4. Вывод результата
+                string autoTagMessage = _args.AutoTagEnabled ? " + авто-теги" : "";
+                _progressManager.UpdateThreadLine(lineIndex,
+                    $"Поток {formattedThreadId}> Готово: {shortFileName} - {results.ReplayGain:F2} dB, RMS: {results.RmsDb:F2} dB{autoTagMessage}",
+                    ConsoleColor.Green);
+
+                _statistics.IncrementSuccess();
+                _statistics.AddSuccess($"{fileName} - {results.ReplayGain:F2} dB, RMS: {results.RmsDb:F2} dB{autoTagMessage}");
+                Thread.Sleep(1000);
             }
             catch (Exception ex)
             {

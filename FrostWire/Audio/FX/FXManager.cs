@@ -8,6 +8,7 @@ namespace FrostWire.Audio.FX
     public class FXManager
     {
         private readonly AppConfig _config;
+        private readonly Mixer _mixer;
         private readonly ReplayGain _replayGain;
         private readonly Compressor _firstCompressor;
         private readonly Compressor _secondCompressor;
@@ -15,11 +16,12 @@ namespace FrostWire.Audio.FX
         private readonly Fader _fader;
         private bool _enabled = true;
         public Limiter Limiter => _limiter;
-        public FXManager(int mixerHandle, AppConfig config)
+        public FXManager(Mixer mixer, AppConfig config)
         {
             _config = config;
+            _mixer = mixer;
             // Создаем эффекты в порядке обработки: ReplayGain -> Compressor -> Limiter
-            _replayGain = new ReplayGain(config.ReplayGain.UseReplayGain, config.ReplayGain.UseCustomGain, mixerHandle);
+            _replayGain = new ReplayGain(config.ReplayGain.UseReplayGain, config.ReplayGain.UseCustomGain, _mixer.InputHandle);
             if (config.FirstCompressor.Enable)
             {
                 var cparams = new CompressorModel()
@@ -32,7 +34,7 @@ namespace FrostWire.Audio.FX
                     Gain = _config.FirstCompressor.Gain,
                     Priority = 3
                 };
-                _firstCompressor = new Compressor(mixerHandle, cparams);
+                _firstCompressor = new Compressor(_mixer.InputHandle, cparams);
                 Logger.Info("Первый компрессов включен");
             }
             if (config.SecondCompressor.Enable)
@@ -46,7 +48,7 @@ namespace FrostWire.Audio.FX
                     Gain = _config.SecondCompressor.Gain,
                     Priority = 2
                 };
-                _secondCompressor = new Compressor(mixerHandle, cparams);
+                _secondCompressor = new Compressor(_mixer.InputHandle, cparams);
                 Logger.Info("Второй компрессов включен");
             }
             if (config.Limiter.Enable)
@@ -57,15 +59,17 @@ namespace FrostWire.Audio.FX
                     Release = _config.Limiter.Release,
                     Gain = _config.Limiter.Gain,
                 };
-                _limiter = new Limiter(mixerHandle, cparams);
+                _limiter = new Limiter(_mixer.InputHandle, cparams);
                 Logger.Info("Лимитер включен");
             }
 
             var fparams = new FaderModel() { Duration = 3 };
-            _fader = new Fader(mixerHandle, fparams);
+            _fader = new Fader(_mixer.InputHandle, fparams);
             Logger.Info("Фейдер включен");
 
-            Logger.Debug($"[FXManager] Инициализирован с mixerHandle={mixerHandle}");
+            var mbc = new MultiBandCompressor(_mixer);
+
+            Logger.Debug($"[FXManager] Инициализирован с inputHandle={_mixer.InputHandle}");
         }
         public void SetGain(TAG_INFO tagInfo)
         {

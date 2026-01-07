@@ -1,4 +1,5 @@
-﻿using FrostWire.Core;
+﻿using FrostWire.App;
+using FrostWire.Core;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Mix;
 
@@ -7,18 +8,16 @@ namespace FrostWire.Audio
     public class Mixer
     {
         private int _handle;
+        private AppConfig _config;
         private HashSet<int> _streams = new();  // HashSet для быстрого поиска и уникальности
 
-        public int Handle => _handle;           // Публичный доступ к хэндлу микшера
+        public int InputHandle => _handle;     // Публичный доступ к хэндлу микшера
+        public int OutputHandle { get; set; }
         public bool IsValid => _handle != 0;    // Проверка валидности микшера
 
-        public Mixer(int sampleRate)
+        public Mixer(AppConfig config)
         {
-            _handle = BassMix.BASS_Mixer_StreamCreate(  // Создание микшерного потока
-                sampleRate,
-                2,                                      // Стерео (2 канала)
-                BASSFlag.BASS_MIXER_NONSTOP | BASSFlag.BASS_SAMPLE_FLOAT
-            );
+            _handle = BassMix.BASS_Mixer_StreamCreate(_config.Audio.SampleRate, 2, BASSFlag.BASS_MIXER_NONSTOP | BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_STREAM_DECODE);
             Bass.BASS_SetConfig(BASSConfig.BASS_CONFIG_MIXER_BUFFER, 2000);
             int bufLenAsync = Bass.BASS_GetConfig(BASSConfig.BASS_CONFIG_MIXER_BUFFER);
 

@@ -2,53 +2,49 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Fx;
 using Un4seen.Bass.AddOn.Mix;
 
-namespace gainer.Audio
+namespace FrostWire.Audio.FX
 {
-    public class AudioReader
+    public class MultiBandCompressor
     {
-        public event Action<double>? ProgressChanged;
+        private Mixer _mixer;
+        private int _subBandStream;
+        private int _lowBandStream;
+        private int _midBandStream;
+        private int _highBandStream;
 
-        //private int _mainHandle = 0;
-        private bool _disposed = false;
-        private int _progressUpdateCounter = 0;
-        private const int PROGRESS_UPDATE_INTERVAL = 10; // Обновляем каждые 10 блоков
-
-        public int Stream {  get; private set; }
-        public int SubStream { get; private set; }
-        public int LowStream { get; private set; }
-        public int MidStream { get; private set; }
-        public int HighStream { get; private set; }
-
-        public AudioReader(string filePath)
+        public MultiBandCompressor(Mixer mixer)
         {
-            // Создаем поток для декодирования
-            Stream = Bass.BASS_StreamCreateFile(
-                filePath,
-                0, 0,
-                BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT
-            );
+            _mixer = mixer;
+            _mixer.OutputHandle = CreateMixer();
+            (_subBandStream, _lowBandStream, _midBandStream, _highBandStream) = CreateStreams(_mixer.InputHandle);
+            SetEQs(_subBandStream, _lowBandStream, _midBandStream, _highBandStream);
+            SetComps(_lowBandStream, _midBandStream, _highBandStream);
 
-            if (Stream == 0)
-                throw new Exception($"Не удалось открыть файл: {Bass.BASS_ErrorGetCode()}");
-
-            (SubStream, LowStream, MidStream, HighStream) = SplitStream(Stream);
-            SetFilteres(SubStream, LowStream, MidStream, HighStream);
+            BassMix.BASS_Mixer_StreamAddChannel(_mixer.OutputHandle, _subBandStream, BASSFlag.BASS_MIXER_CHAN_NORAMPIN);
+            BassMix.BASS_Mixer_StreamAddChannel(_mixer.OutputHandle, _lowBandStream, BASSFlag.BASS_MIXER_CHAN_NORAMPIN);
+            BassMix.BASS_Mixer_StreamAddChannel(_mixer.OutputHandle, _midBandStream, BASSFlag.BASS_MIXER_CHAN_NORAMPIN);
+            BassMix.BASS_Mixer_StreamAddChannel(_mixer.OutputHandle, _highBandStream, BASSFlag.BASS_MIXER_CHAN_NORAMPIN);
         }
-
-        private (int sub, int low, int mid, int high) SplitStream(int stream)
+        private int CreateMixer()
         {
-            int h_sub = BassMix.BASS_Split_StreamCreate(stream, BASSFlag.BASS_DEFAULT | BASSFlag.BASS_STREAM_DECODE, null);
-            int h_low = BassMix.BASS_Split_StreamCreate(stream, BASSFlag.BASS_DEFAULT | BASSFlag.BASS_STREAM_DECODE, null);
-            int h_mid = BassMix.BASS_Split_StreamCreate(stream, BASSFlag.BASS_DEFAULT | BASSFlag.BASS_STREAM_DECODE, null);
-            int h_high = BassMix.BASS_Split_StreamCreate(stream, BASSFlag.BASS_DEFAULT | BASSFlag.BASS_STREAM_DECODE, null);
-
-            return (h_sub, h_low, h_mid, h_high);
+            return BassMix.BASS_Mixer_StreamCreate(44100, 2, BASSFlag.BASS_MIXER_NONSTOP | BASSFlag.BASS_SAMPLE_FLOAT);
         }
-        private void SetFilteres(int sub, int low, int mid, int high)
+        private (int sub, int low, int mid, int high) CreateStreams(int mixerHandle)
+        {
+            int subBandStream = BassMix.BASS_Split_StreamCreate(mixerHandle, BASSFlag.BASS_DEFAULT | BASSFlag.BASS_STREAM_DECODE, null);
+            int lowBandStream = BassMix.BASS_Split_StreamCreate(mixerHandle, BASSFlag.BASS_DEFAULT | BASSFlag.BASS_STREAM_DECODE, null);
+            int midBandStream = BassMix.BASS_Split_StreamCreate(mixerHandle, BASSFlag.BASS_DEFAULT | BASSFlag.BASS_STREAM_DECODE, null);
+            int highBandStream = BassMix.BASS_Split_StreamCreate(mixerHandle, BASSFlag.BASS_DEFAULT | BASSFlag.BASS_STREAM_DECODE, null);
+            return (subBandStream, lowBandStream, midBandStream, highBandStream);
+        }
+        private void SetEQs(int subBandStream, int lowBandStream, int midBandStream, int highBandStream)
         {
             float subLowCrossover = 120;
             float lowMidCrossover = 500;
@@ -58,7 +54,7 @@ namespace gainer.Audio
             float qButterworth = 0.707f; // Q для Баттерворта 2-го порядка
 
             // САБ: ФНЧ 4-го порядка (два каскада)
-            var subHandle1 = Bass.BASS_ChannelSetFX(sub, BASSFXType.BASS_FX_BFX_BQF, 11);
+            var subHandle1 = Bass.BASS_ChannelSetFX(subBandStream, BASSFXType.BASS_FX_BFX_BQF, 11);
             Bass.BASS_FXSetParameters(subHandle1, new BASS_BFX_BQF()
             {
                 lFilter = BASSBFXBQF.BASS_BFX_BQF_LOWPASS,
@@ -68,7 +64,7 @@ namespace gainer.Audio
                 fGain = 0f
             });
 
-            var subHandle2 = Bass.BASS_ChannelSetFX(sub, BASSFXType.BASS_FX_BFX_BQF, 10);
+            var subHandle2 = Bass.BASS_ChannelSetFX(subBandStream, BASSFXType.BASS_FX_BFX_BQF, 10);
             Bass.BASS_FXSetParameters(subHandle2, new BASS_BFX_BQF()
             {
                 lFilter = BASSBFXBQF.BASS_BFX_BQF_LOWPASS,
@@ -80,7 +76,7 @@ namespace gainer.Audio
 
             // НЧ полоса: ФВЧ 4-го порядка 120 Гц + ФНЧ 4-го порядка 500 Гц
             // ФВЧ 120 Гц (первый каскад)
-            var lowHandle1 = Bass.BASS_ChannelSetFX(low, BASSFXType.BASS_FX_BFX_BQF, 11);
+            var lowHandle1 = Bass.BASS_ChannelSetFX(lowBandStream, BASSFXType.BASS_FX_BFX_BQF, 11);
             Bass.BASS_FXSetParameters(lowHandle1, new BASS_BFX_BQF()
             {
                 lFilter = BASSBFXBQF.BASS_BFX_BQF_HIGHPASS,
@@ -91,7 +87,7 @@ namespace gainer.Audio
             });
 
             // ФВЧ 120 Гц (второй каскад)
-            var lowHandle2 = Bass.BASS_ChannelSetFX(low, BASSFXType.BASS_FX_BFX_BQF, 10);
+            var lowHandle2 = Bass.BASS_ChannelSetFX(lowBandStream, BASSFXType.BASS_FX_BFX_BQF, 10);
             Bass.BASS_FXSetParameters(lowHandle2, new BASS_BFX_BQF()
             {
                 lFilter = BASSBFXBQF.BASS_BFX_BQF_HIGHPASS,
@@ -102,7 +98,7 @@ namespace gainer.Audio
             });
 
             // ФНЧ 500 Гц (первый каскад)
-            var lowHandle3 = Bass.BASS_ChannelSetFX(low, BASSFXType.BASS_FX_BFX_BQF, 13);
+            var lowHandle3 = Bass.BASS_ChannelSetFX(lowBandStream, BASSFXType.BASS_FX_BFX_BQF, 13);
             Bass.BASS_FXSetParameters(lowHandle3, new BASS_BFX_BQF()
             {
                 lFilter = BASSBFXBQF.BASS_BFX_BQF_LOWPASS,
@@ -113,7 +109,7 @@ namespace gainer.Audio
             });
 
             // ФНЧ 500 Гц (второй каскад)
-            var lowHandle4 = Bass.BASS_ChannelSetFX(low, BASSFXType.BASS_FX_BFX_BQF, 12);
+            var lowHandle4 = Bass.BASS_ChannelSetFX(lowBandStream, BASSFXType.BASS_FX_BFX_BQF, 12);
             Bass.BASS_FXSetParameters(lowHandle4, new BASS_BFX_BQF()
             {
                 lFilter = BASSBFXBQF.BASS_BFX_BQF_LOWPASS,
@@ -125,7 +121,7 @@ namespace gainer.Audio
 
             // СЧ полоса: аналогично с частотами 500 Гц и 4000 Гц
             // ФВЧ 500 Гц (каскад 1)
-            var midHandle1 = Bass.BASS_ChannelSetFX(mid, BASSFXType.BASS_FX_BFX_BQF, 11);
+            var midHandle1 = Bass.BASS_ChannelSetFX(midBandStream, BASSFXType.BASS_FX_BFX_BQF, 11);
             Bass.BASS_FXSetParameters(midHandle1, new BASS_BFX_BQF()
             {
                 lFilter = BASSBFXBQF.BASS_BFX_BQF_HIGHPASS,
@@ -136,7 +132,7 @@ namespace gainer.Audio
             });
 
             // ФВЧ 500 Гц (каскад 2)
-            var midHandle2 = Bass.BASS_ChannelSetFX(mid, BASSFXType.BASS_FX_BFX_BQF, 10);
+            var midHandle2 = Bass.BASS_ChannelSetFX(midBandStream, BASSFXType.BASS_FX_BFX_BQF, 10);
             Bass.BASS_FXSetParameters(midHandle2, new BASS_BFX_BQF()
             {
                 lFilter = BASSBFXBQF.BASS_BFX_BQF_HIGHPASS,
@@ -147,7 +143,7 @@ namespace gainer.Audio
             });
 
             // ФНЧ 4000 Гц (каскад 1)
-            var midHandle3 = Bass.BASS_ChannelSetFX(mid, BASSFXType.BASS_FX_BFX_BQF, 13);
+            var midHandle3 = Bass.BASS_ChannelSetFX(midBandStream, BASSFXType.BASS_FX_BFX_BQF, 13);
             Bass.BASS_FXSetParameters(midHandle3, new BASS_BFX_BQF()
             {
                 lFilter = BASSBFXBQF.BASS_BFX_BQF_LOWPASS,
@@ -158,7 +154,7 @@ namespace gainer.Audio
             });
 
             // ФНЧ 4000 Гц (каскад 2)
-            var midHandle4 = Bass.BASS_ChannelSetFX(mid, BASSFXType.BASS_FX_BFX_BQF, 12);
+            var midHandle4 = Bass.BASS_ChannelSetFX(midBandStream, BASSFXType.BASS_FX_BFX_BQF, 12);
             Bass.BASS_FXSetParameters(midHandle4, new BASS_BFX_BQF()
             {
                 lFilter = BASSBFXBQF.BASS_BFX_BQF_LOWPASS,
@@ -169,7 +165,7 @@ namespace gainer.Audio
             });
 
             // ВЧ полоса: ФВЧ 4000 Гц 4-го порядка
-            var highHandle1 = Bass.BASS_ChannelSetFX(high, BASSFXType.BASS_FX_BFX_BQF, 11);
+            var highHandle1 = Bass.BASS_ChannelSetFX(highBandStream, BASSFXType.BASS_FX_BFX_BQF, 11);
             Bass.BASS_FXSetParameters(highHandle1, new BASS_BFX_BQF()
             {
                 lFilter = BASSBFXBQF.BASS_BFX_BQF_HIGHPASS,
@@ -179,7 +175,7 @@ namespace gainer.Audio
                 fGain = 0f
             });
 
-            var highHandle2 = Bass.BASS_ChannelSetFX(high, BASSFXType.BASS_FX_BFX_BQF, 10);
+            var highHandle2 = Bass.BASS_ChannelSetFX(highBandStream, BASSFXType.BASS_FX_BFX_BQF, 10);
             Bass.BASS_FXSetParameters(highHandle2, new BASS_BFX_BQF()
             {
                 lFilter = BASSBFXBQF.BASS_BFX_BQF_HIGHPASS,
@@ -189,48 +185,9 @@ namespace gainer.Audio
                 fGain = 0f
             });
         }
-
-        public float[] ReadAllSamples(int stream)
+        private void SetComps(int lowBandStream, int midBandStream, int highBandStream)
         {
-            if (_disposed)
-                throw new ObjectDisposedException(nameof(AudioReader));
-
-            List<float> samples = new List<float>();
-            float[] buffer = new float[44100 * 2]; // 1 секунда стерео
-
-            // Получаем общее количество сэмплов для расчета прогресса
-            long totalBytes = Bass.BASS_ChannelGetLength(stream);
-            long bytesProcessed = 0;
-
-            int bytesRead;
-            while ((bytesRead = Bass.BASS_ChannelGetData(stream, buffer, buffer.Length * 4)) > 0)
-            {
-                bytesProcessed += bytesRead;
-                int samplesRead = bytesRead / 4;
-                samples.AddRange(buffer.Take(samplesRead));
-
-                // Оповещаем о прогрессе чтения (0%-50%)
-                if (totalBytes > 0 && _progressUpdateCounter % PROGRESS_UPDATE_INTERVAL == 0)
-                {
-                    double progress = (bytesProcessed / (double)totalBytes) * 0.5; // Чтение - половина процесса
-                    ProgressChanged?.Invoke(progress);
-                }
-                _progressUpdateCounter++;
-            }
-
-            return samples.ToArray();
-        }
-
-        public float[] GetPCMData32(int stream)
-        {
-            try
-            {
-                return ReadAllSamples(stream);
-            }
-            finally
-            {
-                
-            }
+            
         }
     }
 }

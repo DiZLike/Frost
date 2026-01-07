@@ -30,8 +30,8 @@ namespace FrostWire.Audio
             _jingleService = jingleService;
 
             _audioEngine = new BassAudioEngine(config);
-            _mixer = new Mixer(_config.Audio.SampleRate);
-            _fx = new FXManager(_mixer.Handle, _config);
+            _mixer = new Mixer(_config);
+            _fx = new FXManager(_mixer, _config);
             _trackLoader = new TrackLoader(_audioEngine, _fx);
             _jinglePlayer = new JinglePlayerSlowLoad(config, jingleService, _audioEngine, _mixer, _fx);
 
@@ -59,7 +59,7 @@ namespace FrostWire.Audio
 
             _currentStream = loadedTrack.StreamHandle;
             _mixer.AddStream(_currentStream);
-            _audioEngine.PlayStream(_mixer.Handle);
+            _audioEngine.PlayStream(_mixer.OutputHandle);
 
             Logger.Info($"[Player] Сейчас играет: {loadedTrack.TrackInfo.Artist} - {loadedTrack.TrackInfo.Title}");
 
@@ -175,7 +175,7 @@ namespace FrostWire.Audio
             }
 
             _mixer.AddStream(_currentStream);
-            _audioEngine.PlayStream(_mixer.Handle);
+            _audioEngine.PlayStream(_mixer.OutputHandle);
 
             return trackInfo;
         }

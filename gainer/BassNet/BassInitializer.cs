@@ -51,7 +51,6 @@ namespace gainer.BassNet
                 "basswma.dll",     // WMA
                 "bass_ape.dll",    // Monkey's Audio
                 "basswv.dll",      // WavPack
-                "bassmidi.dll",    // MIDI (на всякий случай)
                 "bass_alac.dll",   // Apple Lossless
                 "bass_mpc.dll",    // Musepack
                 "bass_ofr.dll",    // OptimFROG

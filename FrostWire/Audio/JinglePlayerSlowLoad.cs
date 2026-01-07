@@ -111,7 +111,7 @@ namespace FrostWire.Audio
 
                 // Добавляем в микшер и воспроизводим
                 _mixer.AddStream(jingleStream);
-                _audioEngine.PlayStream(_mixer.Handle);
+                _audioEngine.PlayStream(_mixer.OutputHandle);
 
                 // Воспроизводим до конца
                 while (true)
