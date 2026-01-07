@@ -91,17 +91,6 @@ namespace FrostWire.Audio.FX
             if (!_initialized || !_enabled) return;
             if(_parameters.Adaptive)
             {
-                //// Нормализуем значение ReplayGain
-                //float thresholdOffset = -replayGainValue * 0.3f;
-
-                //// Динамическая адаптация параметров
-                //float dynamicThreshold = _parameters.Threshold + thresholdOffset;
-                //float dynamicRatio = _parameters.Ratio + (replayGainValue * 0.05f);
-
-                //// Ограничиваем значения
-                //dynamicThreshold = Math.Max(-30f, Math.Min(-6f, dynamicThreshold));
-                //dynamicRatio = Math.Max(1.5f, Math.Min(15f, dynamicRatio));
-
                 var (threshold, ratio, attackMs, releaseMs, makeupGain) = 
                     CalculateRadioCompressor(rms, replayGainValue, CompressionMode.Medium, false);
 

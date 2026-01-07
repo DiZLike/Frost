@@ -1,7 +1,6 @@
 ## Игнорировать папки bin и obj во всех проектах
 **/[Bb]in/
 **/[Oo]bj/
-**/strimer.conf
 **/ffmpeg.exe
 
 ## Игнорировать папку .vs (настройки Visual Studio)

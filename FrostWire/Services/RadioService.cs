@@ -29,7 +29,7 @@ namespace FrostWire.Services
         // История последних исполнителей и жанров (для предотвращения повторений)
         private readonly ConcurrentQueue<string> _lastArtists = new();
         private readonly ConcurrentQueue<string> _lastGenres = new();
-        private const int MAX_ARTIST_HISTORY = 10;         // Храним последних 5 исполнителей
+        private int MAX_ARTIST_HISTORY = 10;
 
         public RadioService(AppConfig config)
         {
@@ -56,6 +56,7 @@ namespace FrostWire.Services
                 );
                 Logger.Info($"[RadioService] Резервный плейлист: {_fallbackPlaylist.TotalTracks} треков"); // Лог: информация о плейлисте
             }
+            MAX_ARTIST_HISTORY = _config.Playlist.MaxHistory;
 
             Logger.Info($"[RadioService] Расписание включено: {config.Playlist.ScheduleEnable}"); // Лог: статус расписания
         }
@@ -89,12 +90,14 @@ namespace FrostWire.Services
             string? selectedArtist = null;
             string? selectedGenre = null;
             int attempts = 0;
-            const int MAX_ATTEMPTS = 5; // Максимальное количество попыток найти трек с другим исполнителем
+            int MAX_ATTEMPTS = _config.Playlist.MaxAttempts;
 
             do
             {
                 // Получаем случайный трек из плейлиста
                 selectedTrack = GetNextTrackFromPlaylist();
+                if (!_config.Playlist.ArtistGenreHistoryEnable)
+                    return selectedTrack;
 
                 if (string.IsNullOrEmpty(selectedTrack))
                 {

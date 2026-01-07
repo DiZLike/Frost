@@ -1,14 +1,7 @@
 ﻿using FrostWire.App.Config;
 using FrostWire.App.Config.Encoders;
-using FrostWire.Audio;
-using FrostWire.Audio.FX;
 using FrostWire.Core;
-using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text;
-using TagLib.Ogg.Codecs;
-using static Un4seen.Bass.Misc.BaseEncoder;
 
 namespace FrostWire.App
 {
@@ -113,7 +106,6 @@ namespace FrostWire.App
 
                 Logger.Debug($"[AppConfig] Загружено: IceCast={Icecast.Server}:{Icecast.Port}, Плейлист={Playlist.PlaylistFile}");
                 Logger.Debug($"[AppConfig] Аудио: Устройство={Audio.AudioDevice}, Частота={Audio.SampleRate}Гц");
-                //Logger.Debug($"[AppConfig] Кодировщик: Opus {Opus.OpusBitrate}кбит/с {Opus.OpusMode}, RG={(ReplayGain.UseReplayGain ? "Вкл" : "Выкл")}");
                 return true;
             }
             catch (Exception ex)
@@ -123,10 +115,25 @@ namespace FrostWire.App
                 return false;
             }
         }
-
+        private bool GetBoolValue(string value)
+        {
+            return value.ToLower() == "yes";
+        }
+        private int GetIntValue(string value)
+        {
+            if (int.TryParse(value, out int int_value))
+                return int_value;
+            return 0;
+        }
+        private float GetFloatValue(string value)
+        {
+            value = value.Replace(".", ",");
+            if (float.TryParse(value, out float float_value))
+                return float_value;
+            return 0;
+        }
         private void SetValue(string section, string key, string value)
         {
-            // Упрощенная обработка: учитываем только секцию, без префиксов в ключах
             switch (section)
             {
                 case "audio":
@@ -174,13 +181,22 @@ namespace FrostWire.App
                             Playlist.PlaylistFile = value;
                             break;
                         case "dynamic_playlist":
-                            Playlist.DynamicPlaylist = value.ToLower() == "yes";
+                            Playlist.DynamicPlaylist = GetBoolValue(value);
                             break;
                         case "save_playlist_history":
-                            Playlist.SavePlaylistHistory = value.ToLower() == "yes";
+                            Playlist.SavePlaylistHistory = GetBoolValue(value);
+                            break;
+                        case "artist_genre_history_enable":
+                            Playlist.ArtistGenreHistoryEnable = GetBoolValue(value);
+                            break;
+                        case "max_history":
+                            Playlist.MaxHistory = GetIntValue(value);
+                            break;
+                        case "max_attempts":
+                            Playlist.MaxAttempts = GetIntValue(value);
                             break;
                         case "schedule_enable":
-                            Playlist.ScheduleEnable = value.ToLower() == "yes";
+                            Playlist.ScheduleEnable = GetBoolValue(value);
                             break;
                         case "schedule":
                             Playlist.ScheduleFile = value;
@@ -200,11 +216,10 @@ namespace FrostWire.App
                                 encoder.Type = value.ToLower();
                                 break;
                             case "enabled":
-                                encoder.Enabled = value.ToLower() == "yes";
+                                encoder.Enabled = GetBoolValue(value);
                                 break;
                             case "bitrate":
-                                if (int.TryParse(value, out int bitrate))
-                                    opus.Bitrate = bitrate;
+                                opus.Bitrate = GetIntValue(value);
                                 break;
                             case "bitrate_mode":
                                 opus.Mode = value;
@@ -213,8 +228,7 @@ namespace FrostWire.App
                                 opus.ContentType = value;
                                 break;
                             case "complexity":
-                                if (int.TryParse(value, out int complexity))
-                                    opus.Complexity = complexity;
+                                opus.Complexity = GetIntValue(value);
                                 break;
                             case "framesize":
                                 opus.FrameSize = value;
@@ -227,10 +241,10 @@ namespace FrostWire.App
                     switch (key)
                     {
                         case "use_replay_gain":
-                            ReplayGain.UseReplayGain = value.ToLower() == "yes";
+                            ReplayGain.UseReplayGain = GetBoolValue(value);
                             break;
                         case "use_custom_gain":
-                            ReplayGain.UseCustomGain = value.ToLower() == "yes";
+                            ReplayGain.UseCustomGain = GetBoolValue(value);
                             break;
                     }
                     break;
@@ -239,25 +253,25 @@ namespace FrostWire.App
                     switch (key)
                     {
                         case "enable":
-                            FirstCompressor.Enable = value.ToLower() == "yes";
+                            FirstCompressor.Enable = GetBoolValue(value);
                             break;
                         case "adaptive":
-                            FirstCompressor.Adaptive = value.ToLower() == "yes";
+                            FirstCompressor.Adaptive = GetBoolValue(value);
                             break;
                         case "threshold":
-                            FirstCompressor.Threshold = float.Parse(value.Replace(".", ","));
+                            FirstCompressor.Threshold = GetFloatValue(value);
                             break;
                         case "ratio":
-                            FirstCompressor.Ratio = float.Parse(value.Replace(".", ","));
+                            FirstCompressor.Ratio = GetFloatValue(value);
                             break;
                         case "attack":
-                            FirstCompressor.Attack = float.Parse(value.Replace(".", ","));
+                            FirstCompressor.Attack = GetFloatValue(value);
                             break;
                         case "release":
-                            FirstCompressor.Release = float.Parse(value.Replace(".", ","));
+                            FirstCompressor.Release = GetFloatValue(value);
                             break;
                         case "gain":
-                            FirstCompressor.Gain = float.Parse(value.Replace(".", ","));
+                            FirstCompressor.Gain = GetFloatValue(value);
                             break;
                     }
                     break;
@@ -266,22 +280,22 @@ namespace FrostWire.App
                     switch (key)
                     {
                         case "enable":
-                            SecondCompressor.Enable = value.ToLower() == "yes";
+                            SecondCompressor.Enable = GetBoolValue(value);
                             break;
                         case "threshold":
-                            SecondCompressor.Threshold = float.Parse(value.Replace(".", ","));
+                            SecondCompressor.Threshold = GetFloatValue(value);
                             break;
                         case "ratio":
-                            SecondCompressor.Ratio = float.Parse(value.Replace(".", ","));
+                            SecondCompressor.Ratio = GetFloatValue(value);
                             break;
                         case "attack":
-                            SecondCompressor.Attack = float.Parse(value.Replace(".", ","));
+                            SecondCompressor.Attack = GetFloatValue(value);
                             break;
                         case "release":
-                            SecondCompressor.Release = float.Parse(value.Replace(".", ","));
+                            SecondCompressor.Release = GetFloatValue(value);
                             break;
                         case "gain":
-                            SecondCompressor.Gain = float.Parse(value.Replace(".", ","));
+                            SecondCompressor.Gain = GetFloatValue(value);
                             break;
                     }
                     break;
@@ -290,25 +304,25 @@ namespace FrostWire.App
                     switch (key)
                     {
                         case "enable":
-                            Limiter.Enable = value.ToLower() == "yes";
+                            Limiter.Enable = GetBoolValue(value);
                             break;
                         case "threshold":
-                            Limiter.Threshold = float.Parse(value.Replace(".", ","));
+                            Limiter.Threshold = GetFloatValue(value);
                             break;
                         case "release":
-                            Limiter.Release = float.Parse(value.Replace(".", ","));
+                            Limiter.Release = GetFloatValue(value);
                             break;
                         case "gain":
-                            Limiter.Gain = float.Parse(value.Replace(".", ","));
+                            Limiter.Gain = GetFloatValue(value);
                             break;
                     }
                     break;
 
-                case "myserver":  // Более краткое название, как в старом формате
+                case "myserver":
                     switch (key)
                     {
                         case "enable":
-                            MyServer.MyServerEnabled = value.ToLower() == "yes";
+                            MyServer.MyServerEnabled = GetBoolValue(value);
                             break;
                         case "server":
                             MyServer.MyServerUrl = value;
@@ -344,17 +358,16 @@ namespace FrostWire.App
                     switch (key)
                     {
                         case "enable":
-                            Jingles.JinglesEnable = value.ToLower() == "yes";
+                            Jingles.JinglesEnable = GetBoolValue(value);
                             break;
                         case "file":
                             Jingles.JingleConfigFile = value;
                             break;
                         case "frequency":
-                            if (int.TryParse(value, out int frequency))
-                                Jingles.JingleFrequency = frequency;
+                            Jingles.JingleFrequency = GetIntValue(value);
                             break;
                         case "random":
-                            Jingles.JinglesRandom = value.ToLower() == "yes";
+                            Jingles.JinglesRandom = GetBoolValue(value);
                             break;
                     }
                     break;
@@ -363,10 +376,10 @@ namespace FrostWire.App
                     switch (key)
                     {
                         case "enable":
-                            Debug.DebugEnable = value.ToLower() == "yes";
+                            Debug.DebugEnable = GetBoolValue(value);
                             break;
                         case "stack_view":
-                            Debug.DebugStackView = value.ToLower() == "yes";
+                            Debug.DebugStackView = GetBoolValue(value);
                             break;
                     }
                     break;
@@ -401,9 +414,7 @@ namespace FrostWire.App
             var existingEncoder = Encoders.FirstOrDefault(e => e.Mount == mount);
 
             if (existingEncoder != null)
-            {
                 return existingEncoder;
-            }
 
             // Создаем новый энкодер
             var newEncoder = new COpus { Mount = mount };

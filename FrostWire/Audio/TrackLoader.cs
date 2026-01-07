@@ -55,7 +55,7 @@ namespace FrostWire.Audio
                     StreamHandle = streamHandle,
                     TrackInfo = trackInfo,
                     FilePath = filePath,
-                    LoadTime = stopwatch.Elapsed // Используем Elapsed вместо TimeSpan
+                    LoadTime = stopwatch.Elapsed
                 };
             }
             catch (Exception ex)
