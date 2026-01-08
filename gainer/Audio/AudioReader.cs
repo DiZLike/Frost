@@ -18,6 +18,7 @@ namespace gainer.Audio
         private const int PROGRESS_UPDATE_INTERVAL = 10; // Обновляем каждые 10 блоков
 
         public int Stream {  get; private set; }
+        public int MainStream { get; private set; }
         public int SubStream { get; private set; }
         public int LowStream { get; private set; }
         public int MidStream { get; private set; }
@@ -35,21 +36,23 @@ namespace gainer.Audio
             if (Stream == 0)
                 throw new Exception($"Не удалось открыть файл: {Bass.BASS_ErrorGetCode()}");
 
-            (SubStream, LowStream, MidStream, HighStream) = SplitStream(Stream);
+            (MainStream, SubStream, LowStream, MidStream, HighStream) = SplitStream(Stream);
             SetFilteres(SubStream, LowStream, MidStream, HighStream);
         }
 
-        private (int sub, int low, int mid, int high) SplitStream(int stream)
+        private (int main, int sub, int low, int mid, int high) SplitStream(int stream)
         {
-            int h_sub = BassMix.BASS_Split_StreamCreate(stream, BASSFlag.BASS_DEFAULT | BASSFlag.BASS_STREAM_DECODE, null);
-            int h_low = BassMix.BASS_Split_StreamCreate(stream, BASSFlag.BASS_DEFAULT | BASSFlag.BASS_STREAM_DECODE, null);
-            int h_mid = BassMix.BASS_Split_StreamCreate(stream, BASSFlag.BASS_DEFAULT | BASSFlag.BASS_STREAM_DECODE, null);
-            int h_high = BassMix.BASS_Split_StreamCreate(stream, BASSFlag.BASS_DEFAULT | BASSFlag.BASS_STREAM_DECODE, null);
+            int h_main = BassMix.BASS_Split_StreamCreate(stream, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT, null);
+            int h_sub = BassMix.BASS_Split_StreamCreate(stream, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT, null);
+            int h_low = BassMix.BASS_Split_StreamCreate(stream, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT, null);
+            int h_mid = BassMix.BASS_Split_StreamCreate(stream, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT, null);
+            int h_high = BassMix.BASS_Split_StreamCreate(stream, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT, null);
 
-            return (h_sub, h_low, h_mid, h_high);
+            return (h_main, h_sub, h_low, h_mid, h_high);
         }
         private void SetFilteres(int sub, int low, int mid, int high)
         {
+            BassFx.BASS_FX_GetVersion();
             float subLowCrossover = 120;
             float lowMidCrossover = 500;
             float midHighCrossover = 4000;
@@ -59,6 +62,7 @@ namespace gainer.Audio
 
             // САБ: ФНЧ 4-го порядка (два каскада)
             var subHandle1 = Bass.BASS_ChannelSetFX(sub, BASSFXType.BASS_FX_BFX_BQF, 11);
+            var err = Bass.BASS_ErrorGetCode();
             Bass.BASS_FXSetParameters(subHandle1, new BASS_BFX_BQF()
             {
                 lFilter = BASSBFXBQF.BASS_BFX_BQF_LOWPASS,
@@ -67,6 +71,8 @@ namespace gainer.Audio
                 fQ = qButterworth,
                 fGain = 0f
             });
+
+            
 
             var subHandle2 = Bass.BASS_ChannelSetFX(sub, BASSFXType.BASS_FX_BFX_BQF, 10);
             Bass.BASS_FXSetParameters(subHandle2, new BASS_BFX_BQF()
@@ -192,6 +198,7 @@ namespace gainer.Audio
 
         public float[] ReadAllSamples(int stream)
         {
+            Bass.BASS_ChannelSetPosition(stream, 0);
             if (_disposed)
                 throw new ObjectDisposedException(nameof(AudioReader));
 
@@ -217,7 +224,7 @@ namespace gainer.Audio
                 }
                 _progressUpdateCounter++;
             }
-
+            var error = Bass.BASS_ErrorGetCode();
             return samples.ToArray();
         }
 
@@ -231,6 +238,15 @@ namespace gainer.Audio
             {
                 
             }
+        }
+        public void Free()
+        {
+            Bass.BASS_ChannelFree(Stream);
+            Bass.BASS_ChannelFree(MainStream);
+            Bass.BASS_ChannelFree(SubStream);
+            Bass.BASS_ChannelFree(LowStream);
+            Bass.BASS_ChannelFree(MidStream);
+            Bass.BASS_ChannelFree(HighStream);
         }
     }
 }

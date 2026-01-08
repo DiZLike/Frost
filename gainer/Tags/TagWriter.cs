@@ -35,8 +35,8 @@ namespace gainer.Tags
                             autoTagger.ApplyTags(file, tags);
                         }
 
-                        // Формируем строку комментария в новом формате
-                        string comment = $"replay-gain={results.ReplayGain:F2}\r\nrms={results.RmsDb:F2}";
+                        // Формируем строку комментария с данными по полосам
+                        string comment = FormatResults(results, useCustomTag);
 
                         if (useCustomTag)
                         {
@@ -49,8 +49,8 @@ namespace gainer.Tags
                             {
                                 // Стандартный тег ReplayGain
                                 file.Tag.ReplayGainTrackGain = results.ReplayGain;
-                                // RMS сохраняем в комментарий
-                                file.Tag.Comment = results.RmsDb.ToString("F2");
+                                // Все остальные данные в комментарий
+                                file.Tag.Comment = comment;
                             }
                             catch (NotImplementedException)
                             {
@@ -73,6 +73,29 @@ namespace gainer.Tags
                 {
                     return;
                 }
+            }
+        }
+
+        private string FormatResults(AudioAnalysisResult results, bool useCustomTag)
+        {
+            if (useCustomTag)
+            {
+                return $"replay-gain={results.ReplayGain:F2}\r\n" +
+                       $"rms_main={results.RmsDb:F2}\r\n" +
+                       $"lufs={results.IntegratedLoudness:F1}\r\n" +
+                       $"main_L={results.MainBand.LeftRmsDb:F2} main_R={results.MainBand.RightRmsDb:F2}\r\n" +
+                       $"sub_L={results.SubBand.LeftRmsDb:F2} sub_R={results.SubBand.RightRmsDb:F2}\r\n" +
+                       $"low_L={results.LowBand.LeftRmsDb:F2} low_R={results.LowBand.RightRmsDb:F2}\r\n" +
+                       $"mid_L={results.MidBand.LeftRmsDb:F2} mid_R={results.MidBand.RightRmsDb:F2}\r\n" +
+                       $"high_L={results.HighBand.LeftRmsDb:F2} high_R={results.HighBand.RightRmsDb:F2}";
+            }
+            else
+            {
+                return $"Main: L={results.MainBand.LeftRmsDb:F2} R={results.MainBand.RightRmsDb:F2} dB\r\n" +
+                       $"Sub: L={results.SubBand.LeftRmsDb:F2} R={results.SubBand.RightRmsDb:F2} dB\r\n" +
+                       $"Low: L={results.LowBand.LeftRmsDb:F2} R={results.LowBand.RightRmsDb:F2} dB\r\n" +
+                       $"Mid: L={results.MidBand.LeftRmsDb:F2} R={results.MidBand.RightRmsDb:F2} dB\r\n" +
+                       $"High: L={results.HighBand.LeftRmsDb:F2} R={results.HighBand.RightRmsDb:F2} dB";
             }
         }
     }

@@ -50,16 +50,13 @@ namespace gainer.Processing
                     }
                 };
 
-                // 1.2 Основной поток
-                float[] pcmDataMain = audioReader.GetPCMData32(audioReader.Stream);
-                // 1.3 Низ
+                // Чтение всех полос
+                float[] pcmDataMain = audioReader.GetPCMData32(audioReader.MainStream);
                 float[] pcmDataSub = audioReader.GetPCMData32(audioReader.SubStream);
-                // 1.4 Бас
                 float[] pcmDataLow = audioReader.GetPCMData32(audioReader.LowStream);
-                // 1.5 Середина
                 float[] pcmDataMid = audioReader.GetPCMData32(audioReader.MidStream);
-                // 1.6 Высота
                 float[] pcmDataHigh = audioReader.GetPCMData32(audioReader.HighStream);
+                audioReader.Free();
 
                 if (pcmDataMain.Length == 0)
                 {
@@ -72,7 +69,7 @@ namespace gainer.Processing
                     return;
                 }
 
-                // 2. Анализ (ReplayGain + RMS)
+                // 2. Анализ всех полос
                 var analyzer = new AudioAnalyzer(44100, _args.TargetLufs, _args.UseKFilter);
                 analyzer.ProgressChanged += (progress, message) =>
                 {
@@ -86,7 +83,7 @@ namespace gainer.Processing
                     }
                 };
 
-                var results = analyzer.Analyze(pcmDataMain);
+                var results = analyzer.Analyze(pcmDataMain, pcmDataSub, pcmDataLow, pcmDataMid, pcmDataHigh);
 
                 // 3. Сохранение в теги
                 _progressManager.UpdateThreadLine(lineIndex,
@@ -96,14 +93,15 @@ namespace gainer.Processing
                 var tagWriter = new TagWriter(filePath, _args.AutoTagEnabled);
                 tagWriter.SaveAnalysisResults(results, _args.UseCustomTag);
 
-                // 4. Вывод результата
+                // 4. Вывод результата с информацией о полосах
                 string autoTagMessage = _args.AutoTagEnabled ? " + авто-теги" : "";
+                string bandsInfo = results.GetBandsInfo();
                 _progressManager.UpdateThreadLine(lineIndex,
-                    $"Поток {formattedThreadId}> Готово: {shortFileName} - {results.ReplayGain:F2} dB, RMS: {results.RmsDb:F2} dB{autoTagMessage}",
+                    $"Поток {formattedThreadId}> Готово: {shortFileName} - RG: {results.ReplayGain:F2} dB | {bandsInfo}{autoTagMessage}",
                     ConsoleColor.Green);
 
                 _statistics.IncrementSuccess();
-                _statistics.AddSuccess($"{fileName} - {results.ReplayGain:F2} dB, RMS: {results.RmsDb:F2} dB{autoTagMessage}");
+                _statistics.AddSuccess($"{fileName} - RG: {results.ReplayGain:F2} dB | {bandsInfo}{autoTagMessage}");
                 Thread.Sleep(1000);
             }
             catch (Exception ex)

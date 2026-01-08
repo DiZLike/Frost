@@ -8,6 +8,8 @@
     <BaseOutputPath>bin\</BaseOutputPath>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
+
   <ItemGroup>
     <Reference Include="Bass.Net">
       <HintPath>..\streamer\Bass.Net.dll</HintPath>

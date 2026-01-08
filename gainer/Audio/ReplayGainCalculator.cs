@@ -80,11 +80,17 @@ namespace gainer.Audio
 
         private double CalculateRMS(float[] samples)
         {
+            if (samples == null || samples.Length == 0)
+                return 0;
+
             double sumOfSquares = 0;
             for (int i = 0; i < samples.Length; i++)
                 sumOfSquares += samples[i] * samples[i];
 
-            return samples.Length > 0 ? Math.Sqrt(sumOfSquares / samples.Length) : 0;
+            double rms = Math.Sqrt(sumOfSquares / samples.Length);
+
+            // Если RMS слишком мал, возвращаем -120 dB (тишина)
+            return rms < 1e-6 ? 1e-6 : rms;
         }
     }
 }

@@ -8,6 +8,8 @@ namespace gainer
     {
         static void Main(string[] args)
         {
+            //-gain n -tag c -target -23 -autotag off "C:\Users\Evgeny\Desktop\777"
+            args = new string[] { "-gain", "n", "-tag", "c", "-target", "-23", "-autotag", "off", "\"C:\\Users\\Evgeny\\Desktop\\777\"" };
             try
             {
                 if (args.Length < 7)
@@ -53,7 +55,19 @@ namespace gainer
             Console.WriteLine();
             Console.WriteLine("Результаты сохраняются в формате:");
             Console.WriteLine("  replay-gain=-3.5");
-            Console.WriteLine("  rms=-25.12");
+            Console.WriteLine("  rms_main=-25.12");
+            Console.WriteLine("  main_L=-25.1 main_R=-25.2");
+            Console.WriteLine("  sub_L=-30.1 sub_R=-30.3");
+            Console.WriteLine("  low_L=-28.5 low_R=-28.7");
+            Console.WriteLine("  mid_L=-26.2 mid_R=-26.4");
+            Console.WriteLine("  high_L=-27.8 high_R=-27.9");
+            Console.WriteLine();
+            Console.WriteLine("Полосы частот:");
+            Console.WriteLine("  Main: 20-20000 Гц (полный спектр)");
+            Console.WriteLine("  Sub: 0-120 Гц (саб)");
+            Console.WriteLine("  Low: 120-500 Гц (басы)");
+            Console.WriteLine("  Mid: 500-4000 Гц (средние)");
+            Console.WriteLine("  High: 4000+ Гц (верха)");
         }
 
         private static void PrintSummary(CommandLineArgs args)
@@ -65,7 +79,9 @@ namespace gainer
             Console.WriteLine($"Тип тегов: {(args.UseCustomTag ? "Кастомный" : "Стандартный")}");
             Console.WriteLine($"Целевое LUFS: {args.TargetLufs}");
             Console.WriteLine($"Авто-теги: {(args.AutoTagEnabled ? "ВКЛ" : "ВЫКЛ")}");
-            Console.WriteLine($"Расчет: ReplayGain + RMS (в децибелах)");
+            Console.WriteLine($"Расчет: ReplayGain + RMS по полосам");
+            Console.WriteLine($"Полосы: Main, Sub, Low, Mid, High");
+            Console.WriteLine($"Каналы: L/R раздельно");
         }
     }
 }
