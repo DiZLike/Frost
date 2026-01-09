@@ -81,7 +81,7 @@ namespace gainer.Tags
             if (useCustomTag)
             {
                 return $"replay-gain={results.ReplayGain:F2}\r\n" +
-                       $"rms_main={results.RmsDb:F2}\r\n" +
+                       $"rms={results.RmsDb:F2}\r\n" +
                        $"lufs={results.IntegratedLoudness:F1}\r\n" +
                        $"main_L={results.MainBand.LeftRmsDb:F2} main_R={results.MainBand.RightRmsDb:F2}\r\n" +
                        $"sub_L={results.SubBand.LeftRmsDb:F2} sub_R={results.SubBand.RightRmsDb:F2}\r\n" +

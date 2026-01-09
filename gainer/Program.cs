@@ -9,7 +9,7 @@ namespace gainer
         static void Main(string[] args)
         {
             //-gain n -tag c -target -23 -autotag off "C:\Users\Evgeny\Desktop\777"
-            args = new string[] { "-gain", "n", "-tag", "c", "-target", "-23", "-autotag", "off", "\"C:\\Users\\Evgeny\\Desktop\\777\"" };
+            args = new string[] { "-gain", "n", "-tag", "c", "-target", "-23", "-autotag", "off", "C:\\Users\\Evgeny\\Desktop\\7" };
             try
             {
                 if (args.Length < 7)
